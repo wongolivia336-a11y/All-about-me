@@ -1,9 +1,8 @@
 import type { HotspotId } from "./hotspots";
 
 /**
- * Placeholder copy. Everything here is meant to be replaced with the real
- * thing — it exists so the layout can be judged with realistic volumes of text
- * rather than lorem ipsum.
+ * Section copy. Replace the placeholder bodies with your own words — the
+ * volumes here are roughly what the layout is designed for.
  */
 export interface Section {
   title: string;
@@ -15,23 +14,14 @@ export interface Section {
 
 export const content: Partial<Record<HotspotId, Section>> = {
   laptop: {
-    kicker: "Web",
-    title: "网页与界面",
-    body: "屏幕里跑的是真实项目。后续这块会换成 <Html transform> 承载的实际 DOM，可以直接在书桌上操作站点本身。",
-    items: [
-      { title: "Project One", meta: "2026 · 设计 + 前端" },
-      { title: "Project Two", meta: "2025 · 界面系统" },
-      { title: "Project Three", meta: "2024 · 品牌官网" },
-    ],
+    kicker: "Web · GitHub",
+    title: "代码与网页",
+    body: "GitHub 的数据是实时拉取的，每次打开都是当前状态。LinkedIn 只能静态跳转——它的公开 API 在 2015 年就关停了。",
   },
   phone: {
     kicker: "App",
-    title: "移动端产品",
-    body: "手机屏幕是可滑动的原型区。放交互录屏或真实的可点原型都可以。",
-    items: [
-      { title: "App One", meta: "2026 · 产品设计" },
-      { title: "App Two", meta: "2024 · 概念原型" },
-    ],
+    title: "我写的东西",
+    body: "公众号、小红书、网易云——发布在哪儿，就从哪个图标进。这几个平台都不开放 API，所以是跳转，不是嵌入。",
   },
   portfolio: {
     kicker: "Portfolio",
@@ -57,5 +47,22 @@ export const content: Partial<Record<HotspotId, Section>> = {
     kicker: "About",
     title: "关于我",
     body: "软木板放最私人的内容：你是谁、最近在做什么、在想什么。手写体，别用正文字体——这块要跟作品区拉开语气。",
+  },
+  // The music surface is MusicPanel, not the generic panel — but this entry
+  // still has to exist, because the Index lists whatever `content` knows about.
+  marshall: {
+    kicker: "Music",
+    title: "在听什么",
+    body: "点音箱开始播放。歌单链接和音频文件都在 src/data/links.ts 和 public/audio/ 里配。",
+  },
+  posters: {
+    kicker: "Cinema",
+    title: "片单",
+    body: "林奇、杨德昌、侯孝贤。墙上现在挂的是排版占位图——把海报文件放进 public/posters/，再在 data/films.ts 里填上路径就会自动替换。",
+  },
+  domi: {
+    kicker: "Domi",
+    title: "多米",
+    body: "家里的猫。坐在椅子上，会呼吸。这一段留给你自己写。",
   },
 };

@@ -285,6 +285,163 @@ body {
   opacity: 0.7;
 }
 
+/* ---------- github / apps / music panels ---------- */
+
+.panel--wide {
+  width: min(430px, calc(100vw - 68px));
+}
+
+.panel__note {
+  margin: 18px 0 0;
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  opacity: 0.85;
+}
+
+.panel__note code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(128, 128, 128, 0.16);
+}
+
+.panel__note a,
+.panel__note-link {
+  display: inline-block;
+  margin-top: 14px;
+  color: var(--ink);
+  font-size: 12.5px;
+}
+
+.panel__note--warn {
+  color: #b4552f;
+  opacity: 1;
+}
+
+.app--evening .panel__note--warn {
+  color: #e8956a;
+}
+
+.panel__cta--button {
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+}
+
+.gh__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.gh__avatar {
+  border-radius: 50%;
+  background: rgba(128, 128, 128, 0.2);
+}
+
+.gh__name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.gh__meta {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+.gh__live {
+  margin-left: auto;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #2ea043;
+  color: #fff;
+}
+
+.gh__repo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+}
+
+.gh__desc {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 230px;
+}
+
+.apps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.apps__item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 150ms ease;
+}
+
+.apps__item:hover {
+  transform: translateX(3px);
+}
+
+.apps__item--empty {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.apps__item--empty:hover {
+  transform: none;
+}
+
+.apps__icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 600;
+  flex: 0 0 auto;
+}
+
+.apps__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.apps__label {
+  font-size: 14px;
+}
+
+.apps__handle {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
 /* ---------- portfolio spread viewer ---------- */
 
 .viewer {

@@ -28,15 +28,24 @@ study/src/
     Devices.tsx    laptop, phone
     Objects.tsx    lamp, portfolio, mug, camera, prints, plant
     Shelf.tsx      bookshelf and pinboard
+    Marshall.tsx   desk speaker
+    PosterWall.tsx the film wall
+    Chair.tsx      reading chair, and Domi
     CameraRig.tsx  camera choreography
   data/
     hotspots.ts    object -> content -> URL -> camera pose
     content.ts     section copy
+    films.ts       the poster wall
+    links.ts       accounts
   interaction/
     studyStore.ts  shared state
     Hotspot.tsx    hover label + click to enter
   ui/
-    Panel.tsx           content surface
+    Surface.tsx         picks the panel for the focused object
+    GitHubPanel.tsx     live GitHub
+    PhonePanel.tsx      publishing platforms
+    MusicPanel.tsx      the speaker
+    Panel.tsx           generic content surface
     PortfolioViewer.tsx spread-by-spread portfolio reader
 scripts/
   render-portfolio.py   turns the source PDF into web assets
@@ -51,6 +60,32 @@ its close-up with it instead of leaving the camera pointed at bare wood.
 **Shared state is an external store, not React context.** `<Canvas>` mounts its
 own reconciler root, so context from the DOM tree never reaches components
 inside the scene.
+
+One trap worth recording: drei's `<SoftShadows>` injects a PCSS shader that
+calls `unpackRGBAToDepth`, which current three.js no longer defines. A failed
+injection breaks shader compilation for *every* material in the scene, and the
+symptom is not an obviously broken image — metalness and clearcoat quietly stop
+working and the whole room reads as matte plastic. The Canvas uses three's own
+soft shadow map instead.
+
+## Accounts
+
+Only GitHub is live. It is fetched straight from the browser: the
+unauthenticated REST API allows 60 requests per hour *per visitor IP*, so every
+visitor has their own budget and two calls per page view is nowhere near it. No
+token and no backend.
+
+LinkedIn closed its public API in 2015, and Xiaohongshu, WeChat Official
+Accounts and NetEase Cloud Music expose nothing a static site may read. Those
+are outbound links, and the UI says so rather than dressing a stale cache up as
+live data. URLs go in `src/data/links.ts`.
+
+## Dropping in assets
+
+- `public/posters/` — film artwork, wired up in `src/data/films.ts`
+- `public/audio/now-playing.mp3` — what the speaker plays
+
+Both folders have a README covering the format and the rights question.
 
 ## The portfolio
 

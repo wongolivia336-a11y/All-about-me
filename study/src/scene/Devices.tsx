@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { RoundedBox } from "@react-three/drei";
+import { phoneApps } from "../data/links";
 import { Hotspot } from "../interaction/Hotspot";
 import { useStudy } from "../interaction/studyStore";
 import { DESK_TOP_Y, layout } from "./layout";
@@ -103,7 +104,7 @@ function Laptop() {
 }
 
 function Phone() {
-  const screen = useMemo(makeAppScreen, []);
+  const screen = useMemo(() => makeAppScreen(phoneApps), []);
   const { focused } = useStudy();
   const lit = focused === "phone";
 

@@ -13,9 +13,18 @@ interface StudyState {
   focused: HotspotId | null;
   /** desk lamp switch — drives the room's mood */
   lampOn: boolean;
+  /** the speaker. Browsers block autoplay, so this only ever starts on a click */
+  musicPlaying: boolean;
+  /** set when playback was refused — usually because no audio file is present */
+  musicUnavailable: boolean;
 }
 
-let state: StudyState = { focused: null, lampOn: false };
+let state: StudyState = {
+  focused: null,
+  lampOn: false,
+  musicPlaying: false,
+  musicUnavailable: false,
+};
 const listeners = new Set<() => void>();
 
 function setState(patch: Partial<StudyState>) {
@@ -34,8 +43,13 @@ const getSnapshot = () => state;
 
 export const focus = (id: HotspotId | null) => setState({ focused: id });
 export const toggleLamp = () => setState({ lampOn: !state.lampOn });
+export const setMusicPlaying = (playing: boolean) =>
+  setState({ musicPlaying: playing, ...(playing ? { musicUnavailable: false } : {}) });
+
+export const reportMusicUnavailable = () =>
+  setState({ musicPlaying: false, musicUnavailable: true });
 
 export function useStudy() {
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
-  return { ...snapshot, focus, toggleLamp };
+  return { ...snapshot, focus, toggleLamp, setMusicPlaying };
 }

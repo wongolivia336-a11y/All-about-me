@@ -27,7 +27,7 @@ export function CameraRig() {
       makeDefault
       smoothTime={0.45}
       minDistance={0.32}
-      maxDistance={5}
+      maxDistance={6.5}
       minPolarAngle={0.25}
       maxPolarAngle={Math.PI / 2.08}
       minAzimuthAngle={-Math.PI / 2.4}

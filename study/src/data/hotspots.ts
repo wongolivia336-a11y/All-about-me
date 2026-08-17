@@ -15,6 +15,9 @@ export type HotspotId =
   | "shelf"
   | "camera"
   | "board"
+  | "marshall"
+  | "posters"
+  | "domi"
   | "lamp";
 
 type Vec3 = [number, number, number];
@@ -32,8 +35,8 @@ export interface Hotspot {
   target: Vec3;
 }
 
-export const HOME_CAM: Vec3 = [2.05, 1.62, 1.95];
-export const HOME_TARGET: Vec3 = [-0.1, 0.85, -0.95];
+export const HOME_CAM: Vec3 = [2.75, 1.9, 3.0];
+export const HOME_TARGET: Vec3 = [0, 0.95, -1.05];
 
 const at = (
   base: readonly [number, number, number],
@@ -92,6 +95,27 @@ export const hotspots: Hotspot[] = [
     blurb: "关于我 / 最近在做什么",
     path: "/about",
     ...at(layout.board.pos, 0, [0, 0.05, 0.75]),
+  },
+  {
+    id: "marshall",
+    label: "Music",
+    blurb: "在听什么",
+    path: "/music",
+    ...at(layout.marshall.pos, 0.07, [0.12, 0.2, 0.36]),
+  },
+  {
+    id: "posters",
+    label: "Cinema",
+    blurb: "片单 / 海报墙",
+    path: "/cinema",
+    ...at(layout.posters.pos, 0, [0, 0, 1.4]),
+  },
+  {
+    id: "domi",
+    label: "Domi",
+    blurb: "我家多米",
+    path: "/domi",
+    ...at([layout.chair.pos[0], 0.62, layout.chair.pos[2]], 0.15, [-0.4, 0.18, 0.6]),
   },
   {
     id: "lamp",

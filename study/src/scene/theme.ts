@@ -97,36 +97,133 @@ export const makeSiteScreen = () =>
     roundRect(ctx, 64, 528, (w - 128) * 0.6, 12, 6);
   });
 
-/** Stand-in app UI for the phone screen. */
-export const makeAppScreen = () =>
+/**
+ * The phone's home screen: the apps you actually publish to.
+ * Icon marks and colours come from `data/links.ts` so the screen and the
+ * panel behind it never disagree about what is on the phone.
+ */
+export const makeAppScreen = (
+  apps: { mark: string; label: string; tone: string }[],
+) =>
   makeTexture(512, 1040, (ctx, w, h) => {
-    const g = ctx.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, "#1d2430");
-    g.addColorStop(1, "#0f141c");
+    const g = ctx.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0, "#39566f");
+    g.addColorStop(0.55, "#2b3f56");
+    g.addColorStop(1, "#1d2a3a");
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, w, h);
 
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "600 22px -apple-system, Segoe UI, sans-serif";
-    ctx.fillText("9:41", 34, 52);
+    // status bar
+    ctx.fillStyle = "rgba(255,255,255,0.95)";
+    ctx.font = "600 24px -apple-system, Segoe UI, sans-serif";
+    ctx.fillText("9:41", 36, 56);
+    ctx.textAlign = "right";
+    ctx.fillText("▮▮▮", w - 36, 56);
+    ctx.textAlign = "left";
 
-    ctx.font = "700 46px -apple-system, Segoe UI, sans-serif";
-    ctx.fillText("Today", 34, 150);
-    ctx.fillStyle = "#7d8794";
-    ctx.font = "400 22px -apple-system, Segoe UI, sans-serif";
-    ctx.fillText("Mobile — product & prototype", 34, 190);
+    // date widget
+    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    ctx.font = "300 92px -apple-system, Segoe UI, sans-serif";
+    ctx.fillText("9:41", 40, 220);
+    ctx.font = "400 26px -apple-system, Segoe UI, sans-serif";
+    ctx.fillStyle = "rgba(255,255,255,0.6)";
+    ctx.fillText("周一  8月17日", 44, 262);
 
-    for (let i = 0; i < 5; i++) {
-      const y = 240 + i * 132;
-      ctx.fillStyle = "rgba(255,255,255,0.06)";
-      roundRect(ctx, 28, y, w - 56, 112, 22);
-      ctx.fillStyle = ["#5b8def", "#e0794f", "#57b894", "#b06fd0", "#e0b54f"][i];
-      roundRect(ctx, 48, y + 24, 64, 64, 18);
-      ctx.fillStyle = "rgba(255,255,255,0.85)";
-      roundRect(ctx, 132, y + 34, 190, 14, 7);
-      ctx.fillStyle = "rgba(255,255,255,0.35)";
-      roundRect(ctx, 132, y + 62, 130, 12, 6);
+    // icon grid
+    const cols = 3;
+    const icon = 104;
+    const gapX = (w - cols * icon - 80) / (cols - 1);
+    apps.slice(0, 9).forEach((app, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const x = 40 + col * (icon + gapX);
+      const y = 360 + row * (icon + 66);
+
+      ctx.fillStyle = app.tone;
+      roundRect(ctx, x, y, icon, icon, 26);
+
+      ctx.fillStyle = "rgba(255,255,255,0.96)";
+      ctx.font = "600 44px -apple-system, PingFang SC, Segoe UI, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(app.mark, x + icon / 2, y + icon / 2 + 16);
+
+      ctx.fillStyle = "rgba(255,255,255,0.82)";
+      ctx.font = "400 20px -apple-system, PingFang SC, Segoe UI, sans-serif";
+      ctx.fillText(app.label, x + icon / 2, y + icon + 30);
+      ctx.textAlign = "left";
+    });
+
+    // dock
+    ctx.fillStyle = "rgba(255,255,255,0.12)";
+    roundRect(ctx, 34, h - 168, w - 68, 132, 34);
+    ctx.fillStyle = "rgba(255,255,255,0.35)";
+    roundRect(ctx, w / 2 - 70, h - 26, 140, 6, 3);
+  });
+
+/** Woven speaker cloth for the Marshall front. */
+export const makeGrilleTexture = () =>
+  makeTexture(256, 256, (ctx, w, h) => {
+    ctx.fillStyle = "#141212";
+    ctx.fillRect(0, 0, w, h);
+    ctx.strokeStyle = "rgba(210,200,185,0.20)";
+    ctx.lineWidth = 1;
+    for (let i = 0; i < w; i += 4) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i, h);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, i);
+      ctx.lineTo(w, i);
+      ctx.stroke();
     }
+    ctx.fillStyle = "rgba(255,240,220,0.05)";
+    for (let i = 0; i < 900; i++) {
+      ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
+    }
+  });
+
+/**
+ * Typeset stand-in for a film poster.
+ * Real artwork dropped into public/posters/ replaces this at load time.
+ */
+export const makePosterTexture = (film: {
+  title: string;
+  titleEn: string;
+  director: string;
+  year: string;
+  tone: string;
+}) =>
+  makeTexture(440, 660, (ctx, w, h) => {
+    ctx.fillStyle = film.tone;
+    ctx.fillRect(0, 0, w, h);
+
+    const glow = ctx.createRadialGradient(w / 2, h * 0.36, 20, w / 2, h * 0.4, w * 0.8);
+    glow.addColorStop(0, "rgba(255,255,255,0.16)");
+    glow.addColorStop(1, "rgba(0,0,0,0.32)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.strokeStyle = "rgba(255,255,255,0.28)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(26, 26, w - 52, h - 52);
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(255,255,255,0.95)";
+    const size = film.title.length > 8 ? 40 : 58;
+    ctx.font = `600 ${size}px "PingFang SC", "Microsoft YaHei", serif`;
+    ctx.fillText(film.title, w / 2, h * 0.46);
+
+    ctx.fillStyle = "rgba(255,255,255,0.7)";
+    ctx.font = "400 21px Georgia, serif";
+    ctx.fillText(film.titleEn, w / 2, h * 0.54);
+
+    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.font = "400 19px -apple-system, PingFang SC, sans-serif";
+    ctx.fillText(film.director, w / 2, h * 0.82);
+    ctx.font = "400 17px Georgia, serif";
+    ctx.fillText(film.year, w / 2, h * 0.87);
+    ctx.textAlign = "left";
   });
 
 /** Warm paper-ish texture for the open portfolio spread. */

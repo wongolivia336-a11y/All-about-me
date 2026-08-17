@@ -1,4 +1,4 @@
-import { ContactShadows, Environment, Lightformer, SoftShadows } from "@react-three/drei";
+import { ContactShadows, Environment, Lightformer } from "@react-three/drei";
 import { useStudy } from "../interaction/studyStore";
 
 /**
@@ -25,8 +25,13 @@ export function Studio() {
 
   return (
     <>
-      <SoftShadows size={24} samples={10} focus={0.7} />
-
+      {/*
+        No <SoftShadows> here. drei's PCSS injection calls unpackRGBAToDepth,
+        which current three.js no longer defines, and a failed injection breaks
+        shader compilation for *every* material in the scene — metalness and
+        clearcoat silently stop working and the room reads as matte plastic.
+        The Canvas uses three's own soft shadow map instead.
+      */}
       <ambientLight intensity={lampOn ? 0.07 : 0.28} />
 
       <directionalLight
