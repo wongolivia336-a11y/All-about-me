@@ -82,10 +82,22 @@ live data. URLs go in `src/data/links.ts`.
 
 ## Dropping in assets
 
-- `public/posters/` — film artwork, wired up in `src/data/films.ts`
 - `public/audio/now-playing.mp3` — what the speaker plays
+- `public/posters/` — only if you host artwork yourself; see below
 
 Both folders have a README covering the format and the rights question.
+
+Film posters come from TMDB rather than from files in this repo:
+
+```bash
+node scripts/fetch-posters.mjs <tmdb-api-key>
+```
+
+The script writes image URLs into `src/data/films.json` and the page links
+TMDB's CDN. The key is used at build time only and never ships. Official
+posters are copyrighted, and serving copies from your own domain is a step
+beyond displaying them — linking under TMDB's terms avoids that, and their
+required attribution appears automatically once any TMDB URL is present.
 
 ## The portfolio
 

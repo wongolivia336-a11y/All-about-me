@@ -1,4 +1,5 @@
 import { useStudy } from "../interaction/studyStore";
+import { CinemaPanel } from "./CinemaPanel";
 import { GitHubPanel } from "./GitHubPanel";
 import { MusicPanel } from "./MusicPanel";
 import { Panel } from "./Panel";
@@ -23,6 +24,8 @@ export function Surface() {
       return <PhonePanel />;
     case "marshall":
       return <MusicPanel />;
+    case "posters":
+      return <CinemaPanel />;
     default:
       return <Panel />;
   }

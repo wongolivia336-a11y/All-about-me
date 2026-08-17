@@ -1,12 +1,17 @@
+import filmsJson from "./films.json";
+
 /**
  * The poster wall.
  *
- * `poster` points at a file you drop into `public/posters/`. Until one exists
- * the wall draws a typeset placeholder from the title and credits, so the
- * layout can be judged before any artwork is sourced.
+ * The list lives in `films.json` so `scripts/fetch-posters.mjs` can write
+ * artwork URLs back into it without anyone hand-editing TypeScript.
  *
- * Note on artwork: official posters are copyrighted. Showing them on a public
- * site is your call and your risk — nothing here fetches or bundles them.
+ * `poster` is a URL, not a bundled file. Real artwork comes from TMDB's CDN
+ * and is linked, never copied into this repo — official film posters are
+ * copyrighted, and redistributing them from your own domain is a different
+ * thing from displaying them. Until a URL is present each frame draws a
+ * typeset placeholder, and a URL that fails to load falls back to the same
+ * placeholder, so the wall is never full of holes.
  */
 export interface Film {
   id: string;
@@ -14,83 +19,17 @@ export interface Film {
   titleEn: string;
   director: string;
   year: string;
-  /** e.g. "/posters/yi-yi.jpg" — leave undefined for the typeset placeholder */
+  /** absolute URL (TMDB) or a path under /posters/ if you host your own */
   poster?: string;
   /** the accent the placeholder is drawn in */
   tone: string;
 }
 
-export const films: Film[] = [
-  {
-    id: "mulholland-drive",
-    title: "穆赫兰道",
-    titleEn: "Mulholland Drive",
-    director: "David Lynch",
-    year: "2001",
-    tone: "#8d2f3f",
-  },
-  {
-    id: "blue-velvet",
-    title: "蓝丝绒",
-    titleEn: "Blue Velvet",
-    director: "David Lynch",
-    year: "1986",
-    tone: "#2b3f6b",
-  },
-  {
-    id: "eraserhead",
-    title: "橡皮头",
-    titleEn: "Eraserhead",
-    director: "David Lynch",
-    year: "1977",
-    tone: "#2e2e30",
-  },
-  {
-    id: "yi-yi",
-    title: "一一",
-    titleEn: "Yi Yi",
-    director: "杨德昌",
-    year: "2000",
-    tone: "#3f5f52",
-  },
-  {
-    id: "a-brighter-summer-day",
-    title: "牯岭街少年杀人事件",
-    titleEn: "A Brighter Summer Day",
-    director: "杨德昌",
-    year: "1991",
-    tone: "#6b4a2b",
-  },
-  {
-    id: "terrorizers",
-    title: "恐怖分子",
-    titleEn: "The Terrorizers",
-    director: "杨德昌",
-    year: "1986",
-    tone: "#4a4a52",
-  },
-  {
-    id: "city-of-sadness",
-    title: "悲情城市",
-    titleEn: "A City of Sadness",
-    director: "侯孝贤",
-    year: "1989",
-    tone: "#5a5f4a",
-  },
-  {
-    id: "the-assassin",
-    title: "刺客聂隐娘",
-    titleEn: "The Assassin",
-    director: "侯孝贤",
-    year: "2015",
-    tone: "#7a5a2f",
-  },
-  {
-    id: "time-to-live",
-    title: "童年往事",
-    titleEn: "A Time to Live, a Time to Die",
-    director: "侯孝贤",
-    year: "1985",
-    tone: "#8a6a4f",
-  },
-];
+export const films: Film[] = filmsJson as Film[];
+
+/** Required by TMDB's terms whenever their artwork or data is shown. */
+export const TMDB_ATTRIBUTION =
+  "海报数据来自 TMDB。本站使用 TMDB API，但未获 TMDB 认可或认证。";
+
+export const usingTmdb = () =>
+  films.some((f) => f.poster?.includes("image.tmdb.org"));

@@ -383,6 +383,42 @@ body {
   max-width: 230px;
 }
 
+.cinema__group {
+  margin-top: 20px;
+}
+
+.cinema__director {
+  margin: 0 0 8px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.cinema__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.cinema__list li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.cinema__title {
+  font-size: 14px;
+}
+
+.cinema__meta {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
 .apps {
   display: flex;
   flex-direction: column;
