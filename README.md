@@ -16,6 +16,21 @@ npm install
 npm run dev
 ```
 
+## Deploying
+
+The app is not at the repo root — it lives in `study/` — so `vercel.json` at the
+root tells Vercel where to build and what to serve. Without it Vercel finds no
+package.json, produces no output, and every URL answers 404.
+
+For that file to be read, the project's **Root Directory** in the Vercel
+dashboard must be the repo root (blank or `.`), not `study`. Setting Root
+Directory to `study` also works, but then `vercel.json` is ignored and Vercel
+auto-detects Vite instead — pick one, not both.
+
+The catch-all rewrite sends every path to `index.html`. Client routing is not
+wired yet, but the object URLs in `hotspots.ts` (`/cinema`, `/web`, …) need it
+the moment it is.
+
 ## Layout
 
 ```
