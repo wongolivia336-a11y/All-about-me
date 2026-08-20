@@ -5,7 +5,8 @@
     "titleEn": "Mulholland Drive",
     "director": "David Lynch",
     "year": "2001",
-    "tone": "#8d2f3f"
+    "tone": "#7d2233",
+    "motif": "beam"
   },
   {
     "id": "blue-velvet",
@@ -13,7 +14,8 @@
     "titleEn": "Blue Velvet",
     "director": "David Lynch",
     "year": "1986",
-    "tone": "#2b3f6b"
+    "tone": "#1f3157",
+    "motif": "folds"
   },
   {
     "id": "eraserhead",
@@ -21,7 +23,8 @@
     "titleEn": "Eraserhead",
     "director": "David Lynch",
     "year": "1977",
-    "tone": "#2e2e30"
+    "tone": "#232326",
+    "motif": "grain"
   },
   {
     "id": "yi-yi",
@@ -29,7 +32,8 @@
     "titleEn": "Yi Yi",
     "director": "杨德昌",
     "year": "2000",
-    "tone": "#3f5f52"
+    "tone": "#2f4f47",
+    "motif": "windows"
   },
   {
     "id": "a-brighter-summer-day",
@@ -37,7 +41,8 @@
     "titleEn": "A Brighter Summer Day",
     "director": "杨德昌",
     "year": "1991",
-    "tone": "#6b4a2b"
+    "tone": "#5a3a20",
+    "motif": "orb"
   },
   {
     "id": "terrorizers",
@@ -45,7 +50,8 @@
     "titleEn": "The Terrorizers",
     "director": "杨德昌",
     "year": "1986",
-    "tone": "#4a4a52"
+    "tone": "#3c3c46",
+    "motif": "windows"
   },
   {
     "id": "city-of-sadness",
@@ -53,7 +59,8 @@
     "titleEn": "A City of Sadness",
     "director": "侯孝贤",
     "year": "1989",
-    "tone": "#5a5f4a"
+    "tone": "#464d3c",
+    "motif": "horizon"
   },
   {
     "id": "the-assassin",
@@ -61,7 +68,8 @@
     "titleEn": "The Assassin",
     "director": "侯孝贤",
     "year": "2015",
-    "tone": "#7a5a2f"
+    "tone": "#6b4a20",
+    "motif": "orb"
   },
   {
     "id": "time-to-live",
@@ -69,6 +77,7 @@
     "titleEn": "A Time to Live, a Time to Die",
     "director": "侯孝贤",
     "year": "1985",
-    "tone": "#8a6a4f"
+    "tone": "#75593f",
+    "motif": "horizon"
   }
 ]

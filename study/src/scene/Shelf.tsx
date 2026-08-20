@@ -3,6 +3,7 @@ import { RoundedBox } from "@react-three/drei";
 import { Hotspot } from "../interaction/Hotspot";
 import { layout } from "./layout";
 import { palette } from "./theme";
+import { makeWood } from "./textures";
 
 /** Deterministic pseudo-random, so the books don't reshuffle on every render. */
 const rnd = (seed: number) => {
@@ -25,6 +26,8 @@ const SPINE_COLORS = [
 
 export function Bookshelf() {
   const { pos, rotY } = layout.shelf;
+  const oak = useMemo(() => makeWood("#c9a375", "#966c3e", [2, 1]), []);
+  const backPanel = useMemo(() => makeWood("#c2a07c", "#8e6b42", [3, 2]), []);
 
   const W = 1.17; // inner width
   const D = 0.3;
@@ -38,21 +41,36 @@ export function Bookshelf() {
         {[-1, 1].map((s) => (
           <mesh key={s} position={[s * (W / 2 + 0.015), H / 2, 0]} castShadow receiveShadow>
             <boxGeometry args={[0.03, H, D]} />
-            <meshStandardMaterial color={palette.deskEdge} roughness={0.65} />
+            <meshStandardMaterial
+              map={oak.map}
+              bumpMap={oak.bumpMap}
+              bumpScale={0.2}
+              roughness={0.58}
+            />
           </mesh>
         ))}
 
         {/* back panel */}
         <mesh position={[0, H / 2, -D / 2 + 0.007]} receiveShadow>
           <boxGeometry args={[W + 0.03, H, 0.014]} />
-          <meshStandardMaterial color="#c2a07c" roughness={0.8} />
+          <meshStandardMaterial
+            map={backPanel.map}
+            bumpMap={backPanel.bumpMap}
+            bumpScale={0.2}
+            roughness={0.82}
+          />
         </mesh>
 
         {/* shelves */}
         {shelfYs.map((y) => (
           <mesh key={y} position={[0, y, 0]} castShadow receiveShadow>
             <boxGeometry args={[W, 0.028, D]} />
-            <meshStandardMaterial color={palette.deskEdge} roughness={0.65} />
+            <meshStandardMaterial
+              map={oak.map}
+              bumpMap={oak.bumpMap}
+              bumpScale={0.2}
+              roughness={0.58}
+            />
           </mesh>
         ))}
 

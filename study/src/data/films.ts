@@ -1,3 +1,4 @@
+import type { Motif } from "../scene/poster";
 import filmsJson from "./films.json";
 
 /**
@@ -21,8 +22,10 @@ export interface Film {
   year: string;
   /** absolute URL (TMDB) or a path under /posters/ if you host your own */
   poster?: string;
-  /** the accent the placeholder is drawn in */
+  /** the field colour the drawn poster is built on */
   tone: string;
+  /** which geometric figure the drawn poster uses */
+  motif?: Motif;
 }
 
 export const films: Film[] = filmsJson as Film[];

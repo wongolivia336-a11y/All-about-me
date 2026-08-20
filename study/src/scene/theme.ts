@@ -183,48 +183,8 @@ export const makeGrilleTexture = () =>
     }
   });
 
-/**
- * Typeset stand-in for a film poster.
- * Real artwork dropped into public/posters/ replaces this at load time.
- */
-export const makePosterTexture = (film: {
-  title: string;
-  titleEn: string;
-  director: string;
-  year: string;
-  tone: string;
-}) =>
-  makeTexture(440, 660, (ctx, w, h) => {
-    ctx.fillStyle = film.tone;
-    ctx.fillRect(0, 0, w, h);
-
-    const glow = ctx.createRadialGradient(w / 2, h * 0.36, 20, w / 2, h * 0.4, w * 0.8);
-    glow.addColorStop(0, "rgba(255,255,255,0.16)");
-    glow.addColorStop(1, "rgba(0,0,0,0.32)");
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, w, h);
-
-    ctx.strokeStyle = "rgba(255,255,255,0.28)";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(26, 26, w - 52, h - 52);
-
-    ctx.textAlign = "center";
-    ctx.fillStyle = "rgba(255,255,255,0.95)";
-    const size = film.title.length > 8 ? 40 : 58;
-    ctx.font = `600 ${size}px "PingFang SC", "Microsoft YaHei", serif`;
-    ctx.fillText(film.title, w / 2, h * 0.46);
-
-    ctx.fillStyle = "rgba(255,255,255,0.7)";
-    ctx.font = "400 21px Georgia, serif";
-    ctx.fillText(film.titleEn, w / 2, h * 0.54);
-
-    ctx.fillStyle = "rgba(255,255,255,0.55)";
-    ctx.font = "400 19px -apple-system, PingFang SC, sans-serif";
-    ctx.fillText(film.director, w / 2, h * 0.82);
-    ctx.font = "400 17px Georgia, serif";
-    ctx.fillText(film.year, w / 2, h * 0.87);
-    ctx.textAlign = "left";
-  });
+// Poster artwork lives in ./poster.ts — it grew its own motif system and no
+// longer belongs in the shared texture grab-bag.
 
 /** Warm paper-ish texture for the open portfolio spread. */
 export const makeSpreadTexture = () =>

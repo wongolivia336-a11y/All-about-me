@@ -5,7 +5,7 @@ import type { Film } from "../data/films";
 import { films } from "../data/films";
 import { Hotspot } from "../interaction/Hotspot";
 import { layout } from "./layout";
-import { makePosterTexture } from "./theme";
+import { makePosterTexture } from "./poster";
 
 const POSTER_W = 0.22;
 const POSTER_H = 0.33;

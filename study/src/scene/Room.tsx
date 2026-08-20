@@ -4,6 +4,7 @@ import { ReadingChair } from "./Chair";
 import { Devices } from "./Devices";
 import { Marshall } from "./Marshall";
 import { DeskProps } from "./Objects";
+import { PostFX } from "./PostFX";
 import { PosterWall } from "./PosterWall";
 import { Bookshelf, Corkboard } from "./Shelf";
 import { Shell } from "./Shell";
@@ -22,6 +23,7 @@ export function Room() {
       <PosterWall />
       <ReadingChair />
       <CameraRig />
+      <PostFX />
     </Suspense>
   );
 }

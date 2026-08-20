@@ -5,6 +5,7 @@ import type { Group } from "three";
 import { Hotspot } from "../interaction/Hotspot";
 import { layout } from "./layout";
 import { palette } from "./theme";
+import { makeFabric, makeWood } from "./textures";
 
 const SEAT_Y = 0.44;
 
@@ -29,6 +30,8 @@ export function ReadingChair() {
 }
 
 function Chair() {
+  const oak = useMemo(() => makeWood("#d8b489", "#a3784a", [1, 1]), []);
+  const cloth = useMemo(() => makeFabric("#c2a894", [3, 3]), []);
   const legs: [number, number][] = [
     [-0.17, -0.17],
     [0.17, -0.17],
@@ -58,9 +61,11 @@ function Chair() {
         receiveShadow
       >
         <meshPhysicalMaterial
-          color={palette.deskTop}
-          roughness={0.5}
-          clearcoat={0.25}
+          map={oak.map}
+          bumpMap={oak.bumpMap}
+          bumpScale={0.2}
+          roughness={0.44}
+          clearcoat={0.3}
         />
       </RoundedBox>
 
@@ -73,7 +78,14 @@ function Chair() {
         castShadow
         receiveShadow
       >
-        <meshPhysicalMaterial color="#c2a894" roughness={0.92} sheen={0.6} />
+        <meshPhysicalMaterial
+          map={cloth.map}
+          bumpMap={cloth.bumpMap}
+          bumpScale={0.3}
+          roughness={0.94}
+          sheen={0.7}
+          sheenColor="#e6d3c2"
+        />
       </RoundedBox>
 
       {/* back */}
