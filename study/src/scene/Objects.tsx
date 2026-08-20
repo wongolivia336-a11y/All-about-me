@@ -109,12 +109,38 @@ function PortfolioSpread() {
   );
 }
 
+// Body dimensions live here so the handle can be attached by arithmetic
+// instead of by nudging magic numbers until it looks about right.
+const MUG_H = 0.1;
+const MUG_R_TOP = 0.041;
+const MUG_R_BOTTOM = 0.035;
+const mugWallAt = (y: number) =>
+  MUG_R_BOTTOM + (y / MUG_H) * (MUG_R_TOP - MUG_R_BOTTOM);
+
+const HANDLE_ARC = Math.PI * 1.2;
+const HANDLE_R = 0.023;
+const HANDLE_TUBE = 0.0062;
+const HANDLE_Y = 0.056;
+
+/**
+ * A torus arc starts at +X and sweeps counter-clockwise, so a 216° arc left
+ * unrotated is centred on 108° — pointing back through the cup. Rotating by
+ * half the arc centres the bulge on +X, where a handle belongs.
+ */
+const HANDLE_ROT = -HANDLE_ARC / 2;
+/** x of the arc's open ends, relative to the torus centre (negative) */
+const HANDLE_END_X = HANDLE_R * Math.cos(HANDLE_ARC / 2);
+/** push the centre out until both ends bite 2mm into the wall */
+const HANDLE_X = mugWallAt(HANDLE_Y) - HANDLE_END_X - 0.002;
+
 function Mug() {
   const { pos } = layout.mug;
   return (
     <group position={[pos[0], pos[1], pos[2]]}>
-      <mesh position={[0, 0.05, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.041, 0.035, 0.1, 32, 1, true]} />
+      <mesh position={[0, MUG_H / 2, 0]} castShadow receiveShadow>
+        <cylinderGeometry
+          args={[MUG_R_TOP, MUG_R_BOTTOM, MUG_H, 40, 1, true]}
+        />
         <meshPhysicalMaterial
           color={palette.ceramic}
           roughness={0.28}
@@ -123,17 +149,30 @@ function Mug() {
           side={2}
         />
       </mesh>
-      <mesh position={[0, 0.006, 0]}>
-        <cylinderGeometry args={[0.035, 0.035, 0.012, 32]} />
+
+      {/* rim, so the lip has thickness instead of a zero-width edge */}
+      <mesh position={[0, MUG_H, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+        <torusGeometry args={[MUG_R_TOP, 0.0016, 8, 40]} />
+        <meshPhysicalMaterial color={palette.ceramic} roughness={0.26} clearcoat={0.9} />
+      </mesh>
+
+      <mesh position={[0, 0.006, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[MUG_R_BOTTOM, MUG_R_BOTTOM, 0.012, 40]} />
         <meshPhysicalMaterial color={palette.ceramic} roughness={0.3} clearcoat={0.9} />
       </mesh>
+
       {/* coffee */}
       <mesh position={[0, 0.082, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[0.038, 32]} />
+        <circleGeometry args={[mugWallAt(0.082) - 0.001, 40]} />
         <meshPhysicalMaterial color="#3b2317" roughness={0.15} clearcoat={1} />
       </mesh>
-      <mesh position={[0.048, 0.055, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
-        <torusGeometry args={[0.022, 0.006, 12, 28, Math.PI * 1.2]} />
+
+      <mesh
+        position={[HANDLE_X, HANDLE_Y, 0]}
+        rotation={[0, 0, HANDLE_ROT]}
+        castShadow
+      >
+        <torusGeometry args={[HANDLE_R, HANDLE_TUBE, 14, 32, HANDLE_ARC]} />
         <meshPhysicalMaterial color={palette.ceramic} roughness={0.28} clearcoat={0.9} />
       </mesh>
     </group>
