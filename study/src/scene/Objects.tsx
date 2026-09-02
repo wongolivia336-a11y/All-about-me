@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { RoundedBox } from "@react-three/drei";
+import * as THREE from "three";
 import { Hotspot } from "../interaction/Hotspot";
 import { useStudy } from "../interaction/studyStore";
 import { layout } from "./layout";
@@ -24,6 +25,7 @@ function DeskLamp() {
   const { pos, rotY } = layout.lamp;
   const armLen = 0.4;
   const headY = 0.44;
+  const spotTarget = useMemo(() => new THREE.Object3D(), []);
 
   return (
     <Hotspot id="lamp" onSelect={toggleLamp} labelAt={[pos[0], pos[1] + 0.6, pos[2]]}>
@@ -66,14 +68,37 @@ function DeskLamp() {
         </group>
 
         {lampOn && (
-          <pointLight
-            position={[0, headY - 0.08, 0.1]}
-            intensity={1.6}
-            distance={2.4}
-            decay={2}
-            color="#ffd9a0"
-            castShadow
-          />
+          <>
+            {/*
+              A spot rather than a point light, so the lamp throws a visible
+              pool onto the desk instead of just tinting the room. The target
+              lives in the lamp's own group, which keeps its position local and
+              puts it in the scene graph — three ignores a target that was
+              never added.
+            */}
+            <primitive object={spotTarget} position={[0.16, -0.62, 0.42]} />
+            <spotLight
+              position={[0, headY - 0.06, 0.06]}
+              target={spotTarget}
+              angle={0.72}
+              penumbra={0.85}
+              intensity={5.5}
+              distance={2.6}
+              decay={1.6}
+              color="#ffd9a0"
+              castShadow
+              shadow-mapSize={[1024, 1024]}
+              shadow-bias={-0.0008}
+            />
+            {/* a little unfocused spill, so the shade itself glows */}
+            <pointLight
+              position={[0, headY - 0.02, 0.04]}
+              intensity={0.35}
+              distance={0.9}
+              decay={2}
+              color="#ffcf90"
+            />
+          </>
         )}
       </group>
     </Hotspot>

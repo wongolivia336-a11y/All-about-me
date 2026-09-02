@@ -9,7 +9,8 @@ import { focus, useStudy } from "../interaction/studyStore";
  * until you touch an object.
  */
 export function MusicPanel() {
-  const { musicPlaying, musicUnavailable, setMusicPlaying } = useStudy();
+  const { musicPlaying, musicUnavailable, setMusicPlaying, volume, setVolume } =
+    useStudy();
   const netease = phoneApps.find((a) => a.id === "netease");
 
   return (
@@ -31,6 +32,22 @@ export function MusicPanel() {
       >
         {musicPlaying ? "⏸  暂停" : "▶  播放"}
       </button>
+
+      {/* the cat's meow rides the same setting, so one control covers the room */}
+      <label className="volume">
+        <span className="volume__label">音量</span>
+        <input
+          className="volume__slider"
+          type="range"
+          min={0}
+          max={100}
+          step={1}
+          value={Math.round(volume * 100)}
+          onChange={(e) => setVolume(Number(e.target.value) / 100)}
+          aria-label="音量"
+        />
+        <span className="volume__value">{Math.round(volume * 100)}</span>
+      </label>
 
       {musicUnavailable && (
         <p className="panel__note panel__note--warn">

@@ -9,6 +9,8 @@ import { PosterWall } from "./PosterWall";
 import { Bookshelf, Corkboard } from "./Shelf";
 import { Shell } from "./Shell";
 import { Studio } from "./Studio";
+import { Whiteboard } from "./Whiteboard";
+import { Workbench } from "./Workbench";
 
 export function Room() {
   return (
@@ -17,9 +19,11 @@ export function Room() {
       <Shell />
       <Devices />
       <DeskProps />
+      <Workbench />
       <Marshall />
       <Bookshelf />
       <Corkboard />
+      <Whiteboard />
       <PosterWall />
       <ReadingChair />
       <CameraRig />

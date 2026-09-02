@@ -18,6 +18,9 @@ export type HotspotId =
   | "marshall"
   | "posters"
   | "domi"
+  | "sketchbook"
+  | "materials"
+  | "whiteboard"
   | "lamp";
 
 type Vec3 = [number, number, number];
@@ -95,6 +98,27 @@ export const hotspots: Hotspot[] = [
     blurb: "关于我 / 最近在做什么",
     path: "/about",
     ...at(layout.board.pos, 0, [0, 0.05, 0.75]),
+  },
+  {
+    id: "sketchbook",
+    label: "Sketchbook",
+    blurb: "手稿与草图",
+    path: "/sketchbook",
+    ...at(layout.sketchbook.pos, 0.02, [0, 0.32, 0.2]),
+  },
+  {
+    id: "materials",
+    label: "Materials",
+    blurb: "材料样本",
+    path: "/materials",
+    ...at(layout.tray.pos, 0.02, [0, 0.24, 0.18]),
+  },
+  {
+    id: "whiteboard",
+    label: "In progress",
+    blurb: "还没想清楚的部分",
+    path: "/in-progress",
+    ...at(layout.whiteboard.pos, 0, [0, 0, 1.25]),
   },
   {
     id: "marshall",

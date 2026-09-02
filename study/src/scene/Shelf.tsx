@@ -77,8 +77,38 @@ export function Bookshelf() {
         {shelfYs.slice(0, 4).map((y, row) => (
           <BookRow key={y} y={y + 0.014} width={W} row={row} />
         ))}
+
+        <FaceDownBook y={shelfYs[4] + 0.014} />
       </group>
     </Hotspot>
+  );
+}
+
+/**
+ * A book left open and turned over on the top shelf. It is the one universally
+ * legible sign that someone is halfway through something, and it costs three
+ * boxes: two covers tented over a spine.
+ */
+function FaceDownBook({ y }: { y: number }) {
+  return (
+    <group position={[0.3, y, 0.01]} rotation={[0, 0.22, 0]}>
+      {[-1, 1].map((s) => (
+        <mesh
+          key={s}
+          position={[s * 0.052, 0.005, 0]}
+          rotation={[0, 0, s * -0.13]}
+          castShadow
+          receiveShadow
+        >
+          <boxGeometry args={[0.105, 0.009, 0.15]} />
+          <meshStandardMaterial color="#e9e1d1" roughness={0.92} />
+        </mesh>
+      ))}
+      <mesh position={[0, 0.015, 0]} castShadow>
+        <boxGeometry args={[0.018, 0.007, 0.152]} />
+        <meshStandardMaterial color="#8a5a3c" roughness={0.7} />
+      </mesh>
+    </group>
   );
 }
 

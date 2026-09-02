@@ -383,6 +383,60 @@ body {
   max-width: 230px;
 }
 
+.volume {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.volume__label {
+  font-size: 12px;
+  color: var(--ink-soft);
+  flex: 0 0 auto;
+}
+
+.volume__slider {
+  flex: 1;
+  appearance: none;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--line);
+  outline: none;
+}
+
+.volume__slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ink);
+  cursor: pointer;
+  border: none;
+}
+
+.volume__slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ink);
+  cursor: pointer;
+  border: none;
+}
+
+.volume__value {
+  font-size: 11.5px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  color: var(--ink-soft);
+  flex: 0 0 26px;
+  text-align: right;
+}
+
+.panel__note--warn {
+  color: #c0663f;
+  opacity: 1;
+}
+
 .cinema__group {
   margin-top: 20px;
 }

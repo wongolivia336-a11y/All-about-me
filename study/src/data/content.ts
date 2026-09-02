@@ -63,6 +63,21 @@ export const content: Partial<Record<HotspotId, Section>> = {
   domi: {
     kicker: "Domi",
     title: "多米",
-    body: "家里的猫。坐在椅子上，会呼吸。这一段留给你自己写。",
+    body: "家里的猫。会呼吸、会眨眼、会到处看，戳她一下会甩尾巴。放一段 public/audio/domi-meow.mp3 进去，她就会叫——你的 cat-meow-gallery 里就有现成的录音。这一段留给你自己写。",
+  },
+  sketchbook: {
+    kicker: "Sketchbook",
+    title: "手稿",
+    body: "工业设计出身的人，桌上应该有本速写本。现在摊开的是空白点阵纸——我没有替你画假的草图。扫描件放进 public/sketches/，这里就换成真的。",
+  },
+  materials: {
+    kicker: "Materials",
+    title: "材料样本",
+    body: "铝、橡木、注塑件、羊毛、磨砂玻璃、釉面陶瓷。六片样本用的是同一套灯光，差别全部来自金属度、粗糙度、清漆层和透射——这盘东西同时也是这个房间材质系统的说明书。",
+  },
+  whiteboard: {
+    kicker: "In progress",
+    title: "还没想清楚的部分",
+    body: "你 GitHub 主页第一句是「I like building where things are still a little unclear」。这块白板就是那句话的实物：画了一半的流程、两根虚线箭头、一个问号，还有之前擦掉的痕迹。写什么由你决定。",
   },
 };

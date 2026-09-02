@@ -17,6 +17,8 @@ interface StudyState {
   musicPlaying: boolean;
   /** set when playback was refused — usually because no audio file is present */
   musicUnavailable: boolean;
+  /** 0..1, shared by the speaker and by the cat */
+  volume: number;
 }
 
 let state: StudyState = {
@@ -24,6 +26,7 @@ let state: StudyState = {
   lampOn: false,
   musicPlaying: false,
   musicUnavailable: false,
+  volume: 0.6,
 };
 const listeners = new Set<() => void>();
 
@@ -49,7 +52,13 @@ export const setMusicPlaying = (playing: boolean) =>
 export const reportMusicUnavailable = () =>
   setState({ musicPlaying: false, musicUnavailable: true });
 
+export const setVolume = (v: number) =>
+  setState({ volume: Math.min(1, Math.max(0, v)) });
+
+/** Read without subscribing — for one-off sounds fired from an event handler. */
+export const currentVolume = () => state.volume;
+
 export function useStudy() {
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
-  return { ...snapshot, focus, toggleLamp, setMusicPlaying };
+  return { ...snapshot, focus, toggleLamp, setMusicPlaying, setVolume };
 }

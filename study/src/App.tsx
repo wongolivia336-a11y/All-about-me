@@ -2,14 +2,30 @@ import { useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { content } from "./data/content";
 import { HOME_CAM, hotspots } from "./data/hotspots";
-import { focus, reportMusicUnavailable, useStudy } from "./interaction/studyStore";
+import {
+  focus,
+  reportMusicUnavailable,
+  toggleLamp as flipLamp,
+  useStudy,
+} from "./interaction/studyStore";
 import { Room } from "./scene/Room";
 import { Surface } from "./ui/Surface";
 
 export default function App() {
-  const { focused, lampOn, toggleLamp, musicPlaying } = useStudy();
+  const { focused, lampOn, toggleLamp, musicPlaying, volume } = useStudy();
   const [indexMode, setIndexMode] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Open on whatever time of day it actually is where the visitor is. Someone
+  // arriving at 1am should find the room at 1am; they can still flip it.
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 7 || hour >= 18) flipLamp();
+  }, []);
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = volume;
+  }, [volume]);
 
   // The audio element lives here rather than in the music panel so closing the
   // panel does not stop the music.

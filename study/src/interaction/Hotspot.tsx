@@ -15,6 +15,12 @@ interface Props {
    * this to flip the lights instead of becoming a destination.
    */
   onSelect?: () => void;
+  /**
+   * Runs *alongside* the default behaviour rather than replacing it, for
+   * objects that react to being touched as well as opening. The cat both
+   * startles and opens her panel.
+   */
+  onActivate?: () => void;
 }
 
 /**
@@ -23,7 +29,13 @@ interface Props {
  * The label only shows in the overview — once you are pushed in, it would just
  * be in the way.
  */
-export function Hotspot({ id, children, labelAt = [0, 0.16, 0], onSelect }: Props) {
+export function Hotspot({
+  id,
+  children,
+  labelAt = [0, 0.16, 0],
+  onSelect,
+  onActivate,
+}: Props) {
   const [hovered, setHovered] = useState(false);
   const { focused, focus } = useStudy();
   useCursor(hovered);
@@ -44,6 +56,7 @@ export function Hotspot({ id, children, labelAt = [0, 0.16, 0], onSelect }: Prop
       }}
       onClick={(e) => {
         e.stopPropagation();
+        onActivate?.();
         if (onSelect) onSelect();
         else focus(isFocused ? null : id);
       }}
