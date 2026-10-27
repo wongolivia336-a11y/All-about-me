@@ -1,32 +1,43 @@
-# React + TypeScript + Vite
+# Olivia's Room
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A personal digital space with two ways in:
 
-Currently, two official plugins are available:
+- **Room** — a spatial, object-led experience.
+- **Index** — the default, keyboard-friendly way to scan selected work.
+- **Room** — available at `#room`, a deliberate spatial mode rather than a gate.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The two modes deliberately serve different needs: the Room carries personality; the Index lets a recruiter or collaborator understand the work without learning the room first. The browser history keeps the selected mode, so `#room` is shareable and Back returns predictably.
 
-## React Compiler
+## Run locally
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Create a production build:
+
+```bash
+npm run build
+```
+
+## Content
+
+Selected public work is registered in `src/data/library.ts`.
+
+Each entry needs a collection, a year, one concise summary, and its real public links. Keep the public Index selective; it is not intended to become a raw mirror of every repository.
+
+- `work` — finished or representative product/design work
+- `research` — inquiry-led visualisation and knowledge work
+- `make` — experiments, tools, and interaction studies
+- `journal` — writing, once there is work ready to publish
+
+## Structure
+
+- `src/scene/` — the 3D room, layout, materials, and camera choreography
+- `src/interaction/` — room state and object interaction
+- `src/ui/Archive.tsx` — the accessible Index interface
+- `src/data/library.ts` — curated portfolio content
+- `src/data/hotspots.ts` — physical room objects and their focus positions
+
+The room should stay an experience, rather than becoming the only route to information. New content normally starts in `library.ts`; add or remap a room object only when the object gives it a meaningful physical metaphor.
