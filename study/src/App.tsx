@@ -15,6 +15,7 @@ export default function App() {
   const { lampOn, toggleLamp, musicPlaying, volume } = useStudy();
   const [indexMode, setIndexMode] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const indexTrigger = useRef<HTMLButtonElement>(null);
   const appliedTimeMood = useRef(false);
 
   useEffect(() => {
@@ -44,8 +45,10 @@ export default function App() {
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
-      if (indexMode) setIndexMode(false);
-      else focus(null);
+      if (indexMode) {
+        setIndexMode(false);
+        window.requestAnimationFrame(() => indexTrigger.current?.focus());
+      } else focus(null);
     };
 
     window.addEventListener("keydown", onKey);
@@ -55,6 +58,11 @@ export default function App() {
   const openIndex = () => {
     focus(null);
     setIndexMode(true);
+  };
+
+  const closeIndex = () => {
+    setIndexMode(false);
+    window.requestAnimationFrame(() => indexTrigger.current?.focus());
   };
 
   return (
@@ -83,7 +91,12 @@ export default function App() {
           >
             <span aria-hidden="true">{lampOn ? "☾" : "☀"}</span>
           </button>
-          <button className="hud__btn" type="button" onClick={openIndex}>
+          <button
+            ref={indexTrigger}
+            className="hud__btn"
+            type="button"
+            onClick={openIndex}
+          >
             Index
           </button>
         </div>
@@ -93,7 +106,7 @@ export default function App() {
 
       <audio ref={audioRef} src="/audio/now-playing.mp3" loop preload="none" />
 
-      {indexMode && <Archive onClose={() => setIndexMode(false)} />}
+      {indexMode && <Archive onClose={closeIndex} />}
     </div>
   );
 }
