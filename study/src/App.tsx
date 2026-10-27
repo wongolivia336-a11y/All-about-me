@@ -11,12 +11,24 @@ import { Room } from "./scene/Room";
 import { Archive } from "./ui/Archive";
 import { Surface } from "./ui/Surface";
 
+type View = "index" | "room";
+
+const viewFromHash = (): View => (window.location.hash === "#room" ? "room" : "index");
+
 export default function App() {
   const { lampOn, toggleLamp, musicPlaying, volume } = useStudy();
-  const [indexMode, setIndexMode] = useState(false);
+  const [indexMode, setIndexMode] = useState(() => viewFromHash() === "index");
   const audioRef = useRef<HTMLAudioElement>(null);
   const indexTrigger = useRef<HTMLButtonElement>(null);
   const appliedTimeMood = useRef(false);
+
+  useEffect(() => {
+    if (!window.location.hash) window.history.replaceState(null, "", "#index");
+
+    const syncView = () => setIndexMode(viewFromHash() === "index");
+    window.addEventListener("popstate", syncView);
+    return () => window.removeEventListener("popstate", syncView);
+  }, []);
 
   useEffect(() => {
     if (appliedTimeMood.current) return;
@@ -42,13 +54,22 @@ export default function App() {
     }
   }, [musicPlaying]);
 
+  const setView = (view: View) => {
+    const hash = view === "room" ? "#room" : "#index";
+    if (window.location.hash !== hash) window.history.pushState(null, "", hash);
+    setIndexMode(view === "index");
+  };
+
+  const closeIndex = () => {
+    setView("room");
+    window.requestAnimationFrame(() => indexTrigger.current?.focus());
+  };
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
-      if (indexMode) {
-        setIndexMode(false);
-        window.requestAnimationFrame(() => indexTrigger.current?.focus());
-      } else focus(null);
+      if (indexMode) closeIndex();
+      else focus(null);
     };
 
     window.addEventListener("keydown", onKey);
@@ -57,52 +78,51 @@ export default function App() {
 
   const openIndex = () => {
     focus(null);
-    setIndexMode(true);
-  };
-
-  const closeIndex = () => {
-    setIndexMode(false);
-    window.requestAnimationFrame(() => indexTrigger.current?.focus());
+    setView("index");
   };
 
   return (
     <div className={`app${lampOn ? " app--evening" : ""}`}>
-      <Canvas
-        shadows="soft"
-        dpr={[1, 2]}
-        gl={{ antialias: true, toneMappingExposure: 1.05 }}
-        camera={{ position: HOME_CAM, fov: 36, near: 0.05, far: 60 }}
-        onPointerMissed={() => focus(null)}
-      >
-        <color attach="background" args={[lampOn ? "#171419" : "#e8e3da"]} />
-        <Room />
-      </Canvas>
-
-      <header className="hud">
-        <span className="hud__name">Olivia Wong</span>
-        <div className="hud__actions">
-          <button
-            className="hud__btn hud__btn--icon"
-            type="button"
-            onClick={toggleLamp}
-            aria-label="切换昼夜"
-            aria-pressed={lampOn}
-            title="切换昼夜"
+      {!indexMode && (
+        <>
+          <Canvas
+            shadows="soft"
+            dpr={[1, 2]}
+            gl={{ antialias: true, toneMappingExposure: 1.05 }}
+            camera={{ position: HOME_CAM, fov: 36, near: 0.05, far: 60 }}
+            onPointerMissed={() => focus(null)}
           >
-            <span aria-hidden="true">{lampOn ? "☾" : "☀"}</span>
-          </button>
-          <button
-            ref={indexTrigger}
-            className="hud__btn"
-            type="button"
-            onClick={openIndex}
-          >
-            Index
-          </button>
-        </div>
-      </header>
+            <color attach="background" args={[lampOn ? "#171419" : "#e8e3da"]} />
+            <Room />
+          </Canvas>
 
-      <Surface />
+          <header className="hud">
+            <span className="hud__name">Olivia Wong</span>
+            <div className="hud__actions">
+              <button
+                className="hud__btn hud__btn--icon"
+                type="button"
+                onClick={toggleLamp}
+                aria-label="切换昼夜"
+                aria-pressed={lampOn}
+                title="切换昼夜"
+              >
+                <span aria-hidden="true">{lampOn ? "☾" : "☀"}</span>
+              </button>
+              <button
+                ref={indexTrigger}
+                className="hud__btn"
+                type="button"
+                onClick={openIndex}
+              >
+                Index
+              </button>
+            </div>
+          </header>
+
+          <Surface />
+        </>
+      )}
 
       <audio ref={audioRef} src="/audio/now-playing.mp3" loop preload="none" />
 
