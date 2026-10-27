@@ -75,7 +75,6 @@ export function Archive({ onClose }: ArchiveProps) {
                       onClick={() => setSelectedId(entry.id)}
                     >
                       <span>{entry.title}</span>
-                      <time dateTime={String(entry.year)}>{entry.year}</time>
                     </button>
                   </li>
                 );
