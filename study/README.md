@@ -3,9 +3,10 @@
 A personal digital space with two ways in:
 
 - **Room** — a spatial, object-led experience.
-- **Index** — a fast, keyboard-friendly way to scan selected work.
+- **Index** — the default, keyboard-friendly way to scan selected work.
+- **Room** — available at `#room`, a deliberate spatial mode rather than a gate.
 
-The two modes deliberately serve different needs: the Room carries personality; the Index lets a recruiter or collaborator understand the work without learning the room first.
+The two modes deliberately serve different needs: the Room carries personality; the Index lets a recruiter or collaborator understand the work without learning the room first. The browser history keeps the selected mode, so `#room` is shareable and Back returns predictably.
 
 ## Run locally
 
