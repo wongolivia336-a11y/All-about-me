@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import { content } from "./data/content";
-import { HOME_CAM, hotspots } from "./data/hotspots";
+import { HOME_CAM } from "./data/hotspots";
 import {
   focus,
   reportMusicUnavailable,
@@ -9,16 +8,19 @@ import {
   useStudy,
 } from "./interaction/studyStore";
 import { Room } from "./scene/Room";
+import { Archive } from "./ui/Archive";
 import { Surface } from "./ui/Surface";
 
 export default function App() {
-  const { focused, lampOn, toggleLamp, musicPlaying, volume } = useStudy();
+  const { lampOn, toggleLamp, musicPlaying, volume } = useStudy();
   const [indexMode, setIndexMode] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const appliedTimeMood = useRef(false);
 
-  // Open on whatever time of day it actually is where the visitor is. Someone
-  // arriving at 1am should find the room at 1am; they can still flip it.
   useEffect(() => {
+    if (appliedTimeMood.current) return;
+    appliedTimeMood.current = true;
+
     const hour = new Date().getHours();
     if (hour < 7 || hour >= 18) flipLamp();
   }, []);
@@ -33,8 +35,6 @@ export default function App() {
     const el = audioRef.current;
     if (!el) return;
     if (musicPlaying) {
-      // rejects when the file is missing or the browser blocks it — say so
-      // rather than leaving a play button that silently does nothing
       el.play().catch(reportMusicUnavailable);
     } else {
       el.pause();
@@ -42,14 +42,20 @@ export default function App() {
   }, [musicPlaying]);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
       if (indexMode) setIndexMode(false);
       else focus(null);
     };
+
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [indexMode]);
+
+  const openIndex = () => {
+    focus(null);
+    setIndexMode(true);
+  };
 
   return (
     <div className={`app${lampOn ? " app--evening" : ""}`}>
@@ -65,62 +71,29 @@ export default function App() {
       </Canvas>
 
       <header className="hud">
-        <div className="hud__id">
-          <span className="hud__name">Olivia Wong</span>
-          <span className="hud__role">设计 · 摄影 · 产品</span>
-        </div>
+        <span className="hud__name">Olivia Wong</span>
         <div className="hud__actions">
           <button
-            className="hud__btn"
+            className="hud__btn hud__btn--icon"
+            type="button"
             onClick={toggleLamp}
+            aria-label="切换昼夜"
             aria-pressed={lampOn}
-            title="开灯 / 关灯"
+            title="切换昼夜"
           >
-            {lampOn ? "☾ 夜" : "☀ 昼"}
+            <span aria-hidden="true">{lampOn ? "☾" : "☀"}</span>
           </button>
-          <button className="hud__btn" onClick={() => setIndexMode((v) => !v)}>
-            {indexMode ? "返回房间" : "Index"}
+          <button className="hud__btn" type="button" onClick={openIndex}>
+            Index
           </button>
         </div>
       </header>
-
-      {!focused && !indexMode && (
-        <p className="hint">点击物件进入 · 拖动可轻微转视角 · Esc 返回</p>
-      )}
 
       <Surface />
 
       <audio ref={audioRef} src="/audio/now-playing.mp3" loop preload="none" />
 
-      {indexMode && (
-        <div className="index" role="dialog" aria-label="内容索引">
-          <div className="index__inner">
-            <p className="index__kicker">Index</p>
-            <h1 className="index__title">如果你赶时间</h1>
-            <p className="index__note">
-              房间里的每个物件都对应下面一项。不想逛的话，直接从这儿进。
-            </p>
-            <ul className="index__list">
-              {hotspots
-                .filter((h) => content[h.id])
-                .map((h) => (
-                  <li key={h.id}>
-                    <button
-                      onClick={() => {
-                        setIndexMode(false);
-                        focus(h.id);
-                      }}
-                    >
-                      <span className="index__label">{h.label}</span>
-                      <span className="index__blurb">{h.blurb}</span>
-                      <span className="index__path">{h.path}</span>
-                    </button>
-                  </li>
-                ))}
-            </ul>
-          </div>
-        </div>
-      )}
+      {indexMode && <Archive onClose={() => setIndexMode(false)} />}
     </div>
   );
 }
