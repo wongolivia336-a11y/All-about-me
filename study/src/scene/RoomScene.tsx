@@ -1,6 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { HOME_CAM } from "../data/hotspots";
 import { focus } from "../interaction/studyStore";
+import { sceneDebug } from "./debug";
 import { Room } from "./Room";
 
 interface RoomSceneProps {
@@ -14,7 +15,7 @@ interface RoomSceneProps {
 export default function RoomScene({ isNight }: RoomSceneProps) {
   return (
     <Canvas
-      shadows="soft"
+      shadows={sceneDebug.shadowsEnabled ? "soft" : false}
       dpr={[1, 2]}
       gl={{ antialias: true, toneMappingExposure: 1.05 }}
       camera={{ position: HOME_CAM, fov: 36, near: 0.05, far: 60 }}

@@ -14,12 +14,14 @@ interface StudyState {
   focused: HotspotId | null;
   /** a one-shot request from a physical object to the DOM Index */
   archiveRequest: Collection | null;
+  /** ambient time of day; this never follows a local task-light action */
+  isNight: boolean;
   /** whether the lamp emits enough light to count as on */
   lampOn: boolean;
   /** 0..1 desk-lamp output, shared by the lamp model and the fallback control */
-  lightLevel: number;
+  lampIntensity: number;
   /** the level restored after a press turns the lamp back on */
-  lastLightLevel: number;
+  lastLampIntensity: number;
   /** the speaker. Browsers block autoplay, so this only ever starts on a click */
   musicPlaying: boolean;
   /** set when playback was refused — usually because no audio file is present */
@@ -31,9 +33,10 @@ interface StudyState {
 let state: StudyState = {
   focused: null,
   archiveRequest: null,
+  isNight: initialNightMode(),
   lampOn: false,
-  lightLevel: 0,
-  lastLightLevel: 0.72,
+  lampIntensity: 0,
+  lastLampIntensity: 0.72,
   musicPlaying: false,
   musicUnavailable: false,
   volume: 0.6,
@@ -55,24 +58,33 @@ function subscribe(listener: () => void) {
 const getSnapshot = () => state;
 const clamp = (value: number) => Math.min(1, Math.max(0, value));
 
+function initialNightMode() {
+  if (typeof window === "undefined") return false;
+  const hour = new Date().getHours();
+  return hour < 7 || hour >= 18;
+}
+
 export const focus = (id: HotspotId | null) => setState({ focused: id });
 export const requestArchive = (collection: Collection) =>
   setState({ archiveRequest: collection, focused: null });
 export const clearArchiveRequest = () => setState({ archiveRequest: null });
+export const setNightMode = (isNight: boolean) => {
+  if (state.isNight !== isNight) setState({ isNight });
+};
 
-export const setLightLevel = (value: number) => {
+export const setLampIntensity = (value: number) => {
   const requestedLevel = clamp(value);
-  const lightLevel = requestedLevel > 0.01 ? requestedLevel : 0;
+  const lampIntensity = requestedLevel > 0.01 ? requestedLevel : 0;
 
   setState({
-    lightLevel,
-    lampOn: lightLevel > 0,
-    ...(lightLevel > 0 ? { lastLightLevel: lightLevel } : {}),
+    lampIntensity,
+    lampOn: lampIntensity > 0,
+    ...(lampIntensity > 0 ? { lastLampIntensity: lampIntensity } : {}),
   });
 };
 
 export const toggleLamp = () =>
-  setLightLevel(state.lampOn ? 0 : state.lastLightLevel);
+  setLampIntensity(state.lampOn ? 0 : state.lastLampIntensity);
 
 export const setMusicPlaying = (playing: boolean) =>
   setState({ musicPlaying: playing, ...(playing ? { musicUnavailable: false } : {}) });
@@ -94,7 +106,8 @@ export function useStudy() {
     requestArchive,
     clearArchiveRequest,
     toggleLamp,
-    setLightLevel,
+    setNightMode,
+    setLampIntensity,
     setMusicPlaying,
     setVolume,
   };

@@ -15,14 +15,20 @@ import { useStudy } from "../interaction/studyStore";
  * whole walls.
  */
 export function PostFX() {
-  const { lightLevel } = useStudy();
+  const { isNight, lampIntensity } = useStudy();
+  // Time of day establishes the spatial mood. The dimmer only adds a subtle
+  // local response, so a daytime task light cannot accidentally turn the
+  // complete room into a night-grade post-processing treatment.
+  const aoIntensity = isNight ? 2.45 + lampIntensity * 0.25 : 2.35;
+  const bloomIntensity = isNight ? 0.16 + lampIntensity * 0.82 : 0.06 + lampIntensity * 0.35;
+  const vignetteDarkness = isNight ? 0.52 - lampIntensity * 0.13 : 0.34;
 
   return (
     <EffectComposer multisampling={0} enableNormalPass>
       <N8AO
         aoRadius={0.35}
         distanceFalloff={0.6}
-        intensity={2.5 + lightLevel * 0.45}
+        intensity={aoIntensity}
         quality="medium"
         color="#2a2018"
         halfRes
@@ -33,12 +39,12 @@ export function PostFX() {
         making whiteboards, windows or interface textures haze over.
       */}
       <Bloom
-        intensity={0.2 + lightLevel * 0.8}
+        intensity={bloomIntensity}
         luminanceThreshold={1}
         luminanceSmoothing={0.16}
         mipmapBlur
       />
-      <Vignette offset={0.28} darkness={0.52 - lightLevel * 0.16} />
+      <Vignette offset={0.28} darkness={vignetteDarkness} />
       <SMAA />
     </EffectComposer>
   );

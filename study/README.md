@@ -46,8 +46,26 @@ Each entry needs a collection, a year, one concise summary, and its real public 
 - `src/ui/Archive.tsx` — the accessible Index interface
 - `src/data/library.ts` — curated portfolio content
 - `src/data/hotspots.ts` — physical room objects and their focus positions
+- `docs/3d-audit.md` — structural audit, debug overlay, collision method, and asset roadmap
 
 The room should stay an experience, rather than becoming the only route to information. New content normally starts in `library.ts`; add or remap a room object only when the object gives it a meaningful physical metaphor.
+
+## 3D development checks
+
+The room is an open architectural diorama: its finite floor, wall thickness,
+window opening and desk geometry live in `scene/layout.ts` and `scene/Shell.tsx`.
+For development-only spatial checks, open one of these URLs while `npm run dev`
+is running:
+
+```text
+/?debug=scene#room
+/?debug=scene,wireframe#room
+/?debug=scene,normals#room
+/?debug=scene,shadows-off,postfx-off#room
+```
+
+See `docs/3d-audit.md` for the current verified issues, collision procedure,
+lighting-state contract and GLB asset policy.
 
 Current object routes are intentionally limited to content that is already public:
 

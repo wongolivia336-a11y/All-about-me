@@ -21,16 +21,17 @@ export default function App() {
   const {
     archiveRequest,
     clearArchiveRequest,
+    isNight,
     lampOn,
-    lightLevel,
-    setLightLevel,
+    lampIntensity,
+    setLampIntensity,
+    setNightMode,
     toggleLamp,
     musicPlaying,
     volume,
   } = useStudy();
   const [indexMode, setIndexMode] = useState(() => viewFromHash() === "index");
   const [activeCollection, setActiveCollection] = useState<Collection>("work");
-  const [isNight, setIsNight] = useState(isNightNow);
   const audioRef = useRef<HTMLAudioElement>(null);
   const indexTrigger = useRef<HTMLButtonElement>(null);
   const appliedInitialLighting = useRef(false);
@@ -44,19 +45,19 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const syncTime = () => setIsNight(isNightNow());
+    const syncTime = () => setNightMode(isNightNow());
     syncTime();
     const timer = window.setInterval(syncTime, 60_000);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [setNightMode]);
 
   // Local time controls the ambient room. The lamp is still independent after
   // first load, so choosing a daytime task light never turns the whole site dark.
   useEffect(() => {
     if (appliedInitialLighting.current) return;
     appliedInitialLighting.current = true;
-    if (isNight) setLightLevel(0.72);
-  }, [isNight, setLightLevel]);
+    if (isNight) setLampIntensity(0.72);
+  }, [isNight, setLampIntensity]);
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = volume;
@@ -108,7 +109,7 @@ export default function App() {
     clearArchiveRequest();
   }, [archiveRequest, clearArchiveRequest]);
 
-  const brightnessPercent = Math.round(lightLevel * 100);
+  const brightnessPercent = Math.round(lampIntensity * 100);
 
   return (
     <div className={["app", isNight && "app--evening"].filter(Boolean).join(" ")}>
@@ -132,7 +133,7 @@ export default function App() {
                   step="5"
                   value={brightnessPercent}
                   style={{ "--value": brightnessPercent + "%" } as CSSProperties}
-                  onChange={(event) => setLightLevel(Number(event.currentTarget.value) / 100)}
+                  onChange={(event) => setLampIntensity(Number(event.currentTarget.value) / 100)}
                   aria-label="台灯亮度"
                   aria-valuetext={brightnessPercent + "%"}
                 />

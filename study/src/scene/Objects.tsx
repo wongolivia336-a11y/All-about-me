@@ -27,7 +27,7 @@ export function DeskProps() {
  * - press and drag the knurled dial sideways to set a continuous output.
  */
 function DeskLamp() {
-  const { lightLevel, toggleLamp } = useStudy();
+  const { lampIntensity, toggleLamp } = useStudy();
   const { pos, rotY } = layout.lamp;
   const armLen = 0.4;
   const headY = 0.44;
@@ -56,18 +56,18 @@ function DeskLamp() {
     // desk last. That stagger is small enough to feel physical, not theatrical.
     filamentLevel.current = approach(
       filamentLevel.current,
-      lightLevel,
-      lightLevel > filamentLevel.current ? 13 : 9,
+      lampIntensity,
+      lampIntensity > filamentLevel.current ? 13 : 9,
     );
     shadeLevel.current = approach(
       shadeLevel.current,
-      lightLevel,
-      lightLevel > shadeLevel.current ? 7 : 5,
+      lampIntensity,
+      lampIntensity > shadeLevel.current ? 7 : 5,
     );
     poolLevel.current = approach(
       poolLevel.current,
-      lightLevel,
-      lightLevel > poolLevel.current ? 3.1 : 4.6,
+      lampIntensity,
+      lampIntensity > poolLevel.current ? 3.1 : 4.6,
     );
 
     const filament = filamentLevel.current;
@@ -205,7 +205,7 @@ type DialGesture = {
  * precision and keyboard users.
  */
 function LampDimmer() {
-  const { lightLevel, setLightLevel, toggleLamp, focus } = useStudy();
+  const { lampIntensity, setLampIntensity, toggleLamp, focus } = useStudy();
   const dial = useRef<THREE.Group>(null);
   const gesture = useRef<DialGesture | null>(null);
   const press = useRef(0);
@@ -213,7 +213,7 @@ function LampDimmer() {
   useFrame((_state, delta) => {
     if (!dial.current) return;
 
-    const targetAngle = -0.78 + lightLevel * 1.56;
+    const targetAngle = -0.78 + lampIntensity * 1.56;
     dial.current.rotation.y = THREE.MathUtils.damp(
       dial.current.rotation.y,
       targetAngle,
@@ -236,7 +236,7 @@ function LampDimmer() {
       const nextLevel = Math.min(1, Math.max(0, active.startLevel + distance / travel));
 
       if (Math.abs(distance) > 4) active.moved = true;
-      setLightLevel(nextLevel);
+      setLampIntensity(nextLevel);
 
       const detent = Math.round(nextLevel * 8);
       if (detent !== active.lastDetent) {
@@ -261,7 +261,7 @@ function LampDimmer() {
       window.removeEventListener("pointerup", release);
       window.removeEventListener("pointercancel", release);
     };
-  }, [setLightLevel, toggleLamp]);
+  }, [setLampIntensity, toggleLamp]);
 
   return (
     <group
@@ -271,8 +271,8 @@ function LampDimmer() {
         focus("lamp");
         gesture.current = {
           startX: event.clientX,
-          startLevel: lightLevel,
-          lastDetent: Math.round(lightLevel * 8),
+          startLevel: lampIntensity,
+          lastDetent: Math.round(lampIntensity * 8),
           moved: false,
         };
         press.current = 1;
