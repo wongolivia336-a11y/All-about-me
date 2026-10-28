@@ -1,4 +1,4 @@
-import { useStudy } from "../interaction/studyStore";
+import { useFocusedRoom } from "../interaction/studyStore";
 import { CinemaPanel } from "./CinemaPanel";
 import { GitHubPanel } from "./GitHubPanel";
 import { MusicPanel } from "./MusicPanel";
@@ -12,7 +12,7 @@ import { PortfolioViewer } from "./PortfolioViewer";
  * to the generic panel driven by `data/content.ts`.
  */
 export function Surface() {
-  const { focused } = useStudy();
+  const { focused } = useFocusedRoom();
   if (!focused) return null;
 
   switch (focused) {

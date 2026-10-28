@@ -1,5 +1,5 @@
 import { Bloom, EffectComposer, N8AO, SMAA, Vignette } from "@react-three/postprocessing";
-import { useStudy } from "../interaction/studyStore";
+import { usePostFXLighting } from "../interaction/studyStore";
 
 /**
  * Post-processing.
@@ -15,13 +15,15 @@ import { useStudy } from "../interaction/studyStore";
  * whole walls.
  */
 export function PostFX() {
-  const { isNight, lampIntensity } = useStudy();
+  const { isNight, effectiveBrightness } = usePostFXLighting();
   // Time of day establishes the spatial mood. The dimmer only adds a subtle
   // local response, so a daytime task light cannot accidentally turn the
   // complete room into a night-grade post-processing treatment.
-  const aoIntensity = isNight ? 2.45 + lampIntensity * 0.25 : 2.35;
-  const bloomIntensity = isNight ? 0.16 + lampIntensity * 0.82 : 0.06 + lampIntensity * 0.35;
-  const vignetteDarkness = isNight ? 0.52 - lampIntensity * 0.13 : 0.34;
+  const aoIntensity = isNight ? 2.45 + effectiveBrightness * 0.25 : 2.35;
+  const bloomIntensity = isNight
+    ? 0.16 + effectiveBrightness * 0.82
+    : 0.06 + effectiveBrightness * 0.35;
+  const vignetteDarkness = isNight ? 0.52 - effectiveBrightness * 0.13 : 0.34;
 
   return (
     <EffectComposer multisampling={0} enableNormalPass>

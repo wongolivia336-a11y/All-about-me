@@ -5,6 +5,7 @@ import {
   reportMusicUnavailable,
   useStudy,
 } from "./interaction/studyStore";
+import { tactileFeedback } from "./interaction/tactile";
 import { Archive } from "./ui/Archive";
 import { Surface } from "./ui/Surface";
 
@@ -22,11 +23,13 @@ export default function App() {
     archiveRequest,
     clearArchiveRequest,
     isNight,
-    lampOn,
-    lampIntensity,
-    setLampIntensity,
+    lampPower,
+    lampBrightness,
+    setLampBrightness,
     setNightMode,
-    toggleLamp,
+    toggleLampPower,
+    tactileMuted,
+    setTactileMuted,
     musicPlaying,
     volume,
   } = useStudy();
@@ -34,7 +37,6 @@ export default function App() {
   const [activeCollection, setActiveCollection] = useState<Collection>("work");
   const audioRef = useRef<HTMLAudioElement>(null);
   const indexTrigger = useRef<HTMLButtonElement>(null);
-  const appliedInitialLighting = useRef(false);
 
   useEffect(() => {
     if (!window.location.hash) window.history.replaceState(null, "", "#index");
@@ -50,14 +52,6 @@ export default function App() {
     const timer = window.setInterval(syncTime, 60_000);
     return () => window.clearInterval(timer);
   }, [setNightMode]);
-
-  // Local time controls the ambient room. The lamp is still independent after
-  // first load, so choosing a daytime task light never turns the whole site dark.
-  useEffect(() => {
-    if (appliedInitialLighting.current) return;
-    appliedInitialLighting.current = true;
-    if (isNight) setLampIntensity(0.72);
-  }, [isNight, setLampIntensity]);
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = volume;
@@ -109,7 +103,7 @@ export default function App() {
     clearArchiveRequest();
   }, [archiveRequest, clearArchiveRequest]);
 
-  const brightnessPercent = Math.round(lampIntensity * 100);
+  const brightnessPercent = Math.round(lampBrightness * 100);
 
   return (
     <div className={["app", isNight && "app--evening"].filter(Boolean).join(" ")}>
@@ -130,23 +124,36 @@ export default function App() {
                   type="range"
                   min="0"
                   max="100"
-                  step="5"
+                  step="1"
                   value={brightnessPercent}
                   style={{ "--value": brightnessPercent + "%" } as CSSProperties}
-                  onChange={(event) => setLampIntensity(Number(event.currentTarget.value) / 100)}
-                  aria-label="台灯亮度"
-                  aria-valuetext={brightnessPercent + "%"}
+                  onChange={(event) => setLampBrightness(Number(event.currentTarget.value) / 100)}
+                  aria-label="台灯预设亮度"
+                  aria-valuetext={brightnessPercent + "%" + (lampPower ? "，已开启" : "，已关闭")}
                 />
               </div>
               <button
                 className="hud__btn hud__btn--icon"
                 type="button"
-                onClick={toggleLamp}
-                aria-label={lampOn ? "关闭台灯" : "打开台灯"}
-                aria-pressed={lampOn}
-                title={lampOn ? "关闭台灯" : "打开台灯"}
+                onClick={() => {
+                  tactileFeedback("press", tactileMuted);
+                  toggleLampPower();
+                }}
+                aria-label={lampPower ? "关闭台灯" : "打开台灯"}
+                aria-pressed={lampPower}
+                title={lampPower ? "关闭台灯" : "打开台灯"}
               >
-                <span aria-hidden="true">{lampOn ? "◉" : "○"}</span>
+                <span aria-hidden="true">{lampPower ? "◉" : "○"}</span>
+              </button>
+              <button
+                className="hud__btn hud__btn--icon"
+                type="button"
+                onClick={() => setTactileMuted(!tactileMuted)}
+                aria-label={tactileMuted ? "开启台灯机械反馈" : "关闭台灯机械反馈"}
+                aria-pressed={!tactileMuted}
+                title={tactileMuted ? "开启机械反馈" : "关闭机械反馈"}
+              >
+                <span aria-hidden="true">{tactileMuted ? "○" : "⌁"}</span>
               </button>
               <button
                 ref={indexTrigger}

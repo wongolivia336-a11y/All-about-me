@@ -67,6 +67,11 @@ is running:
 See `docs/3d-audit.md` for the current verified issues, collision procedure,
 lighting-state contract and GLB asset policy.
 
+The lamp's physical dimmer is independently documented in
+`docs/lamp-dimmer.md`. It uses a shared `lampPower` / `lampBrightness` control
+state: the HUD range is an accessible 1% fallback, while the 3D dial owns its
+own captured-pointer press/drag gesture.
+
 Current object routes are intentionally limited to content that is already public:
 
 - Laptop → Work

@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { Html, useCursor } from "@react-three/drei";
 import type { HotspotId } from "../data/hotspots";
 import { hotspotById } from "../data/hotspots";
-import { useStudy } from "./studyStore";
+import { useFocusedRoom } from "./studyStore";
 
 interface Props {
   id: HotspotId;
@@ -37,7 +37,7 @@ export function Hotspot({
   onActivate,
 }: Props) {
   const [hovered, setHovered] = useState(false);
-  const { focused, focus } = useStudy();
+  const { focused, focus } = useFocusedRoom();
   useCursor(hovered);
 
   const spot = hotspotById(id);

@@ -1,5 +1,5 @@
 import { phoneApps } from "../data/links";
-import { focus, useStudy } from "../interaction/studyStore";
+import { focus, useMusicState } from "../interaction/studyStore";
 
 /**
  * The speaker.
@@ -10,7 +10,7 @@ import { focus, useStudy } from "../interaction/studyStore";
  */
 export function MusicPanel() {
   const { musicPlaying, musicUnavailable, setMusicPlaying, volume, setVolume } =
-    useStudy();
+    useMusicState();
   const netease = phoneApps.find((a) => a.id === "netease");
 
   return (

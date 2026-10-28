@@ -139,8 +139,8 @@ This is a build artifact baseline, not a GPU benchmark:
 
 | Asset | Before P0 | Current | Change |
 | --- | ---: | ---: | ---: |
-| Main interface chunk | 69.96 kB | 70.12 kB | +0.16 kB |
-| Lazy RoomScene chunk | 438.87 kB | 440.46 kB | +1.59 kB |
+| Main interface chunk | 69.96 kB | 71.25 kB | +1.29 kB |
+| Lazy RoomScene chunk | 438.87 kB | 441.02 kB | +2.15 kB |
 
 The room stays dynamically imported, so the default Index route does not load
 the RoomScene chunk. Vite reports the room chunk above its 500 kB minified
