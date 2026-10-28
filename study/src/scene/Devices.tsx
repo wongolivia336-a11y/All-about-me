@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { RoundedBox } from "@react-three/drei";
 import { phoneApps } from "../data/links";
 import { Hotspot } from "../interaction/Hotspot";
-import { useStudy } from "../interaction/studyStore";
+import { requestArchive, useStudy } from "../interaction/studyStore";
 import { DESK_TOP_Y, layout } from "./layout";
 import { makeAppScreen, makeSiteScreen, palette } from "./theme";
 
