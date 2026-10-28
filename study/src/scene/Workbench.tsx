@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { RoundedBox } from "@react-three/drei";
 import { Hotspot } from "../interaction/Hotspot";
+import { requestArchive } from "../interaction/studyStore";
 import { layout } from "./layout";
 import { makeCoffeeRing, makeSketchSpread } from "./surfaces";
 import { palette } from "./theme";
