@@ -1,11 +1,14 @@
 import { useMemo } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { useStudy } from "../interaction/studyStore";
 import { BACK_WALL_Z, DESK_TOP_Y, LEFT_WALL_X } from "./layout";
 import { palette } from "./theme";
 import { makeFabric, makePlaster, makeWood } from "./textures";
 
-export function Shell() {
+interface ShellProps {
+  isNight: boolean;
+}
+
+export function Shell({ isNight }: ShellProps) {
   const floor = useMemo(
     () => makeWood("#b08a5f", "#7a5636", [5, 5], { planks: 7 }),
     [],
@@ -67,7 +70,7 @@ export function Shell() {
         <meshStandardMaterial color="#e6e0d4" roughness={0.7} />
       </mesh>
 
-      <Window />
+      <Window isNight={isNight} />
       <Rug />
       <Desk />
     </group>
@@ -78,14 +81,13 @@ export function Shell() {
  * There is no world outside, so the glass is simply a bright emissive panel.
  * It reads as daylight and gives the aluminium something cool to reflect.
  */
-function Window() {
-  const { lampOn } = useStudy();
+function Window({ isNight }: ShellProps) {
   const x = LEFT_WALL_X + 0.02;
   return (
     <group position={[x, 1.35, 0.72]} rotation={[0, Math.PI / 2, 0]}>
       <mesh>
         <planeGeometry args={[1.25, 1.4]} />
-        <meshBasicMaterial color={lampOn ? "#232a3d" : "#eaf3ff"} toneMapped={false} />
+        <meshBasicMaterial color={isNight ? "#232a3d" : "#eaf3ff"} toneMapped={false} />
       </mesh>
       {/* frame */}
       <group position={[0, 0, 0.012]}>
@@ -152,7 +154,7 @@ function Desk() {
       >
         <meshPhysicalMaterial
           map={oak.map}
-          bumpMap={oak.bumpMap}
+          bumpMap={oakEnd.map}
           bumpScale={0.25}
           roughness={0.42}
           clearcoat={0.35}
