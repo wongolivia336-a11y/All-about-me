@@ -137,7 +137,7 @@ function LampDimmer() {
   const gesture = useRef<DialGesture | null>(null);
   const press = useRef(0);
 
-  useFrame(({ clock }, delta) => {
+  useFrame((_state, delta) => {
     if (!dial.current) return;
 
     const targetAngle = -0.78 + lightLevel * 1.56;
