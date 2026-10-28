@@ -4,14 +4,14 @@ import { focus } from "../interaction/studyStore";
 import { Room } from "./Room";
 
 interface RoomSceneProps {
-  lampOn: boolean;
+  isNight: boolean;
 }
 
 /**
  * Kept behind a dynamic import so the content-first Index never pays the
  * WebGL/R3F download cost until someone explicitly enters the room.
  */
-export default function RoomScene({ lampOn }: RoomSceneProps) {
+export default function RoomScene({ isNight }: RoomSceneProps) {
   return (
     <Canvas
       shadows="soft"
@@ -20,8 +20,8 @@ export default function RoomScene({ lampOn }: RoomSceneProps) {
       camera={{ position: HOME_CAM, fov: 36, near: 0.05, far: 60 }}
       onPointerMissed={() => focus(null)}
     >
-      <color attach="background" args={[lampOn ? "#171419" : "#e8e3da"]} />
-      <Room />
+      <color attach="background" args={[isNight ? "#171419" : "#e8e3da"]} />
+      <Room isNight={isNight} />
     </Canvas>
   );
 }
