@@ -106,7 +106,7 @@ export default function App() {
     if (!archiveRequest) return;
     openIndex(archiveRequest);
     clearArchiveRequest();
-  }, [archiveRequest]);
+  }, [archiveRequest, clearArchiveRequest]);
 
   const brightnessPercent = Math.round(lightLevel * 100);
 
