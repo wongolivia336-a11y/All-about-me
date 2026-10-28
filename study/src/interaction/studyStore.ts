@@ -14,8 +14,12 @@ interface StudyState {
   focused: HotspotId | null;
   /** a one-shot request from a physical object to the DOM Index */
   archiveRequest: Collection | null;
-  /** desk lamp switch — drives the room's mood */
+  /** whether the lamp emits enough light to count as on */
   lampOn: boolean;
+  /** 0..1 desk-lamp output, shared by the lamp model and the fallback control */
+  lightLevel: number;
+  /** the level restored after a press turns the lamp back on */
+  lastLightLevel: number;
   /** the speaker. Browsers block autoplay, so this only ever starts on a click */
   musicPlaying: boolean;
   /** set when playback was refused — usually because no audio file is present */
@@ -28,6 +32,8 @@ let state: StudyState = {
   focused: null,
   archiveRequest: null,
   lampOn: false,
+  lightLevel: 0,
+  lastLightLevel: 0.72,
   musicPlaying: false,
   musicUnavailable: false,
   volume: 0.6,
@@ -47,12 +53,27 @@ function subscribe(listener: () => void) {
 }
 
 const getSnapshot = () => state;
+const clamp = (value: number) => Math.min(1, Math.max(0, value));
 
 export const focus = (id: HotspotId | null) => setState({ focused: id });
 export const requestArchive = (collection: Collection) =>
   setState({ archiveRequest: collection, focused: null });
 export const clearArchiveRequest = () => setState({ archiveRequest: null });
-export const toggleLamp = () => setState({ lampOn: !state.lampOn });
+
+export const setLightLevel = (value: number) => {
+  const requestedLevel = clamp(value);
+  const lightLevel = requestedLevel > 0.01 ? requestedLevel : 0;
+
+  setState({
+    lightLevel,
+    lampOn: lightLevel > 0,
+    ...(lightLevel > 0 ? { lastLightLevel: lightLevel } : {}),
+  });
+};
+
+export const toggleLamp = () =>
+  setLightLevel(state.lampOn ? 0 : state.lastLightLevel);
+
 export const setMusicPlaying = (playing: boolean) =>
   setState({ musicPlaying: playing, ...(playing ? { musicUnavailable: false } : {}) });
 
@@ -73,6 +94,7 @@ export function useStudy() {
     requestArchive,
     clearArchiveRequest,
     toggleLamp,
+    setLightLevel,
     setMusicPlaying,
     setVolume,
   };
