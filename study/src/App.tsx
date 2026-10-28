@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties } from "react";
 import type { Collection } from "./data/library";
 import {
   focus,
@@ -131,6 +131,7 @@ export default function App() {
                   max="100"
                   step="5"
                   value={brightnessPercent}
+                  style={{ "--value": brightnessPercent + "%" } as CSSProperties}
                   onChange={(event) => setLightLevel(Number(event.currentTarget.value) / 100)}
                   aria-label="台灯亮度"
                   aria-valuetext={brightnessPercent + "%"}
