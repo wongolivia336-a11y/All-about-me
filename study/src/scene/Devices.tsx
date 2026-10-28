@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { RoundedBox } from "@react-three/drei";
 import { phoneApps } from "../data/links";
 import { Hotspot } from "../interaction/Hotspot";
-import { useStudy } from "../interaction/studyStore";
+import { requestArchive, useStudy } from "../interaction/studyStore";
 import { DESK_TOP_Y, layout } from "./layout";
 import { makeAppScreen, makeSiteScreen, palette } from "./theme";
 
@@ -31,7 +31,11 @@ function Laptop() {
   const { pos, rotY } = layout.laptop;
 
   return (
-    <Hotspot id="laptop" labelAt={[pos[0], DESK_TOP_Y + 0.34, pos[2]]}>
+    <Hotspot
+      id="laptop"
+      onSelect={() => requestArchive("work")}
+      labelAt={[pos[0], DESK_TOP_Y + 0.34, pos[2]]}
+    >
       <group position={[pos[0], 0, pos[2]]} rotation={[0, rotY, 0]}>
         {/* base */}
         <RoundedBox

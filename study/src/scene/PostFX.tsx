@@ -15,27 +15,30 @@ import { useStudy } from "../interaction/studyStore";
  * whole walls.
  */
 export function PostFX() {
-  const { lampOn } = useStudy();
+  const { lightLevel } = useStudy();
 
   return (
     <EffectComposer multisampling={0} enableNormalPass>
       <N8AO
         aoRadius={0.35}
         distanceFalloff={0.6}
-        intensity={lampOn ? 3.2 : 2.4}
+        intensity={2.5 + lightLevel * 0.45}
         quality="medium"
         color="#2a2018"
         halfRes
       />
-      {/* only the lamp, the screens and the window are ever bright enough to
-          bloom, which is what makes the night mode feel lit rather than tinted */}
+      {/*
+        The lamp bulb is rendered above one luminance with tone mapping off.
+        A threshold of 1 therefore gives it a private, warm bloom without
+        making whiteboards, windows or interface textures haze over.
+      */}
       <Bloom
-        intensity={lampOn ? 0.55 : 0.24}
-        luminanceThreshold={0.82}
-        luminanceSmoothing={0.32}
+        intensity={0.2 + lightLevel * 0.8}
+        luminanceThreshold={1}
+        luminanceSmoothing={0.16}
         mipmapBlur
       />
-      <Vignette offset={0.28} darkness={lampOn ? 0.62 : 0.38} />
+      <Vignette offset={0.28} darkness={0.52 - lightLevel * 0.16} />
       <SMAA />
     </EffectComposer>
   );

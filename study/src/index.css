@@ -42,13 +42,13 @@ body {
   touch-action: none;
 }
 
-/* evening mode flips the UI chrome to match the room */
+/* Ambient night is dark, but the content layer stays deliberately high-contrast. */
 .app--evening {
-  --ink: #f2efe9;
-  --ink-soft: #a09a92;
-  --line: rgba(255, 255, 255, 0.14);
-  --glass: rgba(30, 27, 32, 0.66);
-  --shadow: 0 18px 50px -12px rgba(0, 0, 0, 0.5);
+  --ink: #fffdf8;
+  --ink-soft: #e2dcd3;
+  --line: rgba(255, 255, 255, 0.28);
+  --glass: rgba(27, 24, 29, 0.92);
+  --shadow: 0 18px 50px -12px rgba(0, 0, 0, 0.68);
 }
 
 /* ---------- floating label in the 3D scene ---------- */
@@ -143,6 +143,59 @@ body {
 
 .hud__btn:hover {
   transform: translateY(-1px);
+}
+
+.hud__light {
+  display: grid;
+  place-items: center;
+  width: 86px;
+  height: 34px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--glass);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+}
+
+.hud__brightness {
+  appearance: none;
+  width: 100%;
+  height: 3px;
+  margin: 0;
+  border-radius: 999px;
+  outline: none;
+  cursor: ew-resize;
+  background: linear-gradient(
+    to right,
+    var(--ink) 0 var(--value),
+    color-mix(in srgb, var(--ink) 22%, transparent) var(--value) 100%
+  );
+}
+
+.hud__brightness::-webkit-slider-thumb {
+  appearance: none;
+  width: 11px;
+  height: 11px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 0 2px var(--glass);
+}
+
+.hud__brightness::-moz-range-thumb {
+  width: 11px;
+  height: 11px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 0 2px var(--glass);
+}
+
+.app--evening .hud__btn,
+.app--evening .hud__light {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.34);
 }
 
 .hint {
@@ -862,7 +915,7 @@ input:focus-visible {
 }
 
 .app--evening .archive {
-  background: rgba(23, 20, 25, 0.97);
+  background: rgba(23, 20, 25, 0.99);
 }
 
 @keyframes archive-enter {
@@ -1056,6 +1109,10 @@ input:focus-visible {
     padding: 20px;
   }
 
+  .hud__light {
+    width: 72px;
+  }
+
   .archive__shell {
     padding: 22px 20px 36px;
   }
@@ -1089,4 +1146,16 @@ input:focus-visible {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+
+/* 3D chunk fallback: preserve the room's lighting mood without visible copy. */
+.room-loading {
+  position: absolute;
+  inset: 0;
+  background: #e8e3da;
+}
+
+.app--evening .room-loading {
+  background: #171419;
 }

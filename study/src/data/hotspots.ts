@@ -53,12 +53,21 @@ const at = (
   };
 };
 
+// The dial sits slightly right/front of the lamp's centre after its 0.2rad
+// base rotation. Keeping the target here makes direct manipulation feel like
+// the camera is arriving at the control, rather than merely at the lamp.
+const lampDialTarget: Vec3 = [
+  layout.lamp.pos[0] + 0.04,
+  layout.lamp.pos[1] + 0.04,
+  layout.lamp.pos[2] + 0.018,
+];
+
 export const hotspots: Hotspot[] = [
   {
     id: "laptop",
-    label: "Web",
-    blurb: "网页与界面项目",
-    path: "/web",
+    label: "Work",
+    blurb: "作品与系统",
+    path: "/work",
     // sight line straight into the lid, which sits at the back of the base
     ...at([layout.laptop.pos[0], 0.75, layout.laptop.pos[2] - 0.11], 0.11, [
       0, 0.06, 0.42,
@@ -108,16 +117,16 @@ export const hotspots: Hotspot[] = [
   },
   {
     id: "materials",
-    label: "Materials",
-    blurb: "材料样本",
-    path: "/materials",
+    label: "Make",
+    blurb: "原型与实验",
+    path: "/make",
     ...at(layout.tray.pos, 0.02, [0, 0.24, 0.18]),
   },
   {
     id: "whiteboard",
-    label: "In progress",
-    blurb: "还没想清楚的部分",
-    path: "/in-progress",
+    label: "Research",
+    blurb: "问题、证据与图谱",
+    path: "/research",
     ...at(layout.whiteboard.pos, 0, [0, 0, 1.25]),
   },
   {
@@ -143,11 +152,11 @@ export const hotspots: Hotspot[] = [
   },
   {
     id: "lamp",
-    // never a camera destination — clicking it flips the lights
-    label: "Lights",
-    blurb: "开灯 / 关灯",
+    label: "Light",
+    blurb: "台灯亮度",
     path: "/",
-    ...at(layout.lamp.pos, 0.35, [0.3, 0.15, 0.5]),
+    target: lampDialTarget,
+    cam: [lampDialTarget[0] + 0.3, lampDialTarget[1] + 0.19, lampDialTarget[2] + 0.46],
   },
 ];
 

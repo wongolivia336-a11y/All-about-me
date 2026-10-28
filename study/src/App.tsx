@@ -1,26 +1,39 @@
-import { useEffect, useRef, useState } from "react";
-import { Canvas } from "@react-three/fiber";
-import { HOME_CAM } from "./data/hotspots";
+import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties } from "react";
+import type { Collection } from "./data/library";
 import {
   focus,
   reportMusicUnavailable,
-  toggleLamp as flipLamp,
   useStudy,
 } from "./interaction/studyStore";
-import { Room } from "./scene/Room";
 import { Archive } from "./ui/Archive";
 import { Surface } from "./ui/Surface";
 
 type View = "index" | "room";
 
 const viewFromHash = (): View => (window.location.hash === "#room" ? "room" : "index");
+const isNightNow = () => {
+  const hour = new Date().getHours();
+  return hour < 7 || hour >= 18;
+};
+const RoomScene = lazy(() => import("./scene/RoomScene"));
 
 export default function App() {
-  const { lampOn, toggleLamp, musicPlaying, volume } = useStudy();
+  const {
+    archiveRequest,
+    clearArchiveRequest,
+    lampOn,
+    lightLevel,
+    setLightLevel,
+    toggleLamp,
+    musicPlaying,
+    volume,
+  } = useStudy();
   const [indexMode, setIndexMode] = useState(() => viewFromHash() === "index");
+  const [activeCollection, setActiveCollection] = useState<Collection>("work");
+  const [isNight, setIsNight] = useState(isNightNow);
   const audioRef = useRef<HTMLAudioElement>(null);
   const indexTrigger = useRef<HTMLButtonElement>(null);
-  const appliedTimeMood = useRef(false);
+  const appliedInitialLighting = useRef(false);
 
   useEffect(() => {
     if (!window.location.hash) window.history.replaceState(null, "", "#index");
@@ -31,12 +44,19 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (appliedTimeMood.current) return;
-    appliedTimeMood.current = true;
-
-    const hour = new Date().getHours();
-    if (hour < 7 || hour >= 18) flipLamp();
+    const syncTime = () => setIsNight(isNightNow());
+    syncTime();
+    const timer = window.setInterval(syncTime, 60_000);
+    return () => window.clearInterval(timer);
   }, []);
+
+  // Local time controls the ambient room. The lamp is still independent after
+  // first load, so choosing a daytime task light never turns the whole site dark.
+  useEffect(() => {
+    if (appliedInitialLighting.current) return;
+    appliedInitialLighting.current = true;
+    if (isNight) setLightLevel(0.72);
+  }, [isNight, setLightLevel]);
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = volume;
@@ -76,44 +96,62 @@ export default function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, [indexMode]);
 
-  const openIndex = () => {
+  const openIndex = (collection: Collection = "work") => {
     focus(null);
+    setActiveCollection(collection);
     setView("index");
   };
 
+  useEffect(() => {
+    if (!archiveRequest) return;
+    openIndex(archiveRequest);
+    clearArchiveRequest();
+  }, [archiveRequest, clearArchiveRequest]);
+
+  const brightnessPercent = Math.round(lightLevel * 100);
+
   return (
-    <div className={`app${lampOn ? " app--evening" : ""}`}>
+    <div className={["app", isNight && "app--evening"].filter(Boolean).join(" ")}>
       {!indexMode && (
         <>
-          <Canvas
-            shadows="soft"
-            dpr={[1, 2]}
-            gl={{ antialias: true, toneMappingExposure: 1.05 }}
-            camera={{ position: HOME_CAM, fov: 36, near: 0.05, far: 60 }}
-            onPointerMissed={() => focus(null)}
+          <Suspense
+            fallback={<div className="room-loading" role="status" aria-label="加载 Room" />}
           >
-            <color attach="background" args={[lampOn ? "#171419" : "#e8e3da"]} />
-            <Room />
-          </Canvas>
+            <RoomScene isNight={isNight} />
+          </Suspense>
 
           <header className="hud">
             <span className="hud__name">Olivia Wong</span>
             <div className="hud__actions">
+              <div className="hud__light">
+                <input
+                  className="hud__brightness"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={brightnessPercent}
+                  style={{ "--value": brightnessPercent + "%" } as CSSProperties}
+                  onChange={(event) => setLightLevel(Number(event.currentTarget.value) / 100)}
+                  aria-label="台灯亮度"
+                  aria-valuetext={brightnessPercent + "%"}
+                />
+              </div>
               <button
                 className="hud__btn hud__btn--icon"
                 type="button"
                 onClick={toggleLamp}
-                aria-label="切换昼夜"
+                aria-label={lampOn ? "关闭台灯" : "打开台灯"}
                 aria-pressed={lampOn}
-                title="切换昼夜"
+                title={lampOn ? "关闭台灯" : "打开台灯"}
               >
-                <span aria-hidden="true">{lampOn ? "☾" : "☀"}</span>
+                <span aria-hidden="true">{lampOn ? "◉" : "○"}</span>
               </button>
               <button
                 ref={indexTrigger}
                 className="hud__btn"
                 type="button"
-                onClick={openIndex}
+                onClick={() => openIndex()}
               >
                 Index
               </button>
@@ -126,7 +164,9 @@ export default function App() {
 
       <audio ref={audioRef} src="/audio/now-playing.mp3" loop preload="none" />
 
-      {indexMode && <Archive onClose={closeIndex} />}
+      {indexMode && (
+        <Archive initialCollection={activeCollection} onClose={closeIndex} />
+      )}
     </div>
   );
 }

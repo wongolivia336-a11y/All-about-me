@@ -1,7 +1,9 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { RoundedBox } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { Hotspot } from "../interaction/Hotspot";
+import { tactileFeedback } from "../interaction/tactile";
 import { useStudy } from "../interaction/studyStore";
 import { layout } from "./layout";
 import { makeSpreadTexture, palette } from "./theme";
@@ -19,13 +21,82 @@ export function DeskProps() {
   );
 }
 
-/** Clicking the lamp toggles the room's mood instead of moving the camera. */
+/**
+ * A physical lamp rather than a binary UI switch:
+ * - tap its body to restore/cut power;
+ * - press and drag the knurled dial sideways to set a continuous output.
+ */
 function DeskLamp() {
-  const { lampOn, toggleLamp } = useStudy();
+  const { lightLevel, toggleLamp } = useStudy();
   const { pos, rotY } = layout.lamp;
   const armLen = 0.4;
   const headY = 0.44;
   const spotTarget = useMemo(() => new THREE.Object3D(), []);
+  const spotLight = useRef<THREE.SpotLight>(null);
+  const spillLight = useRef<THREE.PointLight>(null);
+  const shadeMaterial = useRef<THREE.MeshPhysicalMaterial>(null);
+  const bulbMaterial = useRef<THREE.MeshBasicMaterial>(null);
+  const haloMaterial = useRef<THREE.MeshBasicMaterial>(null);
+  const halo = useRef<THREE.Mesh>(null);
+  const filamentLevel = useRef(0);
+  const shadeLevel = useRef(0);
+  const poolLevel = useRef(0);
+  const reducedMotion = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    [],
+  );
+
+  useFrame((_state, delta) => {
+    const approach = (current: number, target: number, rate: number) =>
+      reducedMotion ? target : THREE.MathUtils.damp(current, target, rate, delta);
+
+    // The filament wakes first, the shade follows, and the pool reaches the
+    // desk last. That stagger is small enough to feel physical, not theatrical.
+    filamentLevel.current = approach(
+      filamentLevel.current,
+      lightLevel,
+      lightLevel > filamentLevel.current ? 13 : 9,
+    );
+    shadeLevel.current = approach(
+      shadeLevel.current,
+      lightLevel,
+      lightLevel > shadeLevel.current ? 7 : 5,
+    );
+    poolLevel.current = approach(
+      poolLevel.current,
+      lightLevel,
+      lightLevel > poolLevel.current ? 3.1 : 4.6,
+    );
+
+    const filament = filamentLevel.current;
+    const shade = shadeLevel.current;
+    const pool = poolLevel.current;
+
+    if (spotLight.current) {
+      spotLight.current.intensity = 7.8 * pool ** 1.72;
+    }
+    if (spillLight.current) {
+      spillLight.current.intensity = 0.62 * shade ** 1.18;
+    }
+    if (shadeMaterial.current) {
+      shadeMaterial.current.emissiveIntensity = 0.03 + shade * 0.48;
+    }
+    if (bulbMaterial.current) {
+      // Above-one emissive values are intentionally left tone-unmapped so
+      // the existing selective Bloom pass can catch this material only.
+      const glow = 0.08 + filament * 3.1;
+      bulbMaterial.current.color.setRGB(glow, glow * 0.78, glow * 0.52);
+      bulbMaterial.current.opacity = 0.02 + filament * 0.94;
+    }
+    if (haloMaterial.current) {
+      haloMaterial.current.opacity = filament ** 1.7 * 0.18;
+    }
+    if (halo.current) {
+      halo.current.scale.setScalar(1 + filament * 0.72);
+    }
+  });
 
   return (
     <Hotspot id="lamp" onSelect={toggleLamp} labelAt={[pos[0], pos[1] + 0.6, pos[2]]}>
@@ -40,6 +111,8 @@ function DeskLamp() {
           />
         </mesh>
 
+        <LampDimmer />
+
         <mesh position={[0, armLen / 2 + 0.02, -0.03]} rotation={[0.14, 0, 0]} castShadow>
           <cylinderGeometry args={[0.0075, 0.0075, armLen, 16]} />
           <meshStandardMaterial color={palette.aluminumDark} metalness={0.9} roughness={0.3} />
@@ -50,58 +123,190 @@ function DeskLamp() {
           <mesh castShadow>
             <sphereGeometry args={[0.075, 28, 18, 0, Math.PI * 2, 0, Math.PI / 2]} />
             <meshPhysicalMaterial
-              color={lampOn ? "#f6efe2" : palette.ceramic}
+              ref={shadeMaterial}
+              color={palette.ceramic}
+              emissive="#f2b86e"
+              emissiveIntensity={0.03}
               metalness={0.15}
               roughness={0.4}
               clearcoat={0.7}
               side={2}
             />
           </mesh>
-          {/* the bulb face */}
+
+          {/* The hot bulb and its tiny optical halo feed the selective Bloom pass. */}
           <mesh position={[0, -0.004, 0]} rotation={[Math.PI / 2, 0, 0]}>
             <circleGeometry args={[0.062, 28]} />
             <meshBasicMaterial
-              color={lampOn ? "#ffe9c4" : "#3a3a3e"}
+              ref={bulbMaterial}
+              color="#211108"
+              transparent
+              opacity={0.02}
+              toneMapped={false}
+            />
+          </mesh>
+          <mesh ref={halo} position={[0, -0.004, 0.0008]} rotation={[Math.PI / 2, 0, 0]}>
+            <circleGeometry args={[0.084, 32]} />
+            <meshBasicMaterial
+              ref={haloMaterial}
+              color="#ffb765"
+              transparent
+              opacity={0}
+              depthWrite={false}
+              blending={THREE.AdditiveBlending}
               toneMapped={false}
             />
           </mesh>
         </group>
 
-        {lampOn && (
-          <>
-            {/*
-              A spot rather than a point light, so the lamp throws a visible
-              pool onto the desk instead of just tinting the room. The target
-              lives in the lamp's own group, which keeps its position local and
-              puts it in the scene graph — three ignores a target that was
-              never added.
-            */}
-            <primitive object={spotTarget} position={[0.16, -0.62, 0.42]} />
-            <spotLight
-              position={[0, headY - 0.06, 0.06]}
-              target={spotTarget}
-              angle={0.72}
-              penumbra={0.85}
-              intensity={5.5}
-              distance={2.6}
-              decay={1.6}
-              color="#ffd9a0"
-              castShadow
-              shadow-mapSize={[1024, 1024]}
-              shadow-bias={-0.0008}
-            />
-            {/* a little unfocused spill, so the shade itself glows */}
-            <pointLight
-              position={[0, headY - 0.02, 0.04]}
-              intensity={0.35}
-              distance={0.9}
-              decay={2}
-              color="#ffcf90"
-            />
-          </>
-        )}
+        {/*
+          Kept mounted at zero intensity. This gives a real fade-out rather
+          than deleting the light on the first frame after an off action.
+        */}
+        <primitive object={spotTarget} position={[0.16, -0.62, 0.42]} />
+        <spotLight
+          ref={spotLight}
+          position={[0, headY - 0.06, 0.06]}
+          target={spotTarget}
+          angle={0.72}
+          penumbra={0.85}
+          intensity={0}
+          distance={2.6}
+          decay={1.6}
+          color="#ffd9a0"
+          castShadow
+          shadow-mapSize={[1024, 1024]}
+          shadow-bias={-0.0008}
+        />
+        <pointLight
+          ref={spillLight}
+          position={[0, headY - 0.02, 0.04]}
+          intensity={0}
+          distance={0.9}
+          decay={2}
+          color="#ffcf90"
+        />
       </group>
     </Hotspot>
+  );
+}
+
+type DialGesture = {
+  startX: number;
+  startLevel: number;
+  lastDetent: number;
+  moved: boolean;
+};
+
+/**
+ * The dial is deliberately mounted on top of the lamp base, not exposed as a
+ * separate settings panel. A short drag has eight tactile detents; a simple
+ * press toggles the lamp. A small DOM range in the HUD is retained for touch
+ * precision and keyboard users.
+ */
+function LampDimmer() {
+  const { lightLevel, setLightLevel, toggleLamp, focus } = useStudy();
+  const dial = useRef<THREE.Group>(null);
+  const gesture = useRef<DialGesture | null>(null);
+  const press = useRef(0);
+
+  useFrame((_state, delta) => {
+    if (!dial.current) return;
+
+    const targetAngle = -0.78 + lightLevel * 1.56;
+    dial.current.rotation.y = THREE.MathUtils.damp(
+      dial.current.rotation.y,
+      targetAngle,
+      18,
+      delta,
+    );
+
+    press.current = THREE.MathUtils.damp(press.current, 0, 24, delta);
+    dial.current.position.y = 0.007 - press.current * 0.003;
+    dial.current.scale.y = 1 - press.current * 0.14;
+  });
+
+  useEffect(() => {
+    const move = (event: PointerEvent) => {
+      const active = gesture.current;
+      if (!active) return;
+
+      const travel = Math.min(220, Math.max(120, window.innerWidth * 0.25));
+      const distance = event.clientX - active.startX;
+      const nextLevel = Math.min(1, Math.max(0, active.startLevel + distance / travel));
+
+      if (Math.abs(distance) > 4) active.moved = true;
+      setLightLevel(nextLevel);
+
+      const detent = Math.round(nextLevel * 8);
+      if (detent !== active.lastDetent) {
+        tactileFeedback("tick");
+        active.lastDetent = detent;
+      }
+    };
+
+    const release = () => {
+      const active = gesture.current;
+      if (!active) return;
+
+      gesture.current = null;
+      if (!active.moved) toggleLamp();
+    };
+
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", release);
+    window.addEventListener("pointercancel", release);
+    return () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", release);
+      window.removeEventListener("pointercancel", release);
+    };
+  }, [setLightLevel, toggleLamp]);
+
+  return (
+    <group
+      position={[0.036, 0.022, 0.026]}
+      onPointerDown={(event) => {
+        event.stopPropagation();
+        focus("lamp");
+        gesture.current = {
+          startX: event.clientX,
+          startLevel: lightLevel,
+          lastDetent: Math.round(lightLevel * 8),
+          moved: false,
+        };
+        press.current = 1;
+        tactileFeedback("press");
+      }}
+      onClick={(event) => event.stopPropagation()}
+    >
+      {/* Brass ring keeps the control readable against the aluminium base. */}
+      <mesh position={[0, 0.003, 0]} castShadow>
+        <cylinderGeometry args={[0.035, 0.035, 0.006, 32]} />
+        <meshStandardMaterial color="#4c3a23" metalness={0.9} roughness={0.28} />
+      </mesh>
+
+      <group ref={dial} position={[0, 0.007, 0]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.029, 0.032, 0.012, 32]} />
+          <meshPhysicalMaterial
+            color={palette.brass}
+            metalness={0.88}
+            roughness={0.24}
+            clearcoat={0.48}
+          />
+        </mesh>
+        {/* A radial slot makes the current setting legible without copy. */}
+        <mesh position={[0, 0.007, -0.016]} castShadow>
+          <boxGeometry args={[0.003, 0.0015, 0.012]} />
+          <meshStandardMaterial color="#1b1712" roughness={0.48} />
+        </mesh>
+        <mesh position={[0, 0.0072, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.024, 0.0012, 8, 28]} />
+          <meshStandardMaterial color="#f6d18d" metalness={0.85} roughness={0.3} />
+        </mesh>
+      </group>
+    </group>
   );
 }
 

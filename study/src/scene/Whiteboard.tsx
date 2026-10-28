@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { RoundedBox } from "@react-three/drei";
 import { Hotspot } from "../interaction/Hotspot";
+import { requestArchive } from "../interaction/studyStore";
 import { layout } from "./layout";
 import { makeWhiteboard } from "./surfaces";
 
@@ -21,7 +22,11 @@ export function Whiteboard() {
   const { pos } = layout.whiteboard;
 
   return (
-    <Hotspot id="whiteboard" labelAt={[pos[0], pos[1] + 0.44, pos[2]]}>
+    <Hotspot
+      id="whiteboard"
+      onSelect={() => requestArchive("research")}
+      labelAt={[pos[0], pos[1] + 0.44, pos[2]]}
+    >
       <group position={[pos[0], pos[1], pos[2]]}>
         {/* aluminium frame */}
         <RoundedBox

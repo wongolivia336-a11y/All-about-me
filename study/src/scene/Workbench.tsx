@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { RoundedBox } from "@react-three/drei";
 import { Hotspot } from "../interaction/Hotspot";
+import { requestArchive } from "../interaction/studyStore";
 import { layout } from "./layout";
 import { makeCoffeeRing, makeSketchSpread } from "./surfaces";
 import { palette } from "./theme";
@@ -99,7 +100,11 @@ function MaterialTray() {
   const z0 = -((rows * CHIP_D + (rows - 1) * GAP) / 2) + CHIP_D / 2;
 
   return (
-    <Hotspot id="materials" labelAt={[pos[0], pos[1] + 0.16, pos[2]]}>
+    <Hotspot
+      id="materials"
+      onSelect={() => requestArchive("make")}
+      labelAt={[pos[0], pos[1] + 0.16, pos[2]]}
+    >
       <group position={[pos[0], pos[1], pos[2]]} rotation={[0, rotY, 0]}>
         {/* tray */}
         <RoundedBox
