@@ -7,6 +7,7 @@ import {
 } from "../data/library";
 
 interface ArchiveProps {
+  initialCollection: Collection;
   onClose: () => void;
 }
 
@@ -14,8 +15,8 @@ interface ArchiveProps {
  * The fast, keyboard-friendly route through the work.
  * It is intentionally a flat editorial index, not a second portfolio layout.
  */
-export function Archive({ onClose }: ArchiveProps) {
-  const [collection, setCollection] = useState<Collection>("work");
+export function Archive({ initialCollection, onClose }: ArchiveProps) {
+  const [collection, setCollection] = useState<Collection>(initialCollection);
   const entries = entriesFor(collection);
   const [selectedId, setSelectedId] = useState<string | null>(entries[0]?.id ?? null);
   const closeButton = useRef<HTMLButtonElement>(null);
@@ -23,6 +24,12 @@ export function Archive({ onClose }: ArchiveProps) {
   useEffect(() => {
     closeButton.current?.focus();
   }, []);
+
+  useEffect(() => {
+    const nextEntries = entriesFor(initialCollection);
+    setCollection(initialCollection);
+    setSelectedId(nextEntries[0]?.id ?? null);
+  }, [initialCollection]);
 
   const selected = entries.find((entry) => entry.id === selectedId) ?? entries[0];
 
