@@ -56,9 +56,9 @@ const at = (
 export const hotspots: Hotspot[] = [
   {
     id: "laptop",
-    label: "Web",
-    blurb: "网页与界面项目",
-    path: "/web",
+    label: "Work",
+    blurb: "作品与系统",
+    path: "/work",
     // sight line straight into the lid, which sits at the back of the base
     ...at([layout.laptop.pos[0], 0.75, layout.laptop.pos[2] - 0.11], 0.11, [
       0, 0.06, 0.42,
@@ -108,16 +108,16 @@ export const hotspots: Hotspot[] = [
   },
   {
     id: "materials",
-    label: "Materials",
-    blurb: "材料样本",
-    path: "/materials",
+    label: "Make",
+    blurb: "原型与实验",
+    path: "/make",
     ...at(layout.tray.pos, 0.02, [0, 0.24, 0.18]),
   },
   {
     id: "whiteboard",
-    label: "In progress",
-    blurb: "还没想清楚的部分",
-    path: "/in-progress",
+    label: "Research",
+    blurb: "问题、证据与图谱",
+    path: "/research",
     ...at(layout.whiteboard.pos, 0, [0, 0, 1.25]),
   },
   {
