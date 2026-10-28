@@ -1090,3 +1090,15 @@ input:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* 3D chunk fallback: preserve the room's lighting mood without visible copy. */
+.room-loading {
+  position: absolute;
+  inset: 0;
+  background: #e8e3da;
+}
+
+.app--evening .room-loading {
+  background: #171419;
+}
