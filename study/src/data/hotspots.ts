@@ -53,6 +53,15 @@ const at = (
   };
 };
 
+// The dial sits slightly right/front of the lamp's centre after its 0.2rad
+// base rotation. Keeping the target here makes direct manipulation feel like
+// the camera is arriving at the control, rather than merely at the lamp.
+const lampDialTarget: Vec3 = [
+  layout.lamp.pos[0] + 0.04,
+  layout.lamp.pos[1] + 0.04,
+  layout.lamp.pos[2] + 0.018,
+];
+
 export const hotspots: Hotspot[] = [
   {
     id: "laptop",
@@ -143,11 +152,11 @@ export const hotspots: Hotspot[] = [
   },
   {
     id: "lamp",
-    // never a camera destination — clicking it flips the lights
-    label: "Lights",
-    blurb: "开灯 / 关灯",
+    label: "Light",
+    blurb: "台灯亮度",
     path: "/",
-    ...at(layout.lamp.pos, 0.35, [0.3, 0.15, 0.5]),
+    target: lampDialTarget,
+    cam: [lampDialTarget[0] + 0.3, lampDialTarget[1] + 0.19, lampDialTarget[2] + 0.46],
   },
 ];
 
