@@ -135,7 +135,7 @@ function LampDimmer() {
   const { lightLevel, setLightLevel, toggleLamp } = useStudy();
   const dial = useRef<THREE.Group>(null);
   const gesture = useRef<DialGesture | null>(null);
-  const pressedAt = useRef(Number.NEGATIVE_INFINITY);
+  const press = useRef(0);
 
   useFrame(({ clock }, delta) => {
     if (!dial.current) return;
@@ -148,9 +148,9 @@ function LampDimmer() {
       delta,
     );
 
-    const press = Math.max(0, 1 - (clock.elapsedTime - pressedAt.current) / 0.13);
-    dial.current.position.y = 0.007 - press * 0.003;
-    dial.current.scale.y = 1 - press * 0.14;
+    press.current = THREE.MathUtils.damp(press.current, 0, 24, delta);
+    dial.current.position.y = 0.007 - press.current * 0.003;
+    dial.current.scale.y = 1 - press.current * 0.14;
   });
 
   useEffect(() => {
@@ -201,7 +201,7 @@ function LampDimmer() {
           lastDetent: Math.round(lightLevel * 8),
           moved: false,
         };
-        pressedAt.current = event.nativeEvent.timeStamp / 1000;
+        press.current = 1;
         tactileFeedback("press");
       }}
       onClick={(event) => event.stopPropagation()}
