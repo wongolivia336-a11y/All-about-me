@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
+import type { Collection } from "./data/library";
 import { HOME_CAM } from "./data/hotspots";
 import {
   focus,
@@ -16,8 +17,16 @@ type View = "index" | "room";
 const viewFromHash = (): View => (window.location.hash === "#room" ? "room" : "index");
 
 export default function App() {
-  const { lampOn, toggleLamp, musicPlaying, volume } = useStudy();
+  const {
+    archiveRequest,
+    clearArchiveRequest,
+    lampOn,
+    toggleLamp,
+    musicPlaying,
+    volume,
+  } = useStudy();
   const [indexMode, setIndexMode] = useState(() => viewFromHash() === "index");
+  const [activeCollection, setActiveCollection] = useState<Collection>("work");
   const audioRef = useRef<HTMLAudioElement>(null);
   const indexTrigger = useRef<HTMLButtonElement>(null);
   const appliedTimeMood = useRef(false);
@@ -76,10 +85,17 @@ export default function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, [indexMode]);
 
-  const openIndex = () => {
+  const openIndex = (collection: Collection = "work") => {
     focus(null);
+    setActiveCollection(collection);
     setView("index");
   };
+
+  useEffect(() => {
+    if (!archiveRequest) return;
+    openIndex(archiveRequest);
+    clearArchiveRequest();
+  }, [archiveRequest]);
 
   return (
     <div className={`app${lampOn ? " app--evening" : ""}`}>
@@ -113,7 +129,7 @@ export default function App() {
                 ref={indexTrigger}
                 className="hud__btn"
                 type="button"
-                onClick={openIndex}
+                onClick={() => openIndex()}
               >
                 Index
               </button>
@@ -126,7 +142,9 @@ export default function App() {
 
       <audio ref={audioRef} src="/audio/now-playing.mp3" loop preload="none" />
 
-      {indexMode && <Archive onClose={closeIndex} />}
+      {indexMode && (
+        <Archive initialCollection={activeCollection} onClose={closeIndex} />
+      )}
     </div>
   );
 }
