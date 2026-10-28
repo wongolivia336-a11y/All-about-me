@@ -12,11 +12,15 @@ import { Studio } from "./Studio";
 import { Whiteboard } from "./Whiteboard";
 import { Workbench } from "./Workbench";
 
-export function Room() {
+interface RoomProps {
+  isNight: boolean;
+}
+
+export function Room({ isNight }: RoomProps) {
   return (
     <Suspense fallback={null}>
-      <Studio />
-      <Shell />
+      <Studio isNight={isNight} />
+      <Shell isNight={isNight} />
       <Devices />
       <DeskProps />
       <Workbench />
