@@ -2,7 +2,6 @@
 
 A personal digital space with two ways in:
 
-- **Room** — a spatial, object-led experience.
 - **Index** — the default, keyboard-friendly way to scan selected work.
 - **Room** — available at `#room`, a deliberate spatial mode rather than a gate.
 
@@ -21,6 +20,13 @@ Create a production build:
 npm run build
 ```
 
+Quality checks:
+
+```bash
+npm run lint
+npm run build
+```
+
 ## Content
 
 Selected public work is registered in `src/data/library.ts`.
@@ -34,6 +40,7 @@ Each entry needs a collection, a year, one concise summary, and its real public 
 
 ## Structure
 
+- `src/scene/RoomScene.tsx` — dynamically loaded Canvas boundary
 - `src/scene/` — the 3D room, layout, materials, and camera choreography
 - `src/interaction/` — room state and object interaction
 - `src/ui/Archive.tsx` — the accessible Index interface
@@ -41,3 +48,11 @@ Each entry needs a collection, a year, one concise summary, and its real public 
 - `src/data/hotspots.ts` — physical room objects and their focus positions
 
 The room should stay an experience, rather than becoming the only route to information. New content normally starts in `library.ts`; add or remap a room object only when the object gives it a meaningful physical metaphor.
+
+Current object routes are intentionally limited to content that is already public:
+
+- Laptop → Work
+- Material tray → Make
+- Whiteboard → Research
+
+The sketchbook remains a private working object until there are Journal entries worth publishing. The 3D scene is dynamically loaded, so these room routes never increase the default Index bundle.
