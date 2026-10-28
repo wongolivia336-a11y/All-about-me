@@ -1,20 +1,18 @@
-import { useEffect, useRef, useState } from "react";
-import { Canvas } from "@react-three/fiber";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { Collection } from "./data/library";
-import { HOME_CAM } from "./data/hotspots";
 import {
   focus,
   reportMusicUnavailable,
   toggleLamp as flipLamp,
   useStudy,
 } from "./interaction/studyStore";
-import { Room } from "./scene/Room";
 import { Archive } from "./ui/Archive";
 import { Surface } from "./ui/Surface";
 
 type View = "index" | "room";
 
 const viewFromHash = (): View => (window.location.hash === "#room" ? "room" : "index");
+const RoomScene = lazy(() => import("./scene/RoomScene"));
 
 export default function App() {
   const {
@@ -101,16 +99,11 @@ export default function App() {
     <div className={`app${lampOn ? " app--evening" : ""}`}>
       {!indexMode && (
         <>
-          <Canvas
-            shadows="soft"
-            dpr={[1, 2]}
-            gl={{ antialias: true, toneMappingExposure: 1.05 }}
-            camera={{ position: HOME_CAM, fov: 36, near: 0.05, far: 60 }}
-            onPointerMissed={() => focus(null)}
+          <Suspense
+            fallback={<div className="room-loading" role="status" aria-label="加载 Room" />}
           >
-            <color attach="background" args={[lampOn ? "#171419" : "#e8e3da"]} />
-            <Room />
-          </Canvas>
+            <RoomScene lampOn={lampOn} />
+          </Suspense>
 
           <header className="hud">
             <span className="hud__name">Olivia Wong</span>
