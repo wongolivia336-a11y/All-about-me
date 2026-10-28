@@ -154,7 +154,7 @@ function Desk() {
       >
         <meshPhysicalMaterial
           map={oak.map}
-          bumpMap={oakEnd.map}
+          bumpMap={oak.bumpMap}
           bumpScale={0.25}
           roughness={0.42}
           clearcoat={0.35}
