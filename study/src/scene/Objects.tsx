@@ -32,7 +32,71 @@ function DeskLamp() {
   const armLen = 0.4;
   const headY = 0.44;
   const spotTarget = useMemo(() => new THREE.Object3D(), []);
-  const isLit = lightLevel > 0;
+  const spotLight = useRef<THREE.SpotLight>(null);
+  const spillLight = useRef<THREE.PointLight>(null);
+  const shadeMaterial = useRef<THREE.MeshPhysicalMaterial>(null);
+  const bulbMaterial = useRef<THREE.MeshBasicMaterial>(null);
+  const haloMaterial = useRef<THREE.MeshBasicMaterial>(null);
+  const halo = useRef<THREE.Mesh>(null);
+  const filamentLevel = useRef(0);
+  const shadeLevel = useRef(0);
+  const poolLevel = useRef(0);
+  const reducedMotion = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    [],
+  );
+
+  useFrame((_state, delta) => {
+    const approach = (current: number, target: number, rate: number) =>
+      reducedMotion ? target : THREE.MathUtils.damp(current, target, rate, delta);
+
+    // The filament wakes first, the shade follows, and the pool reaches the
+    // desk last. That stagger is small enough to feel physical, not theatrical.
+    filamentLevel.current = approach(
+      filamentLevel.current,
+      lightLevel,
+      lightLevel > filamentLevel.current ? 13 : 9,
+    );
+    shadeLevel.current = approach(
+      shadeLevel.current,
+      lightLevel,
+      lightLevel > shadeLevel.current ? 7 : 5,
+    );
+    poolLevel.current = approach(
+      poolLevel.current,
+      lightLevel,
+      lightLevel > poolLevel.current ? 3.1 : 4.6,
+    );
+
+    const filament = filamentLevel.current;
+    const shade = shadeLevel.current;
+    const pool = poolLevel.current;
+
+    if (spotLight.current) {
+      spotLight.current.intensity = 7.8 * pool ** 1.72;
+    }
+    if (spillLight.current) {
+      spillLight.current.intensity = 0.62 * shade ** 1.18;
+    }
+    if (shadeMaterial.current) {
+      shadeMaterial.current.emissiveIntensity = 0.03 + shade * 0.48;
+    }
+    if (bulbMaterial.current) {
+      // Above-one emissive values are intentionally left tone-unmapped so
+      // the existing selective Bloom pass can catch this material only.
+      const glow = 0.08 + filament * 3.1;
+      bulbMaterial.current.color.setRGB(glow, glow * 0.78, glow * 0.52);
+      bulbMaterial.current.opacity = 0.02 + filament * 0.94;
+    }
+    if (haloMaterial.current) {
+      haloMaterial.current.opacity = filament ** 1.7 * 0.18;
+    }
+    if (halo.current) {
+      halo.current.scale.setScalar(1 + filament * 0.72);
+    }
+  });
 
   return (
     <Hotspot id="lamp" onSelect={toggleLamp} labelAt={[pos[0], pos[1] + 0.6, pos[2]]}>
@@ -59,60 +123,69 @@ function DeskLamp() {
           <mesh castShadow>
             <sphereGeometry args={[0.075, 28, 18, 0, Math.PI * 2, 0, Math.PI / 2]} />
             <meshPhysicalMaterial
-              color={isLit ? "#f6efe2" : palette.ceramic}
+              ref={shadeMaterial}
+              color={palette.ceramic}
               emissive="#f2b86e"
-              emissiveIntensity={lightLevel * 0.2}
+              emissiveIntensity={0.03}
               metalness={0.15}
               roughness={0.4}
               clearcoat={0.7}
               side={2}
             />
           </mesh>
-          {/* the bulb face */}
+
+          {/* The hot bulb and its tiny optical halo feed the selective Bloom pass. */}
           <mesh position={[0, -0.004, 0]} rotation={[Math.PI / 2, 0, 0]}>
             <circleGeometry args={[0.062, 28]} />
             <meshBasicMaterial
-              color="#ffe9c4"
+              ref={bulbMaterial}
+              color="#211108"
               transparent
-              opacity={isLit ? 0.18 + lightLevel * 0.82 : 0.08}
+              opacity={0.02}
+              toneMapped={false}
+            />
+          </mesh>
+          <mesh ref={halo} position={[0, -0.004, 0.0008]} rotation={[Math.PI / 2, 0, 0]}>
+            <circleGeometry args={[0.084, 32]} />
+            <meshBasicMaterial
+              ref={haloMaterial}
+              color="#ffb765"
+              transparent
+              opacity={0}
+              depthWrite={false}
+              blending={THREE.AdditiveBlending}
               toneMapped={false}
             />
           </mesh>
         </group>
 
-        {isLit && (
-          <>
-            {/*
-              A spot rather than a point light, so the lamp throws a visible
-              pool onto the desk instead of just tinting the room. The target
-              lives in the lamp's own group, which keeps its position local and
-              puts it in the scene graph — three ignores a target that was
-              never added.
-            */}
-            <primitive object={spotTarget} position={[0.16, -0.62, 0.42]} />
-            <spotLight
-              position={[0, headY - 0.06, 0.06]}
-              target={spotTarget}
-              angle={0.72}
-              penumbra={0.85}
-              intensity={0.65 + 6.2 * lightLevel ** 1.65}
-              distance={2.6}
-              decay={1.6}
-              color="#ffd9a0"
-              castShadow
-              shadow-mapSize={[1024, 1024]}
-              shadow-bias={-0.0008}
-            />
-            {/* a little unfocused spill, so the shade itself glows */}
-            <pointLight
-              position={[0, headY - 0.02, 0.04]}
-              intensity={0.08 + lightLevel * 0.5}
-              distance={0.9}
-              decay={2}
-              color="#ffcf90"
-            />
-          </>
-        )}
+        {/*
+          Kept mounted at zero intensity. This gives a real fade-out rather
+          than deleting the light on the first frame after an off action.
+        */}
+        <primitive object={spotTarget} position={[0.16, -0.62, 0.42]} />
+        <spotLight
+          ref={spotLight}
+          position={[0, headY - 0.06, 0.06]}
+          target={spotTarget}
+          angle={0.72}
+          penumbra={0.85}
+          intensity={0}
+          distance={2.6}
+          decay={1.6}
+          color="#ffd9a0"
+          castShadow
+          shadow-mapSize={[1024, 1024]}
+          shadow-bias={-0.0008}
+        />
+        <pointLight
+          ref={spillLight}
+          position={[0, headY - 0.02, 0.04]}
+          intensity={0}
+          distance={0.9}
+          decay={2}
+          color="#ffcf90"
+        />
       </group>
     </Hotspot>
   );
@@ -132,7 +205,7 @@ type DialGesture = {
  * precision and keyboard users.
  */
 function LampDimmer() {
-  const { lightLevel, setLightLevel, toggleLamp } = useStudy();
+  const { lightLevel, setLightLevel, toggleLamp, focus } = useStudy();
   const dial = useRef<THREE.Group>(null);
   const gesture = useRef<DialGesture | null>(null);
   const press = useRef(0);
@@ -195,6 +268,7 @@ function LampDimmer() {
       position={[0.036, 0.022, 0.026]}
       onPointerDown={(event) => {
         event.stopPropagation();
+        focus("lamp");
         gesture.current = {
           startX: event.clientX,
           startLevel: lightLevel,
