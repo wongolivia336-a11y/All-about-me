@@ -43,12 +43,23 @@ Each entry needs a collection, a year, one concise summary, and its real public 
 - `src/scene/RoomScene.tsx` — dynamically loaded Canvas boundary
 - `src/scene/` — the 3D room, layout, materials, and camera choreography
 - `src/interaction/` — room state and object interaction
+- `src/ui/AsciiLoader.tsx` — Canvas-only ASCII boot scene and pointer flow
 - `src/ui/Archive.tsx` — the accessible Index interface
 - `src/data/library.ts` — curated portfolio content
 - `src/data/hotspots.ts` — physical room objects and their focus positions
 - `docs/3d-audit.md` — structural audit, debug overlay, collision method, and asset roadmap
 
 The room should stay an experience, rather than becoming the only route to information. New content normally starts in `library.ts`; add or remap a room object only when the object gives it a meaningful physical metaphor.
+
+## Loading sequence
+
+The boot screen samples `public/images/steve-jobs-macintosh.png` into Canvas
+characters in the browser. Its reveal is buffered per character and cursor
+movement temporarily displaces nearby glyphs; it does not send the image to an
+ASCII conversion service or add a runtime dependency. The loader waits for the
+photograph's first buffered render on initial load and for the room Canvas to
+commit on room entry. With `prefers-reduced-motion`, it renders a static frame and then
+hands off without an animation loop.
 
 ## 3D development checks
 

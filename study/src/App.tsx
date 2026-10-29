@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import type { Collection } from "./data/library";
 import {
   focus,
@@ -7,6 +7,7 @@ import {
 } from "./interaction/studyStore";
 import { tactileFeedback } from "./interaction/tactile";
 import { Archive } from "./ui/Archive";
+import { AsciiLoader } from "./ui/AsciiLoader";
 import { Surface } from "./ui/Surface";
 
 type View = "index" | "room";
@@ -35,13 +36,19 @@ export default function App() {
   } = useStudy();
   const [indexMode, setIndexMode] = useState(() => viewFromHash() === "index");
   const [activeCollection, setActiveCollection] = useState<Collection>("work");
+  const [initialReady, setInitialReady] = useState(false);
+  const [roomReady, setRoomReady] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const indexTrigger = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!window.location.hash) window.history.replaceState(null, "", "#index");
 
-    const syncView = () => setIndexMode(viewFromHash() === "index");
+    const syncView = () => {
+      const nextView = viewFromHash();
+      setIndexMode(nextView === "index");
+      if (nextView === "room") setRoomReady(false);
+    };
     window.addEventListener("popstate", syncView);
     return () => window.removeEventListener("popstate", syncView);
   }, []);
@@ -73,6 +80,7 @@ export default function App() {
     const hash = view === "room" ? "#room" : "#index";
     if (window.location.hash !== hash) window.history.pushState(null, "", hash);
     setIndexMode(view === "index");
+    if (view === "room") setRoomReady(false);
   };
 
   const closeIndex = () => {
@@ -104,6 +112,8 @@ export default function App() {
   }, [archiveRequest, clearArchiveRequest]);
 
   const brightnessPercent = Math.round(lampBrightness * 100);
+  const loading = !initialReady || (!indexMode && !roomReady);
+  const markRoomReady = useCallback(() => setRoomReady(true), []);
 
   return (
     <div className={["app", isNight && "app--evening"].filter(Boolean).join(" ")}>
@@ -112,7 +122,7 @@ export default function App() {
           <Suspense
             fallback={<div className="room-loading" role="status" aria-label="加载 Room" />}
           >
-            <RoomScene isNight={isNight} />
+            <RoomScene isNight={isNight} onReady={markRoomReady} />
           </Suspense>
 
           <header className="hud">
@@ -175,6 +185,8 @@ export default function App() {
       {indexMode && (
         <Archive initialCollection={activeCollection} onClose={closeIndex} />
       )}
+
+      <AsciiLoader active={loading} onInitialReady={() => setInitialReady(true)} />
     </div>
   );
 }
