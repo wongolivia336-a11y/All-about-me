@@ -53,11 +53,11 @@ Idle
 
 | Part | Treatment |
 | --- | --- |
-| Top cap | Warm, low-saturation matte silver `#c1c3be` |
-| Side wall | Darker grey-green metal `#777d7b`, 24 instanced micro-knurls |
-| Fixed ring | Deep metal gap `#353a3b` with 13 stationary calibration marks |
+| Top cap | Low-reflection, sandblasted warm silver `#a9adaa`; a shallow shoulder creates the bevel without a decorative ring |
+| Side wall | Darker grey-green metal `#707775`, with 36 almost-flush machined knurl ridges rather than block-like teeth |
+| Fixed ring | A two-layer dark-metal well and scale plate, with 15 stationary calibration marks seated on the plate |
 | Indicator | Graphite radial line, carried by the rotating dial |
-| Accent | Narrow muted-champagne edge `#b2a18b`, not a dominant brass ring |
+| Accent | No separate bright accent ring: the silhouette and graphite indicator provide the readout hierarchy |
 | Motion | 260° range, damped rotation, no forced visual detent snapping |
 
 ## Performance behaviour

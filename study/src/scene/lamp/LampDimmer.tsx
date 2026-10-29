@@ -32,10 +32,12 @@ function Knurling() {
 
   useLayoutEffect(() => {
     if (!mesh.current) return;
-    const count = 24;
+    // These are fine, almost flush machining ridges—not large teeth attached
+    // to the barrel. Their short radial depth keeps the silhouette circular.
+    const count = 36;
     for (let index = 0; index < count; index += 1) {
       const angle = (index / count) * Math.PI * 2;
-      dummy.position.set(Math.sin(angle) * 0.0318, 0, -Math.cos(angle) * 0.0318);
+      dummy.position.set(Math.sin(angle) * 0.03065, -0.00035, -Math.cos(angle) * 0.03065);
       dummy.rotation.set(0, angle, 0);
       dummy.updateMatrix();
       mesh.current.setMatrixAt(index, dummy.matrix);
@@ -44,9 +46,9 @@ function Knurling() {
   }, [dummy]);
 
   return (
-    <instancedMesh ref={mesh} args={[undefined, undefined, 24]} castShadow>
-      <boxGeometry args={[0.0015, 0.0085, 0.0048]} />
-      <meshStandardMaterial color="#777d7b" metalness={0.92} roughness={0.39} />
+    <instancedMesh ref={mesh} args={[undefined, undefined, 36]} castShadow receiveShadow>
+      <boxGeometry args={[0.00135, 0.0066, 0.0011]} />
+      <meshStandardMaterial color="#69706f" metalness={0.78} roughness={0.54} />
     </instancedMesh>
   );
 }
@@ -57,13 +59,13 @@ function ScaleTicks() {
 
   useLayoutEffect(() => {
     if (!mesh.current) return;
-    const count = 13;
+    const count = 15;
     const min = THREE.MathUtils.degToRad(-130);
     const max = THREE.MathUtils.degToRad(130);
     for (let index = 0; index < count; index += 1) {
       const angle = min + (index / (count - 1)) * (max - min);
       const major = index % 3 === 0 || index === count - 1;
-      dummy.position.set(Math.sin(angle) * 0.043, 0.0068, -Math.cos(angle) * 0.043);
+      dummy.position.set(Math.sin(angle) * 0.0365, 0.00572, -Math.cos(angle) * 0.0365);
       dummy.rotation.set(0, angle, 0);
       dummy.scale.set(1, 1, major ? 1.45 : 1);
       dummy.updateMatrix();
@@ -73,9 +75,9 @@ function ScaleTicks() {
   }, [dummy]);
 
   return (
-    <instancedMesh ref={mesh} args={[undefined, undefined, 13]}>
-      <boxGeometry args={[0.0012, 0.0008, 0.004]} />
-      <meshStandardMaterial color="#444c4b" metalness={0.55} roughness={0.55} />
+    <instancedMesh ref={mesh} args={[undefined, undefined, 15]}>
+      <boxGeometry args={[0.0009, 0.00032, 0.0032]} />
+      <meshStandardMaterial color="#6f7775" metalness={0.48} roughness={0.64} />
     </instancedMesh>
   );
 }
@@ -262,35 +264,39 @@ export function LampDimmer() {
   return (
     <group position={[0.036, 0.022, 0.026]}>
       {/* Fixed mechanism: gap, scale and calibrated markings never rotate. */}
-      <mesh position={[0, 0.0025, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.039, 0.04, 0.005, 48]} />
-        <meshPhysicalMaterial color="#353a3b" metalness={0.9} roughness={0.42} />
+      <mesh position={[0, 0.0024, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.0405, 0.0415, 0.0048, 64]} />
+        <meshStandardMaterial color="#3f4545" metalness={0.78} roughness={0.52} />
+      </mesh>
+      <mesh position={[0, 0.0051, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.0402, 0.0402, 0.0007, 64]} />
+        <meshStandardMaterial color="#535a58" metalness={0.64} roughness={0.61} />
       </mesh>
       <ScaleTicks />
 
       <group ref={dial} position={[0, 0.009, 0]}>
         <mesh castShadow receiveShadow>
-          <cylinderGeometry args={[0.03, 0.032, 0.012, 48]} />
-          <meshStandardMaterial color="#777d7b" metalness={0.93} roughness={0.4} />
+          <cylinderGeometry args={[0.03, 0.0306, 0.0102, 64]} />
+          <meshStandardMaterial color="#707775" metalness={0.76} roughness={0.53} />
         </mesh>
         <Knurling />
-        <mesh position={[0, 0.00625, 0]} castShadow>
-          <cylinderGeometry args={[0.029, 0.029, 0.001, 48]} />
-          <meshPhysicalMaterial
+        <mesh position={[0, 0.0052, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[0.0282, 0.03, 0.0016, 64]} />
+          <meshStandardMaterial color="#858b88" metalness={0.68} roughness={0.58} />
+        </mesh>
+        <mesh position={[0, 0.00615, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[0.0278, 0.0278, 0.00065, 64]} />
+          <meshStandardMaterial
             ref={topMaterial}
-            color="#c1c3be"
-            metalness={0.94}
-            roughness={0.48}
-            clearcoat={0.05}
+            color="#a9adaa"
+            metalness={0.58}
+            roughness={0.64}
+            envMapIntensity={0.55}
           />
         </mesh>
-        <mesh position={[0, 0.0069, -0.0165]} castShadow>
-          <boxGeometry args={[0.0021, 0.0009, 0.013]} />
-          <meshStandardMaterial color="#444c4b" metalness={0.35} roughness={0.52} />
-        </mesh>
-        <mesh position={[0, 0.0067, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.029, 0.00055, 6, 48]} />
-          <meshStandardMaterial color="#b2a18b" metalness={0.82} roughness={0.46} />
+        <mesh position={[0, 0.0065, -0.0125]} castShadow>
+          <boxGeometry args={[0.00135, 0.00028, 0.0072]} />
+          <meshStandardMaterial color="#303636" metalness={0.24} roughness={0.7} />
         </mesh>
       </group>
 

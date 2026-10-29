@@ -7,8 +7,9 @@ import {
 } from "./interaction/studyStore";
 import { tactileFeedback } from "./interaction/tactile";
 import { Archive } from "./ui/Archive";
-import { AsciiLoader } from "./ui/AsciiLoader";
 import { Surface } from "./ui/Surface";
+import { useLoading, type LoadingTaskController } from "./ui/loading/LoadingContext";
+import type { RoomAssetProgress } from "./scene/RoomScene";
 
 type View = "index" | "room";
 
@@ -20,6 +21,7 @@ const isNightNow = () => {
 const RoomScene = lazy(() => import("./scene/RoomScene"));
 
 export default function App() {
+  const { begin } = useLoading();
   const {
     archiveRequest,
     clearArchiveRequest,
@@ -36,10 +38,35 @@ export default function App() {
   } = useStudy();
   const [indexMode, setIndexMode] = useState(() => viewFromHash() === "index");
   const [activeCollection, setActiveCollection] = useState<Collection>("work");
-  const [initialReady, setInitialReady] = useState(false);
-  const [roomReady, setRoomReady] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const indexTrigger = useRef<HTMLButtonElement>(null);
+  const roomTask = useRef<LoadingTaskController | null>(null);
+  const roomFailed = useRef(false);
+
+  const beginRoomLoading = useCallback(() => {
+    if (roomTask.current) return;
+    roomTask.current = begin("Room scene");
+  }, [begin]);
+
+  const settleRoomLoading = useCallback(() => {
+    roomTask.current?.done();
+    roomTask.current = null;
+    roomFailed.current = false;
+  }, []);
+
+  const reportRoomProgress = useCallback(
+    ({ active, progress, errors }: RoomAssetProgress) => {
+      if (active) {
+        beginRoomLoading();
+        roomTask.current?.report(progress / 100);
+      }
+      if (errors > 0 && !roomFailed.current) {
+        roomFailed.current = true;
+        roomTask.current?.fail("Room resources could not load.", () => window.location.reload());
+      }
+    },
+    [beginRoomLoading],
+  );
 
   useEffect(() => {
     if (!window.location.hash) window.history.replaceState(null, "", "#index");
@@ -47,11 +74,12 @@ export default function App() {
     const syncView = () => {
       const nextView = viewFromHash();
       setIndexMode(nextView === "index");
-      if (nextView === "room") setRoomReady(false);
+      if (nextView === "room") beginRoomLoading();
+      else settleRoomLoading();
     };
     window.addEventListener("popstate", syncView);
     return () => window.removeEventListener("popstate", syncView);
-  }, []);
+  }, [beginRoomLoading, settleRoomLoading]);
 
   useEffect(() => {
     const syncTime = () => setNightMode(isNightNow());
@@ -76,17 +104,18 @@ export default function App() {
     }
   }, [musicPlaying]);
 
-  const setView = (view: View) => {
+  const setView = useCallback((view: View) => {
     const hash = view === "room" ? "#room" : "#index";
     if (window.location.hash !== hash) window.history.pushState(null, "", hash);
     setIndexMode(view === "index");
-    if (view === "room") setRoomReady(false);
-  };
+    if (view === "room") beginRoomLoading();
+    else settleRoomLoading();
+  }, [beginRoomLoading, settleRoomLoading]);
 
-  const closeIndex = () => {
+  const closeIndex = useCallback(() => {
     setView("room");
     window.requestAnimationFrame(() => indexTrigger.current?.focus());
-  };
+  }, [setView]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -97,23 +126,29 @@ export default function App() {
 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [indexMode]);
+  }, [closeIndex, indexMode]);
 
-  const openIndex = (collection: Collection = "work") => {
+  const openIndex = useCallback((collection: Collection = "work") => {
     focus(null);
     setActiveCollection(collection);
     setView("index");
-  };
+  }, [setView]);
 
   useEffect(() => {
     if (!archiveRequest) return;
     openIndex(archiveRequest);
     clearArchiveRequest();
-  }, [archiveRequest, clearArchiveRequest]);
+  }, [archiveRequest, clearArchiveRequest, openIndex]);
+
+  useEffect(() => {
+    if (!indexMode) beginRoomLoading();
+    else settleRoomLoading();
+  }, [beginRoomLoading, indexMode, settleRoomLoading]);
+
+  useEffect(() => () => settleRoomLoading(), [settleRoomLoading]);
 
   const brightnessPercent = Math.round(lampBrightness * 100);
-  const loading = !initialReady || (!indexMode && !roomReady);
-  const markRoomReady = useCallback(() => setRoomReady(true), []);
+  const markRoomReady = useCallback(() => settleRoomLoading(), [settleRoomLoading]);
 
   return (
     <div className={["app", isNight && "app--evening"].filter(Boolean).join(" ")}>
@@ -122,7 +157,11 @@ export default function App() {
           <Suspense
             fallback={<div className="room-loading" role="status" aria-label="加载 Room" />}
           >
-            <RoomScene isNight={isNight} onReady={markRoomReady} />
+            <RoomScene
+              isNight={isNight}
+              onReady={markRoomReady}
+              onAssetProgress={reportRoomProgress}
+            />
           </Suspense>
 
           <header className="hud">
@@ -185,8 +224,6 @@ export default function App() {
       {indexMode && (
         <Archive initialCollection={activeCollection} onClose={closeIndex} />
       )}
-
-      <AsciiLoader active={loading} onInitialReady={() => setInitialReady(true)} />
     </div>
   );
 }

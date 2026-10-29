@@ -43,7 +43,8 @@ Each entry needs a collection, a year, one concise summary, and its real public 
 - `src/scene/RoomScene.tsx` — dynamically loaded Canvas boundary
 - `src/scene/` — the 3D room, layout, materials, and camera choreography
 - `src/interaction/` — room state and object interaction
-- `src/ui/AsciiLoader.tsx` — Canvas-only ASCII boot scene and pointer flow
+- `src/ui/loading/LoadingManager.tsx` — shared real-work loading coordinator
+- `src/ui/AsciiLoader.tsx` — full-viewport Canvas ASCII flow field
 - `src/ui/Archive.tsx` — the accessible Index interface
 - `src/data/library.ts` — curated portfolio content
 - `src/data/hotspots.ts` — physical room objects and their focus positions
@@ -53,13 +54,13 @@ The room should stay an experience, rather than becoming the only route to infor
 
 ## Loading sequence
 
-The boot screen samples `public/images/steve-jobs-macintosh.png` into Canvas
-characters in the browser. Its reveal is buffered per character and cursor
-movement temporarily displaces nearby glyphs; it does not send the image to an
-ASCII conversion service or add a runtime dependency. The loader waits for the
-photograph's first buffered render on initial load and for the room Canvas to
-commit on room entry. With `prefers-reduced-motion`, it renders a static frame and then
-hands off without an animation loop.
+The boot screen is a full-viewport Canvas ASCII field: cached glyph tiles,
+typed-array flow state, and damped pointer impulses create a low-contrast,
+generated character fabric. `GlobalLoadingProvider` owns real loading tasks
+across the application; entering the Room waits for its committed Canvas frame
+and reports R3F resource progress when assets expose it. There is no simulated
+percentage or external ASCII conversion service. See
+`docs/loading-sequence.md` for the loading API and performance limits.
 
 ## 3D development checks
 

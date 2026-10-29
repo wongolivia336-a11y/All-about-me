@@ -58,19 +58,26 @@ body {
 
 .ascii-loader {
   position: fixed;
-  z-index: 20;
+  z-index: 40;
   inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
-  background: #090a0b;
+  background: #090b0c;
   opacity: 1;
-  transition: opacity 360ms cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0s;
+  transition: opacity 520ms cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0s;
 }
 
 .ascii-loader--hidden {
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 360ms cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 360ms;
+  transition: opacity 520ms cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 520ms;
+}
+
+.ascii-loader--settling {
+  pointer-events: none;
 }
 
 .ascii-loader__canvas {
@@ -79,6 +86,27 @@ body {
   height: 100%;
   touch-action: none;
   cursor: crosshair;
+}
+
+.ascii-loader__retry {
+  position: absolute;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: max(24px, env(safe-area-inset-bottom));
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid rgba(215, 221, 218, 0.42);
+  border-radius: 999px;
+  background: rgba(9, 11, 12, 0.72);
+  color: #d7ddda;
+  font: 600 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.08em;
+}
+
+.ascii-loader__retry:hover,
+.ascii-loader__retry:focus-visible {
+  border-color: #d7ddda;
+  background: #1a2020;
 }
 
 /* Ambient night is dark, but the content layer stays deliberately high-contrast. */
