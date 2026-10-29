@@ -34,7 +34,6 @@ type Field = {
 };
 
 const glyphRamp = ".,:;irsXA253hMHGS#9B&@";
-const tau = Math.PI * 2;
 const minimumFieldExposure = 620;
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 const random = (seed: number) => {
@@ -240,7 +239,6 @@ export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps)
       const seconds = time / 1000;
       for (let index = 0; index < field.x.length; index += 1) {
         const row = Math.floor(index / field.columns);
-        const column = index - row * field.columns;
         const lowFrequency =
           Math.sin(seconds * 0.27 + field.phaseA[index]) * 0.48 +
           Math.sin(seconds * 0.16 + field.phaseB[index]) * 0.31 +
