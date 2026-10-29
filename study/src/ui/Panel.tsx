@@ -1,10 +1,10 @@
 import { content } from "../data/content";
 import { hotspotById } from "../data/hotspots";
-import { useStudy } from "../interaction/studyStore";
+import { useFocusedRoom } from "../interaction/studyStore";
 
 /** The content surface that slides in once the camera is pushed into an object. */
 export function Panel() {
-  const { focused, focus } = useStudy();
+  const { focused, focus } = useFocusedRoom();
   if (!focused) return null;
 
   const section = content[focused];

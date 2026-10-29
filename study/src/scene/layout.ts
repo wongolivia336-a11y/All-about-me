@@ -13,6 +13,30 @@ export const BACK_WALL_Z = -1.65;
 export const LEFT_WALL_X = -2.5;
 
 /**
+ * The study is an open architectural diorama: back and left walls carry the
+ * room, while the front and right remain intentionally cut away for viewing.
+ * Keeping these limits explicit prevents the floor and walls from silently
+ * growing whenever a prop needs a few more centimetres.
+ */
+export const ROOM_BOUNDS = {
+  left: LEFT_WALL_X,
+  right: 2.2,
+  back: BACK_WALL_Z,
+  front: 1.7,
+  height: 2.8,
+  wallThickness: 0.12,
+  floorThickness: 0.08,
+} as const;
+
+/** A real opening in the left wall, measured in the room's Y/Z plane. */
+export const WINDOW_OPENING = {
+  centerZ: 0.72,
+  width: 1.25,
+  bottom: 0.65,
+  height: 1.4,
+} as const;
+
+/**
  * Usable desk surface: x from -0.85 to 0.85, z from -1.41 to -0.69.
  *
  * Laid out in three bands — a back row against the wall, the laptop in the

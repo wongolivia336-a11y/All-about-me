@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { RoundedBox } from "@react-three/drei";
 import { Hotspot } from "../interaction/Hotspot";
-import { useStudy } from "../interaction/studyStore";
+import { useMusicState } from "../interaction/studyStore";
 import { layout } from "./layout";
 import { makeGrilleTexture } from "./theme";
 
@@ -17,7 +17,7 @@ const D = 0.13;
 export function Marshall() {
   const grille = useMemo(makeGrilleTexture, []);
   const { pos, rotY } = layout.marshall;
-  const { musicPlaying } = useStudy();
+  const { musicPlaying } = useMusicState();
 
   const knobs = [-0.062, 0, 0.062];
 

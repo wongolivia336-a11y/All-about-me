@@ -1,11 +1,13 @@
-import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import type { Collection } from "./data/library";
 import {
   focus,
   reportMusicUnavailable,
   useStudy,
 } from "./interaction/studyStore";
+import { tactileFeedback } from "./interaction/tactile";
 import { Archive } from "./ui/Archive";
+import { AsciiLoader } from "./ui/AsciiLoader";
 import { Surface } from "./ui/Surface";
 
 type View = "index" | "room";
@@ -21,42 +23,42 @@ export default function App() {
   const {
     archiveRequest,
     clearArchiveRequest,
-    lampOn,
-    lightLevel,
-    setLightLevel,
-    toggleLamp,
+    isNight,
+    lampPower,
+    lampBrightness,
+    setLampBrightness,
+    setNightMode,
+    toggleLampPower,
+    tactileMuted,
+    setTactileMuted,
     musicPlaying,
     volume,
   } = useStudy();
   const [indexMode, setIndexMode] = useState(() => viewFromHash() === "index");
   const [activeCollection, setActiveCollection] = useState<Collection>("work");
-  const [isNight, setIsNight] = useState(isNightNow);
+  const [initialReady, setInitialReady] = useState(false);
+  const [roomReady, setRoomReady] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const indexTrigger = useRef<HTMLButtonElement>(null);
-  const appliedInitialLighting = useRef(false);
 
   useEffect(() => {
     if (!window.location.hash) window.history.replaceState(null, "", "#index");
 
-    const syncView = () => setIndexMode(viewFromHash() === "index");
+    const syncView = () => {
+      const nextView = viewFromHash();
+      setIndexMode(nextView === "index");
+      if (nextView === "room") setRoomReady(false);
+    };
     window.addEventListener("popstate", syncView);
     return () => window.removeEventListener("popstate", syncView);
   }, []);
 
   useEffect(() => {
-    const syncTime = () => setIsNight(isNightNow());
+    const syncTime = () => setNightMode(isNightNow());
     syncTime();
     const timer = window.setInterval(syncTime, 60_000);
     return () => window.clearInterval(timer);
-  }, []);
-
-  // Local time controls the ambient room. The lamp is still independent after
-  // first load, so choosing a daytime task light never turns the whole site dark.
-  useEffect(() => {
-    if (appliedInitialLighting.current) return;
-    appliedInitialLighting.current = true;
-    if (isNight) setLightLevel(0.72);
-  }, [isNight, setLightLevel]);
+  }, [setNightMode]);
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = volume;
@@ -78,6 +80,7 @@ export default function App() {
     const hash = view === "room" ? "#room" : "#index";
     if (window.location.hash !== hash) window.history.pushState(null, "", hash);
     setIndexMode(view === "index");
+    if (view === "room") setRoomReady(false);
   };
 
   const closeIndex = () => {
@@ -108,7 +111,9 @@ export default function App() {
     clearArchiveRequest();
   }, [archiveRequest, clearArchiveRequest]);
 
-  const brightnessPercent = Math.round(lightLevel * 100);
+  const brightnessPercent = Math.round(lampBrightness * 100);
+  const loading = !initialReady || (!indexMode && !roomReady);
+  const markRoomReady = useCallback(() => setRoomReady(true), []);
 
   return (
     <div className={["app", isNight && "app--evening"].filter(Boolean).join(" ")}>
@@ -117,7 +122,7 @@ export default function App() {
           <Suspense
             fallback={<div className="room-loading" role="status" aria-label="加载 Room" />}
           >
-            <RoomScene isNight={isNight} />
+            <RoomScene isNight={isNight} onReady={markRoomReady} />
           </Suspense>
 
           <header className="hud">
@@ -129,23 +134,36 @@ export default function App() {
                   type="range"
                   min="0"
                   max="100"
-                  step="5"
+                  step="1"
                   value={brightnessPercent}
                   style={{ "--value": brightnessPercent + "%" } as CSSProperties}
-                  onChange={(event) => setLightLevel(Number(event.currentTarget.value) / 100)}
-                  aria-label="台灯亮度"
-                  aria-valuetext={brightnessPercent + "%"}
+                  onChange={(event) => setLampBrightness(Number(event.currentTarget.value) / 100)}
+                  aria-label="台灯预设亮度"
+                  aria-valuetext={brightnessPercent + "%" + (lampPower ? "，已开启" : "，已关闭")}
                 />
               </div>
               <button
                 className="hud__btn hud__btn--icon"
                 type="button"
-                onClick={toggleLamp}
-                aria-label={lampOn ? "关闭台灯" : "打开台灯"}
-                aria-pressed={lampOn}
-                title={lampOn ? "关闭台灯" : "打开台灯"}
+                onClick={() => {
+                  tactileFeedback("press", tactileMuted);
+                  toggleLampPower();
+                }}
+                aria-label={lampPower ? "关闭台灯" : "打开台灯"}
+                aria-pressed={lampPower}
+                title={lampPower ? "关闭台灯" : "打开台灯"}
               >
-                <span aria-hidden="true">{lampOn ? "◉" : "○"}</span>
+                <span aria-hidden="true">{lampPower ? "◉" : "○"}</span>
+              </button>
+              <button
+                className="hud__btn hud__btn--icon"
+                type="button"
+                onClick={() => setTactileMuted(!tactileMuted)}
+                aria-label={tactileMuted ? "开启台灯机械反馈" : "关闭台灯机械反馈"}
+                aria-pressed={!tactileMuted}
+                title={tactileMuted ? "开启机械反馈" : "关闭机械反馈"}
+              >
+                <span aria-hidden="true">{tactileMuted ? "○" : "⌁"}</span>
               </button>
               <button
                 ref={indexTrigger}
@@ -167,6 +185,8 @@ export default function App() {
       {indexMode && (
         <Archive initialCollection={activeCollection} onClose={closeIndex} />
       )}
+
+      <AsciiLoader active={loading} onInitialReady={() => setInitialReady(true)} />
     </div>
   );
 }

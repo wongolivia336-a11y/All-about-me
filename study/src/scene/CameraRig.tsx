@@ -3,7 +3,7 @@ import type { ComponentRef } from "react";
 import { CameraControls } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { HOME_CAM, HOME_TARGET, hotspotById } from "../data/hotspots";
-import { useStudy } from "../interaction/studyStore";
+import { useCameraRoomState } from "../interaction/studyStore";
 
 /**
  * The room is about 4.2m wide but the camera's field of view is vertical, so a
@@ -23,7 +23,7 @@ const pullBackFor = (aspect: number) =>
  */
 export function CameraRig() {
   const controls = useRef<ComponentRef<typeof CameraControls>>(null);
-  const { focused } = useStudy();
+  const { focused, lampInteracting } = useCameraRoomState();
   const aspect = useThree((s) => s.size.width / s.size.height);
 
   useEffect(() => {
@@ -47,6 +47,7 @@ export function CameraRig() {
       ref={controls}
       makeDefault
       smoothTime={0.45}
+      enabled={!lampInteracting}
       minDistance={0.32}
       maxDistance={9.5}
       minPolarAngle={0.25}
