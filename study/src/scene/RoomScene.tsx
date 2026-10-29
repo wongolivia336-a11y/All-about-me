@@ -1,3 +1,4 @@
+import { useProgress } from "@react-three/drei";
 import { Canvas, useThree } from "@react-three/fiber";
 import { useEffect } from "react";
 import { HOME_CAM } from "../data/hotspots";
@@ -8,6 +9,23 @@ import { Room } from "./Room";
 interface RoomSceneProps {
   isNight: boolean;
   onReady?: () => void;
+  onAssetProgress?: (state: RoomAssetProgress) => void;
+}
+
+export type RoomAssetProgress = {
+  active: boolean;
+  progress: number;
+  errors: number;
+};
+
+function SceneAssetProgress({ onAssetProgress }: Pick<RoomSceneProps, "onAssetProgress">) {
+  const { active, progress, errors } = useProgress();
+
+  useEffect(() => {
+    onAssetProgress?.({ active, progress, errors: errors.length });
+  }, [active, errors.length, onAssetProgress, progress]);
+
+  return null;
 }
 
 function SceneReady({ onReady }: { onReady?: () => void }) {
@@ -33,7 +51,7 @@ function SceneReady({ onReady }: { onReady?: () => void }) {
  * Kept behind a dynamic import so the content-first Index never pays the
  * WebGL/R3F download cost until someone explicitly enters the room.
  */
-export default function RoomScene({ isNight, onReady }: RoomSceneProps) {
+export default function RoomScene({ isNight, onReady, onAssetProgress }: RoomSceneProps) {
   return (
     <Canvas
       shadows={sceneDebug.shadowsEnabled ? "soft" : false}
@@ -45,6 +63,7 @@ export default function RoomScene({ isNight, onReady }: RoomSceneProps) {
       <color attach="background" args={[isNight ? "#171419" : "#e8e3da"]} />
       <Room isNight={isNight} />
       <SceneReady onReady={onReady} />
+      <SceneAssetProgress onAssetProgress={onAssetProgress} />
     </Canvas>
   );
 }
