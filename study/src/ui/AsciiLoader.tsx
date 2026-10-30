@@ -12,6 +12,13 @@ type GlyphAtlas = {
   glyphs: HTMLCanvasElement[][];
 };
 
+type PortraitBounds = {
+  height: number;
+  width: number;
+  x: number;
+  y: number;
+};
+
 type Field = {
   baseDensity: Float32Array;
   cellHeight: number;
@@ -24,6 +31,9 @@ type Field = {
   phaseA: Float32Array;
   phaseB: Float32Array;
   phaseC: Float32Array;
+  portraitDensity: Float32Array;
+  portraitShield: Float32Array;
+  portraitWeight: Float32Array;
   rows: number;
   velocityX: Float32Array;
   velocityY: Float32Array;
@@ -34,7 +44,7 @@ type Field = {
 };
 
 const glyphRamp = ".,:;irsXA253hMHGS#9B&@";
-const minimumFieldExposure = 620;
+const minimumPortraitExposure = 680;
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 const random = (seed: number) => {
   const value = Math.sin(seed * 12.9898 + seed * seed * 0.00011) * 43758.5453;
@@ -42,8 +52,8 @@ const random = (seed: number) => {
 };
 
 function buildField(width: number, height: number, mobile: boolean): Field {
-  const desiredCellWidth = mobile ? 8 : 9.6;
-  const columns = clamp(Math.floor(width / desiredCellWidth), mobile ? 46 : 72, mobile ? 78 : 142);
+  const desiredCellWidth = mobile ? 6.2 : 9.6;
+  const columns = clamp(Math.floor(width / desiredCellWidth), mobile ? 56 : 72, mobile ? 84 : 142);
   const cellWidth = width / columns;
   const cellHeight = cellWidth * 1.52;
   const rows = clamp(Math.ceil(height / cellHeight), mobile ? 48 : 46, mobile ? 112 : 92);
@@ -93,6 +103,9 @@ function buildField(width: number, height: number, mobile: boolean): Field {
     phaseA,
     phaseB,
     phaseC,
+    portraitDensity: new Float32Array(count),
+    portraitShield: new Float32Array(count),
+    portraitWeight: new Float32Array(count),
     rows,
     velocityX: new Float32Array(count),
     velocityY: new Float32Array(count),
@@ -131,10 +144,84 @@ function buildGlyphAtlas(cellWidth: number, cellHeight: number, ratio: number): 
   };
 }
 
+function getPortraitBounds(width: number, height: number, image: HTMLImageElement, mobile: boolean): PortraitBounds {
+  const aspect = mobile ? 0.72 : image.naturalWidth / image.naturalHeight;
+  const maximumWidth = width * (mobile ? 0.8 : 0.76);
+  const maximumHeight = height * (mobile ? 0.68 : 0.74);
+  let portraitWidth = maximumWidth;
+  let portraitHeight = portraitWidth / aspect;
+  if (portraitHeight > maximumHeight) {
+    portraitHeight = maximumHeight;
+    portraitWidth = portraitHeight * aspect;
+  }
+
+  return {
+    height: portraitHeight,
+    width: portraitWidth,
+    x: (width - portraitWidth) / 2,
+    y: (height - portraitHeight) / 2,
+  };
+}
+
 /**
- * A full-viewport typographic field. The glyphs are cached Canvas text tiles;
- * typed arrays hold the field and the spring-like pointer energy. It is kept
- * independent from WebGL so it can cover every loading boundary in the app.
+ * The image is sampled once into typed arrays; it is never composited onto
+ * the visible canvas. Every visible pixel of the portrait remains a glyph.
+ */
+function rasterizePortrait(
+  field: Field,
+  image: HTMLImageElement,
+  sample: HTMLCanvasElement,
+  sampleContext: CanvasRenderingContext2D,
+  mobile: boolean,
+) {
+  const bounds = getPortraitBounds(field.width, field.height, image, mobile);
+  sample.width = field.columns;
+  sample.height = field.rows;
+  sampleContext.clearRect(0, 0, sample.width, sample.height);
+  const sourceX = mobile ? image.naturalWidth * 0.25 : 0;
+  const sourceWidth = mobile ? image.naturalWidth * 0.5 : image.naturalWidth;
+  sampleContext.drawImage(
+    image,
+    sourceX,
+    0,
+    sourceWidth,
+    image.naturalHeight,
+    bounds.x / field.cellWidth,
+    bounds.y / field.cellHeight,
+    bounds.width / field.cellWidth,
+    bounds.height / field.cellHeight,
+  );
+  const pixels = sampleContext.getImageData(0, 0, sample.width, sample.height).data;
+
+  field.portraitDensity.fill(0);
+  field.portraitWeight.fill(0);
+  field.portraitShield.fill(0);
+
+  for (let index = 0; index < field.x.length; index += 1) {
+    const sampleColumn = clamp(Math.floor(field.x[index] / field.cellWidth), 0, field.columns - 1);
+    const sampleRow = clamp(Math.floor(field.y[index] / field.cellHeight), 0, field.rows - 1);
+    const pixelIndex = (sampleRow * field.columns + sampleColumn) * 4;
+    const alpha = pixels[pixelIndex + 3] / 255;
+    if (alpha <= 0.01) continue;
+
+    const luma =
+      (pixels[pixelIndex] * 0.2126 + pixels[pixelIndex + 1] * 0.7152 + pixels[pixelIndex + 2] * 0.0722) /
+      255;
+    const localX = (field.x[index] - bounds.x) / bounds.width;
+    const localY = (field.y[index] - bounds.y) / bounds.height;
+    const edge = Math.min(localX, 1 - localX, localY, 1 - localY);
+    const edgeFade = clamp(edge / 0.04, 0, 1);
+    const faceShield = Math.exp(-((localX - 0.5) ** 2) / 0.018 - ((localY - 0.235) ** 2) / 0.018);
+
+    field.portraitDensity[index] = clamp((luma - 0.025) / 0.975, 0, 1);
+    field.portraitWeight[index] = alpha * edgeFade;
+    field.portraitShield[index] = field.portraitWeight[index] * faceShield;
+  }
+}
+
+/**
+ * A three-layer typographic field: stable portrait density, gentle flow, and
+ * temporary pointer impulses. Neither motion layer mutates source density.
  */
 export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -155,11 +242,18 @@ export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps)
     const context = canvas.getContext("2d", { alpha: false });
     if (!context) return;
 
+    const sample = document.createElement("canvas");
+    const sampleContext = sample.getContext("2d", { willReadFrequently: true });
+    if (!sampleContext) return;
+    const image = new Image();
+    image.decoding = "async";
+
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let portraitReady = false;
     let field: Field | null = null;
     let atlas: GlyphAtlas | null = null;
     let lastTime = 0;
-    let fieldStartedAt = 0;
+    let portraitShownAt = 0;
     let presence = 0;
     let animationFrame = 0;
     let running = false;
@@ -167,6 +261,12 @@ export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps)
     let lastPointerX = 0;
     let lastPointerY = 0;
     let lastPointerAt = 0;
+    let reducedMotionDismissTimer = 0;
+
+    const rebuildPortrait = () => {
+      if (!field || !portraitReady || !image.naturalWidth) return;
+      rasterizePortrait(field, image, sample, sampleContext, field.width < 680);
+    };
 
     const fitCanvas = () => {
       const bounds = canvas.getBoundingClientRect();
@@ -183,6 +283,7 @@ export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps)
       if (!field || field.width !== width || field.height !== height) {
         field = buildField(width, height, mobile);
         atlas = buildGlyphAtlas(field.cellWidth, field.cellHeight, ratio);
+        rebuildPortrait();
       }
       return { height, width };
     };
@@ -213,10 +314,14 @@ export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps)
           const radialY = dy / safeDistance;
           const swirlX = -radialY;
           const swirlY = radialX;
-          const impulse = 92 * falloff * (0.58 + speed * 0.82);
+          const portraitProtection = 1 - field.portraitWeight[index] * 0.46 - field.portraitShield[index] * 0.22;
+          const impulse = 92 * falloff * (0.58 + speed * 0.82) * portraitProtection;
           field.velocityX[index] += (radialX * 0.4 + swirlX * 0.32 + motionX * 0.54) * impulse;
           field.velocityY[index] += (radialY * 0.3 + swirlY * 0.26 + motionY * 0.38) * impulse;
-          field.energy[index] = Math.min(1.25, field.energy[index] + falloff * (0.34 + speed * 0.58));
+          field.energy[index] = Math.min(
+            1.25,
+            field.energy[index] + falloff * (0.34 + speed * 0.58) * portraitProtection,
+          );
         }
       }
     };
@@ -224,12 +329,21 @@ export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps)
     const render = (time: number) => {
       const { width, height } = fitCanvas();
       if (!field || !atlas) return;
-      if (!fieldStartedAt) fieldStartedAt = time;
+      if (portraitReady && !portraitShownAt) {
+        portraitShownAt = time;
+        if (reducedMotion) {
+          window.clearTimeout(reducedMotionDismissTimer);
+          reducedMotionDismissTimer = window.setTimeout(() => wake(), 520);
+        }
+      }
 
       const delta = lastTime ? Math.min(0.05, Math.max(0.001, (time - lastTime) / 1000)) : 0.016;
       lastTime = time;
-      const minimumExposure = reducedMotion ? false : time - fieldStartedAt < minimumFieldExposure;
-      const targetPresence = activeRef.current || minimumExposure ? 1 : 0;
+      const minimumExposure =
+        portraitShownAt > 0 && time - portraitShownAt < (reducedMotion ? 520 : minimumPortraitExposure);
+      // The shell has painted only when the portrait source has been sampled;
+      // a slow image request must not let the loader fade as a blank field.
+      const targetPresence = activeRef.current || !portraitReady || minimumExposure ? 1 : 0;
       presence += (targetPresence - presence) * (reducedMotion ? 1 : 1 - Math.exp(-delta * 4.8));
 
       context.globalAlpha = 1;
@@ -245,6 +359,8 @@ export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps)
           Math.sin(seconds * 0.075 + field.phaseC[index]) * 0.21;
         const scaleLift = Math.sin(seconds * 0.44 + field.phaseC[index] + row * 0.12) * 0.5 + 0.5;
         const fluid = lowFrequency * 0.5 + (scaleLift - 0.5) * 0.34;
+        const portraitWeight = field.portraitWeight[index];
+        const portraitShield = field.portraitShield[index];
         const energy = field.energy[index];
 
         field.velocityX[index] += -field.offsetX[index] * 32 * delta;
@@ -264,26 +380,30 @@ export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps)
         );
         field.energy[index] *= Math.exp(-delta * 4.5);
 
-        const density = clamp(
-          0.18 + field.baseDensity[index] * 0.42 + fluid * 0.25 + energy * 0.22,
-          0,
-          1,
-        );
-        const negativeSpace = clamp(field.voidMask[index] + fluid * 0.23, 0.04, 1);
-        const alpha = presence * negativeSpace * (0.14 + density * 0.54 + energy * 0.18);
-        if (alpha < 0.045) continue;
+        const backgroundDensity = clamp(0.12 + field.baseDensity[index] * 0.3 + fluid * 0.14 + energy * 0.1, 0, 1);
+        const portraitDensity = clamp(field.portraitDensity[index] + fluid * 0.055 + energy * 0.055, 0, 1);
+        const density = backgroundDensity + (portraitDensity - backgroundDensity) * portraitWeight;
+        const negativeSpace = clamp(field.voidMask[index] + fluid * 0.16, 0.04, 1);
+        const portraitAlpha = 0.1 + portraitDensity * 0.84 + energy * 0.06;
+        const backgroundAlpha = negativeSpace * (0.045 + backgroundDensity * 0.19 + energy * 0.06);
+        const alpha = presence * (backgroundAlpha + (portraitAlpha - backgroundAlpha) * portraitWeight);
+        if (alpha < 0.028) continue;
 
         const level = clamp(Math.floor(density * (glyphRamp.length - 1)), 0, glyphRamp.length - 1);
-        const tone = energy > 0.52 ? 2 : density > 0.57 ? 1 : 0;
+        const tone = energy > 0.56 ? 2 : portraitWeight > 0.1 && density > 0.52 ? 1 : 0;
+        const motionScale = 1 - portraitWeight * 0.56 - portraitShield * 0.22;
         const driftX =
-          Math.sin(seconds * 0.34 + field.phaseA[index]) * field.cellWidth * 0.18 +
-          Math.cos(seconds * 0.13 + field.phaseC[index]) * field.cellWidth * 0.08;
+          (Math.sin(seconds * 0.34 + field.phaseA[index]) * field.cellWidth * 0.18 +
+            Math.cos(seconds * 0.13 + field.phaseC[index]) * field.cellWidth * 0.08) *
+          motionScale;
         const driftY =
-          Math.cos(seconds * 0.24 + field.phaseB[index]) * field.cellHeight * 0.1 +
-          Math.sin(seconds * 0.11 + field.phaseA[index]) * field.cellHeight * 0.06;
-        const x = field.x[index] + field.offsetX[index] + driftX;
-        const y = field.y[index] + field.offsetY[index] + driftY;
-        const rotation = energy * 0.075 + Math.sin(seconds * 0.22 + field.phaseC[index]) * 0.012;
+          (Math.cos(seconds * 0.24 + field.phaseB[index]) * field.cellHeight * 0.1 +
+            Math.sin(seconds * 0.11 + field.phaseA[index]) * field.cellHeight * 0.06) *
+          motionScale;
+        const x = field.x[index] + field.offsetX[index] * motionScale + driftX;
+        const y = field.y[index] + field.offsetY[index] * motionScale + driftY;
+        const rotation =
+          (energy * 0.075 + Math.sin(seconds * 0.22 + field.phaseC[index]) * 0.012) * motionScale;
         const glyph = atlas.glyphs[tone][level];
 
         context.globalAlpha = alpha;
@@ -305,7 +425,7 @@ export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps)
       }
       context.globalAlpha = 1;
 
-      if (!activeRef.current && !minimumExposure && presence < 0.018 && presentedRef) {
+      if (!activeRef.current && portraitReady && !minimumExposure && presence < 0.018 && presentedRef) {
         presentedRef = false;
         presentedStateRef.current = false;
         setPresented(false);
@@ -315,7 +435,7 @@ export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps)
     const frame = (time: number) => {
       render(time);
       const shouldKeepRendering =
-        !reducedMotion && (activeRef.current || (presentedRef && presence >= 0.018));
+        !reducedMotion && (activeRef.current || !portraitReady || (presentedRef && presence >= 0.018));
       if (shouldKeepRendering) {
         animationFrame = window.requestAnimationFrame(frame);
       } else {
@@ -327,7 +447,7 @@ export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps)
       if (activeRef.current && !presentedRef) {
         presentedRef = true;
         presentedStateRef.current = true;
-        fieldStartedAt = 0;
+        portraitShownAt = 0;
         presence = 0;
         setPresented(true);
       }
@@ -367,7 +487,22 @@ export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps)
         // Capture can have been released automatically by the browser.
       }
     };
+    const sourceReady = () => {
+      portraitReady = true;
+      portraitShownAt = 0;
+      rebuildPortrait();
+      wake();
+    };
+    const sourceFailed = () => {
+      // Keep lifecycle safe if the local asset is unexpectedly unavailable.
+      // The production path always uses the checked-in portrait source.
+      portraitReady = true;
+      wake();
+    };
 
+    image.addEventListener("load", sourceReady);
+    image.addEventListener("error", sourceFailed);
+    image.src = "/images/steve-jobs-macintosh.png";
     canvas.addEventListener("pointerdown", startPointer, { passive: true });
     canvas.addEventListener("pointermove", trackPointer, { passive: true });
     canvas.addEventListener("pointerup", endPointer, { passive: true });
@@ -377,6 +512,9 @@ export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps)
 
     return () => {
       window.cancelAnimationFrame(animationFrame);
+      window.clearTimeout(reducedMotionDismissTimer);
+      image.removeEventListener("load", sourceReady);
+      image.removeEventListener("error", sourceFailed);
       canvas.removeEventListener("pointerdown", startPointer);
       canvas.removeEventListener("pointermove", trackPointer);
       canvas.removeEventListener("pointerup", endPointer);
