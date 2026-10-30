@@ -54,12 +54,13 @@ The room should stay an experience, rather than becoming the only route to infor
 
 ## Loading sequence
 
-The boot screen is a full-viewport Canvas ASCII field: cached glyph tiles,
-typed-array flow state, and damped pointer impulses create a low-contrast,
-generated character fabric. `GlobalLoadingProvider` owns real loading tasks
-across the application; entering the Room waits for its committed Canvas frame
-and reports R3F resource progress when assets expose it. There is no simulated
-percentage or external ASCII conversion service. See
+The boot screen is a full-viewport Canvas ASCII portrait of Steve Jobs. Its
+local source image is sampled into stable typed-array character density, while
+cached glyph tiles, a restrained flow field, and damped pointer impulses keep
+the typographic surface alive without losing the subject. `GlobalLoadingProvider`
+owns real loading tasks across the application; entering the Room waits for its
+committed Canvas frame and reports R3F resource progress when assets expose it.
+There is no simulated percentage or external ASCII conversion service. See
 `docs/loading-sequence.md` for the loading API and performance limits.
 
 ## 3D development checks
