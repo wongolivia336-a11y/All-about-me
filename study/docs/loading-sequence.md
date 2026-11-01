@@ -39,6 +39,10 @@ text layout during each animation frame.
   and pointer energy only change glyph position, tone and opacity around it.
 - The face has an additional motion shield. Its character values stay stable,
   while the surrounding room can breathe more freely.
+- Within the portrait, two density-aligned woven tracks carry the repeating
+  text `STAY HUNGRY, STAY FOOLISH.`. They are deliberately stable and more
+  legible than the surrounding density glyphs, while the source map still
+  determines where the text is visible.
 - Rows are staggered to form a subtle scale / textile rhythm.
 - Three offset, low-frequency waves make density and drift vary by location.
 - Dark masks are stable across frames, preserving negative space instead of
@@ -52,7 +56,7 @@ text layout during each animation frame.
 
 ## Transitions and failures
 
-The field waits until the local portrait has been sampled, then keeps a short
+The field waits until the local portrait has been sampled, then keeps a 1.75 s
 visual handoff so the subject is visible even after a very fast app-shell
 paint. On completion, interaction is released immediately; the Canvas field
 settles and fades without exposing a blank frame.

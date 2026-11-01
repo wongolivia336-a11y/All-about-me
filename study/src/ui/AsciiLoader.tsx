@@ -7,6 +7,7 @@ type AsciiLoaderProps = {
 };
 
 type GlyphAtlas = {
+  characterIndexes: Record<string, number>;
   drawHeight: number;
   drawWidth: number;
   glyphs: HTMLCanvasElement[][];
@@ -32,6 +33,8 @@ type Field = {
   phaseB: Float32Array;
   phaseC: Float32Array;
   portraitDensity: Float32Array;
+  portraitQuoteIndex: Uint8Array;
+  portraitQuoteStrength: Float32Array;
   portraitShield: Float32Array;
   portraitWeight: Float32Array;
   rows: number;
@@ -44,7 +47,9 @@ type Field = {
 };
 
 const glyphRamp = ".,:;irsXA253hMHGS#9B&@";
-const minimumPortraitExposure = 680;
+const portraitPhrase = "STAY HUNGRY, STAY FOOLISH. ";
+const glyphCharacters = Array.from(new Set([...glyphRamp, ...portraitPhrase]));
+const minimumPortraitExposure = 1750;
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 const random = (seed: number) => {
   const value = Math.sin(seed * 12.9898 + seed * seed * 0.00011) * 43758.5453;
@@ -52,8 +57,10 @@ const random = (seed: number) => {
 };
 
 function buildField(width: number, height: number, mobile: boolean): Field {
-  const desiredCellWidth = mobile ? 6.2 : 9.6;
-  const columns = clamp(Math.floor(width / desiredCellWidth), mobile ? 56 : 72, mobile ? 84 : 142);
+  // A slightly larger mobile cell keeps the woven sentence readable at
+  // arm's length without sacrificing the portrait's primary silhouette.
+  const desiredCellWidth = mobile ? 6.8 : 7.8;
+  const columns = clamp(Math.floor(width / desiredCellWidth), mobile ? 56 : 96, mobile ? 84 : 184);
   const cellWidth = width / columns;
   const cellHeight = cellWidth * 1.52;
   const rows = clamp(Math.ceil(height / cellHeight), mobile ? 48 : 46, mobile ? 112 : 92);
@@ -104,6 +111,8 @@ function buildField(width: number, height: number, mobile: boolean): Field {
     phaseB,
     phaseC,
     portraitDensity: new Float32Array(count),
+    portraitQuoteIndex: new Uint8Array(count),
+    portraitQuoteStrength: new Float32Array(count),
     portraitShield: new Float32Array(count),
     portraitWeight: new Float32Array(count),
     rows,
@@ -123,10 +132,11 @@ function buildGlyphAtlas(cellWidth: number, cellHeight: number, ratio: number): 
   const tones = ["#7c8786", "#a8b1af", "#d7ddda"];
 
   return {
+    characterIndexes: Object.fromEntries(glyphCharacters.map((glyph, index) => [glyph, index])),
     drawWidth,
     drawHeight,
     glyphs: tones.map((tone) =>
-      Array.from(glyphRamp, (glyph) => {
+      glyphCharacters.map((glyph) => {
         const tile = document.createElement("canvas");
         tile.width = Math.ceil(drawWidth * ratio);
         tile.height = Math.ceil(drawHeight * ratio);
@@ -146,8 +156,8 @@ function buildGlyphAtlas(cellWidth: number, cellHeight: number, ratio: number): 
 
 function getPortraitBounds(width: number, height: number, image: HTMLImageElement, mobile: boolean): PortraitBounds {
   const aspect = mobile ? 0.72 : image.naturalWidth / image.naturalHeight;
-  const maximumWidth = width * (mobile ? 0.8 : 0.76);
-  const maximumHeight = height * (mobile ? 0.68 : 0.74);
+  const maximumWidth = width * (mobile ? 0.84 : 0.86);
+  const maximumHeight = height * (mobile ? 0.72 : 0.91);
   let portraitWidth = maximumWidth;
   let portraitHeight = portraitWidth / aspect;
   if (portraitHeight > maximumHeight) {
@@ -178,8 +188,8 @@ function rasterizePortrait(
   sample.width = field.columns;
   sample.height = field.rows;
   sampleContext.clearRect(0, 0, sample.width, sample.height);
-  const sourceX = mobile ? image.naturalWidth * 0.25 : 0;
-  const sourceWidth = mobile ? image.naturalWidth * 0.5 : image.naturalWidth;
+  const sourceX = mobile ? image.naturalWidth * 0.23 : 0;
+  const sourceWidth = mobile ? image.naturalWidth * 0.54 : image.naturalWidth;
   sampleContext.drawImage(
     image,
     sourceX,
@@ -192,8 +202,19 @@ function rasterizePortrait(
     bounds.height / field.cellHeight,
   );
   const pixels = sampleContext.getImageData(0, 0, sample.width, sample.height).data;
+  const readLuma = (column: number, row: number) => {
+    const safeColumn = clamp(column, 0, field.columns - 1);
+    const safeRow = clamp(row, 0, field.rows - 1);
+    const pixelIndex = (safeRow * field.columns + safeColumn) * 4;
+    return (
+      (pixels[pixelIndex] * 0.2126 + pixels[pixelIndex + 1] * 0.7152 + pixels[pixelIndex + 2] * 0.0722) /
+      255
+    );
+  };
 
   field.portraitDensity.fill(0);
+  field.portraitQuoteIndex.fill(0);
+  field.portraitQuoteStrength.fill(0);
   field.portraitWeight.fill(0);
   field.portraitShield.fill(0);
 
@@ -204,17 +225,32 @@ function rasterizePortrait(
     const alpha = pixels[pixelIndex + 3] / 255;
     if (alpha <= 0.01) continue;
 
-    const luma =
-      (pixels[pixelIndex] * 0.2126 + pixels[pixelIndex + 1] * 0.7152 + pixels[pixelIndex + 2] * 0.0722) /
-      255;
+    const luma = readLuma(sampleColumn, sampleRow);
+    const edgeDetail = clamp(
+      (Math.abs(readLuma(sampleColumn + 1, sampleRow) - readLuma(sampleColumn - 1, sampleRow)) +
+        Math.abs(readLuma(sampleColumn, sampleRow + 1) - readLuma(sampleColumn, sampleRow - 1))) *
+        1.15,
+      0,
+      1,
+    );
     const localX = (field.x[index] - bounds.x) / bounds.width;
     const localY = (field.y[index] - bounds.y) / bounds.height;
     const edge = Math.min(localX, 1 - localX, localY, 1 - localY);
     const edgeFade = clamp(edge / 0.04, 0, 1);
     const faceShield = Math.exp(-((localX - 0.5) ** 2) / 0.018 - ((localY - 0.235) ** 2) / 0.018);
+    const quoteBand = Math.max(
+      Math.exp(-((localY - 0.67) ** 2) / 0.00032),
+      Math.exp(-((localY - 0.83) ** 2) / 0.00032),
+    );
+    const phraseColumn = Math.max(0, Math.floor((field.x[index] - bounds.x) / field.cellWidth));
 
-    field.portraitDensity[index] = clamp((luma - 0.025) / 0.975, 0, 1);
+    // A gentle black-point lift preserves the eyes and face in a source image
+    // that is dominated by bright walls, without flattening the dark jacket.
+    const tonalDensity = Math.pow(clamp((luma - 0.09) / 0.82, 0, 1), 0.66);
+    field.portraitDensity[index] = clamp(tonalDensity * 0.76 + edgeDetail * 0.46, 0, 1);
     field.portraitWeight[index] = alpha * edgeFade;
+    field.portraitQuoteIndex[index] = phraseColumn % portraitPhrase.length;
+    field.portraitQuoteStrength[index] = field.portraitWeight[index] * quoteBand;
     field.portraitShield[index] = field.portraitWeight[index] * faceShield;
   }
 }
@@ -333,14 +369,14 @@ export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps)
         portraitShownAt = time;
         if (reducedMotion) {
           window.clearTimeout(reducedMotionDismissTimer);
-          reducedMotionDismissTimer = window.setTimeout(() => wake(), 520);
+          reducedMotionDismissTimer = window.setTimeout(() => wake(), 720);
         }
       }
 
       const delta = lastTime ? Math.min(0.05, Math.max(0.001, (time - lastTime) / 1000)) : 0.016;
       lastTime = time;
       const minimumExposure =
-        portraitShownAt > 0 && time - portraitShownAt < (reducedMotion ? 520 : minimumPortraitExposure);
+        portraitShownAt > 0 && time - portraitShownAt < (reducedMotion ? 720 : minimumPortraitExposure);
       // The shell has painted only when the portrait source has been sampled;
       // a slow image request must not let the loader fade as a blank field.
       const targetPresence = activeRef.current || !portraitReady || minimumExposure ? 1 : 0;
@@ -384,13 +420,25 @@ export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps)
         const portraitDensity = clamp(field.portraitDensity[index] + fluid * 0.055 + energy * 0.055, 0, 1);
         const density = backgroundDensity + (portraitDensity - backgroundDensity) * portraitWeight;
         const negativeSpace = clamp(field.voidMask[index] + fluid * 0.16, 0.04, 1);
-        const portraitAlpha = 0.1 + portraitDensity * 0.84 + energy * 0.06;
-        const backgroundAlpha = negativeSpace * (0.045 + backgroundDensity * 0.19 + energy * 0.06);
-        const alpha = presence * (backgroundAlpha + (portraitAlpha - backgroundAlpha) * portraitWeight);
+        const quoteBand = field.portraitQuoteStrength[index];
+        const portraitAlpha = 0.075 + portraitDensity * 0.91 + energy * 0.05;
+        const backgroundAlpha = negativeSpace * (0.035 + backgroundDensity * 0.16 + energy * 0.05);
+        const imageAlpha = presence * (backgroundAlpha + (portraitAlpha - backgroundAlpha) * portraitWeight);
+        const alpha = Math.max(imageAlpha, presence * quoteBand * 0.68);
         if (alpha < 0.028) continue;
 
         const level = clamp(Math.floor(density * (glyphRamp.length - 1)), 0, glyphRamp.length - 1);
-        const tone = energy > 0.56 ? 2 : portraitWeight > 0.1 && density > 0.52 ? 1 : 0;
+        // Match the first portrait renderer's contrast model: portrait luma is
+        // primarily expressed by opacity over a pale glyph, not by muting the
+        // glyph itself into the same tone as the background field.
+        const quoteCharacter = portraitPhrase[field.portraitQuoteIndex[index]];
+        const phraseTrack = quoteBand > 0.2;
+        const tone = phraseTrack || portraitWeight > 0.1 || energy > 0.56 ? 2 : density > 0.57 ? 1 : 0;
+        // The speech is deliberately restricted to two portrait-aligned
+        // woven tracks. This makes the phrase legible without replacing the
+        // tonal glyph ramp that carries Steve's face and silhouette.
+        const usesQuote = phraseTrack;
+        const character = usesQuote ? quoteCharacter : glyphRamp[level];
         const motionScale = 1 - portraitWeight * 0.56 - portraitShield * 0.22;
         const driftX =
           (Math.sin(seconds * 0.34 + field.phaseA[index]) * field.cellWidth * 0.18 +
@@ -404,7 +452,7 @@ export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps)
         const y = field.y[index] + field.offsetY[index] * motionScale + driftY;
         const rotation =
           (energy * 0.075 + Math.sin(seconds * 0.22 + field.phaseC[index]) * 0.012) * motionScale;
-        const glyph = atlas.glyphs[tone][level];
+        const glyph = atlas.glyphs[tone][atlas.characterIndexes[character]];
 
         context.globalAlpha = alpha;
         if (energy > 0.16 || index % 13 === 0) {
