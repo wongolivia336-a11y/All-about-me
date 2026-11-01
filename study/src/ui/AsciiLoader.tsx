@@ -33,6 +33,8 @@ type Field = {
   phaseB: Float32Array;
   phaseC: Float32Array;
   portraitDensity: Float32Array;
+  portraitQuoteIndex: Uint8Array;
+  portraitQuoteStrength: Float32Array;
   portraitShield: Float32Array;
   portraitWeight: Float32Array;
   rows: number;
@@ -45,9 +47,9 @@ type Field = {
 };
 
 const glyphRamp = ".,:;irsXA253hMHGS#9B&@";
-const portraitPhrase = "STAY HUNGRY STAY FOOLISH ";
+const portraitPhrase = "STAY HUNGRY, STAY FOOLISH. ";
 const glyphCharacters = Array.from(new Set([...glyphRamp, ...portraitPhrase]));
-const minimumPortraitExposure = 1250;
+const minimumPortraitExposure = 1750;
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 const random = (seed: number) => {
   const value = Math.sin(seed * 12.9898 + seed * seed * 0.00011) * 43758.5453;
@@ -55,7 +57,9 @@ const random = (seed: number) => {
 };
 
 function buildField(width: number, height: number, mobile: boolean): Field {
-  const desiredCellWidth = mobile ? 6.2 : 7.8;
+  // A slightly larger mobile cell keeps the woven sentence readable at
+  // arm's length without sacrificing the portrait's primary silhouette.
+  const desiredCellWidth = mobile ? 6.8 : 7.8;
   const columns = clamp(Math.floor(width / desiredCellWidth), mobile ? 56 : 96, mobile ? 84 : 184);
   const cellWidth = width / columns;
   const cellHeight = cellWidth * 1.52;
@@ -107,6 +111,8 @@ function buildField(width: number, height: number, mobile: boolean): Field {
     phaseB,
     phaseC,
     portraitDensity: new Float32Array(count),
+    portraitQuoteIndex: new Uint8Array(count),
+    portraitQuoteStrength: new Float32Array(count),
     portraitShield: new Float32Array(count),
     portraitWeight: new Float32Array(count),
     rows,
@@ -207,6 +213,8 @@ function rasterizePortrait(
   };
 
   field.portraitDensity.fill(0);
+  field.portraitQuoteIndex.fill(0);
+  field.portraitQuoteStrength.fill(0);
   field.portraitWeight.fill(0);
   field.portraitShield.fill(0);
 
@@ -230,12 +238,19 @@ function rasterizePortrait(
     const edge = Math.min(localX, 1 - localX, localY, 1 - localY);
     const edgeFade = clamp(edge / 0.04, 0, 1);
     const faceShield = Math.exp(-((localX - 0.5) ** 2) / 0.018 - ((localY - 0.235) ** 2) / 0.018);
+    const quoteBand = Math.max(
+      Math.exp(-((localY - 0.67) ** 2) / 0.00032),
+      Math.exp(-((localY - 0.83) ** 2) / 0.00032),
+    );
+    const phraseColumn = Math.max(0, Math.floor((field.x[index] - bounds.x) / field.cellWidth));
 
     // A gentle black-point lift preserves the eyes and face in a source image
     // that is dominated by bright walls, without flattening the dark jacket.
     const tonalDensity = Math.pow(clamp((luma - 0.09) / 0.82, 0, 1), 0.66);
     field.portraitDensity[index] = clamp(tonalDensity * 0.76 + edgeDetail * 0.46, 0, 1);
     field.portraitWeight[index] = alpha * edgeFade;
+    field.portraitQuoteIndex[index] = phraseColumn % portraitPhrase.length;
+    field.portraitQuoteStrength[index] = field.portraitWeight[index] * quoteBand;
     field.portraitShield[index] = field.portraitWeight[index] * faceShield;
   }
 }
@@ -354,14 +369,14 @@ export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps)
         portraitShownAt = time;
         if (reducedMotion) {
           window.clearTimeout(reducedMotionDismissTimer);
-          reducedMotionDismissTimer = window.setTimeout(() => wake(), 520);
+          reducedMotionDismissTimer = window.setTimeout(() => wake(), 720);
         }
       }
 
       const delta = lastTime ? Math.min(0.05, Math.max(0.001, (time - lastTime) / 1000)) : 0.016;
       lastTime = time;
       const minimumExposure =
-        portraitShownAt > 0 && time - portraitShownAt < (reducedMotion ? 520 : minimumPortraitExposure);
+        portraitShownAt > 0 && time - portraitShownAt < (reducedMotion ? 720 : minimumPortraitExposure);
       // The shell has painted only when the portrait source has been sampled;
       // a slow image request must not let the loader fade as a blank field.
       const targetPresence = activeRef.current || !portraitReady || minimumExposure ? 1 : 0;
@@ -374,7 +389,6 @@ export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps)
       const seconds = time / 1000;
       for (let index = 0; index < field.x.length; index += 1) {
         const row = Math.floor(index / field.columns);
-        const column = index - row * field.columns;
         const lowFrequency =
           Math.sin(seconds * 0.27 + field.phaseA[index]) * 0.48 +
           Math.sin(seconds * 0.16 + field.phaseB[index]) * 0.31 +
@@ -406,22 +420,24 @@ export function AsciiLoader({ active, error = null, onRetry }: AsciiLoaderProps)
         const portraitDensity = clamp(field.portraitDensity[index] + fluid * 0.055 + energy * 0.055, 0, 1);
         const density = backgroundDensity + (portraitDensity - backgroundDensity) * portraitWeight;
         const negativeSpace = clamp(field.voidMask[index] + fluid * 0.16, 0.04, 1);
+        const quoteBand = field.portraitQuoteStrength[index];
         const portraitAlpha = 0.075 + portraitDensity * 0.91 + energy * 0.05;
         const backgroundAlpha = negativeSpace * (0.035 + backgroundDensity * 0.16 + energy * 0.05);
-        const alpha = presence * (backgroundAlpha + (portraitAlpha - backgroundAlpha) * portraitWeight);
+        const imageAlpha = presence * (backgroundAlpha + (portraitAlpha - backgroundAlpha) * portraitWeight);
+        const alpha = Math.max(imageAlpha, presence * quoteBand * 0.68);
         if (alpha < 0.028) continue;
 
         const level = clamp(Math.floor(density * (glyphRamp.length - 1)), 0, glyphRamp.length - 1);
         // Match the first portrait renderer's contrast model: portrait luma is
         // primarily expressed by opacity over a pale glyph, not by muting the
         // glyph itself into the same tone as the background field.
-        const tone = portraitWeight > 0.1 || energy > 0.56 ? 2 : density > 0.57 ? 1 : 0;
-        const quoteCharacter = portraitPhrase[(column + row * 2) % portraitPhrase.length];
-        // The quote is a sparse woven layer, not a replacement for tonal
-        // glyphs. Most cells retain the classic density ramp that carries
-        // the portrait; every sixth row quietly reveals the speech fragment.
-        const usesQuote =
-          portraitWeight > 0.1 && portraitDensity > 0.27 && portraitDensity < 0.67 && row % 6 === 2;
+        const quoteCharacter = portraitPhrase[field.portraitQuoteIndex[index]];
+        const phraseTrack = quoteBand > 0.2;
+        const tone = phraseTrack || portraitWeight > 0.1 || energy > 0.56 ? 2 : density > 0.57 ? 1 : 0;
+        // The speech is deliberately restricted to two portrait-aligned
+        // woven tracks. This makes the phrase legible without replacing the
+        // tonal glyph ramp that carries Steve's face and silhouette.
+        const usesQuote = phraseTrack;
         const character = usesQuote ? quoteCharacter : glyphRamp[level];
         const motionScale = 1 - portraitWeight * 0.56 - portraitShield * 0.22;
         const driftX =
