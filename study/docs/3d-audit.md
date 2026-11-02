@@ -158,3 +158,13 @@ npm run build    PASS
 The next P1 pass is visual QA on a GPU-capable browser: capture day/night and
 all lamp states, inspect debug bounds, measure renderer statistics, then select
 one Hero asset for a real Blender/GLB pilot.
+
+## 2026-11-02 GPU pilot update
+
+The earlier no-GPU statement above describes the P0 iteration. A subsequent
+Edge/Intel Iris Xe run captured actual screenshots and browser measurements for
+Laptop and Domi, compared isolated effects, and ran interaction/lifecycle
+regressions. See [the pilot report](3d-pilot-report.md) and its linked raw
+evidence. The window opening was verified in the same camera pose before/after;
+no window geometry was changed. Submission counts fell, while the sampled
+overview frame rate fell in a separate run, so no FPS improvement is claimed.

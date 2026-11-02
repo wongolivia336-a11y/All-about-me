@@ -3,7 +3,8 @@
  *
  * Open `?debug=scene#room` to expose the spatial
  * overlays. Extra comma-separated flags are available for isolated checks:
- * `wireframe`, `normals`, `shadows-off`, and `postfx-off`.
+ * `wireframe`, `normals`, `shadows-off`, `postfx-off`, and individual
+ * `ao-off`, `bloom-off`, `vignette-off`, `smaa-off` effect switches.
  * Nothing in this module is enabled in a production build.
  */
 const debugQuery = () => {
@@ -26,4 +27,8 @@ export const sceneDebug = {
   normals: has("normals"),
   shadowsEnabled: !has("shadows-off"),
   postFXEnabled: !has("postfx-off"),
+  aoEnabled: !flags.has("ao-off"),
+  bloomEnabled: !flags.has("bloom-off"),
+  vignetteEnabled: !flags.has("vignette-off"),
+  smaaEnabled: !flags.has("smaa-off"),
 };

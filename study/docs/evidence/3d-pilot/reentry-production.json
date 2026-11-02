@@ -1,0 +1,55 @@
+{
+  "browser": "Edge DevTools",
+  "build": "vite preview",
+  "cycles": [
+    {
+      "cycle": 0,
+      "room": {
+        "canvas": true,
+        "hash": "#room"
+      },
+      "index": {
+        "canvas": false,
+        "hash": "#index"
+      },
+      "errorCount": 0
+    },
+    {
+      "cycle": 1,
+      "room": {
+        "canvas": true,
+        "hash": "#room"
+      },
+      "index": {
+        "canvas": false,
+        "hash": "#index"
+      },
+      "errorCount": 0
+    },
+    {
+      "cycle": 2,
+      "room": {
+        "canvas": true,
+        "hash": "#room"
+      },
+      "index": {
+        "canvas": false,
+        "hash": "#index"
+      },
+      "errorCount": 0
+    },
+    {
+      "cycle": 3,
+      "room": {
+        "canvas": true,
+        "hash": "#room"
+      },
+      "index": {
+        "canvas": false,
+        "hash": "#index"
+      },
+      "errorCount": 0
+    }
+  ],
+  "errors": []
+}

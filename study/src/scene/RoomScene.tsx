@@ -30,6 +30,18 @@ function SceneAssetProgress({ onAssetProgress }: Pick<RoomSceneProps, "onAssetPr
 
 function SceneReady({ onReady }: { onReady?: () => void }) {
   const invalidate = useThree((state) => state.invalidate);
+  const gl = useThree((state) => state.gl);
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const debugWindow = window as Window & { __studyRenderInfo?: () => object };
+    debugWindow.__studyRenderInfo = () => ({
+      geometries: gl.info.memory.geometries,
+      textures: gl.info.memory.textures,
+      programs: gl.info.programs?.length ?? null,
+    });
+    return () => { delete debugWindow.__studyRenderInfo; };
+  }, [gl]);
 
   useEffect(() => {
     if (!onReady) return;

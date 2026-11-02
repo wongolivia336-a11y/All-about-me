@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { entriesFor } from "../data/library";
 
 /**
  * Palette for the study. Kept deliberately narrow: warm neutrals for the room,
@@ -57,44 +58,55 @@ function roundRect(
   ctx.fill();
 }
 
-/**
- * A stand-in "website" for the laptop screen. Once a real project is wired up
- * this gets replaced by an <Html transform> surface rendering actual DOM.
- */
+/** A compact, literal preview of the public Work entries on the laptop. */
 export const makeSiteScreen = () =>
   makeTexture(1024, 640, (ctx, w, h) => {
-    ctx.fillStyle = "#f7f5f1";
+    const work = entriesFor("work").slice(0, 2);
+    ctx.fillStyle = "#f5f2ed";
     ctx.fillRect(0, 0, w, h);
 
-    // browser chrome
-    ctx.fillStyle = "#e6e2db";
-    ctx.fillRect(0, 0, w, 46);
-    ctx.fillStyle = "#cfcac1";
-    [30, 56, 82].forEach((x) => {
+    ctx.fillStyle = "#e9e5de";
+    ctx.fillRect(0, 0, w, 43);
+    ctx.fillStyle = "#aaa69f";
+    [28, 50, 72].forEach((x) => {
       ctx.beginPath();
-      ctx.arc(x, 23, 7, 0, Math.PI * 2);
+      ctx.arc(x, 21, 5, 0, Math.PI * 2);
       ctx.fill();
     });
-    ctx.fillStyle = "#f7f5f1";
-    roundRect(ctx, 120, 11, w - 200, 24, 12);
+    ctx.fillStyle = "#faf8f4";
+    roundRect(ctx, 116, 9, w - 194, 25, 7);
 
-    // hero
-    ctx.fillStyle = "#1c1c1e";
-    ctx.font = "600 54px -apple-system, Segoe UI, sans-serif";
-    ctx.fillText("Selected Work", 64, 160);
-    ctx.fillStyle = "#8a8a8f";
-    ctx.font = "400 26px -apple-system, Segoe UI, sans-serif";
-    ctx.fillText("Web — interface & systems", 64, 204);
+    ctx.fillStyle = "#817b72";
+    ctx.font = "500 16px Segoe UI, sans-serif";
+    ctx.fillText("OLIVIA WONG  /  WORK", 52, 91);
+    ctx.fillStyle = "#222321";
+    ctx.font = "500 48px Segoe UI, sans-serif";
+    ctx.fillText("Selected work", 52, 154);
+    ctx.fillStyle = "#77746f";
+    ctx.font = "400 22px Segoe UI, sans-serif";
+    ctx.fillText("Interfaces, systems and tools for real use", 52, 190);
 
-    // cards
-    const cardW = (w - 128 - 48) / 3;
-    ["#c8d8e8", "#e8d2c4", "#d3dcc9"].forEach((c, i) => {
-      ctx.fillStyle = c;
-      roundRect(ctx, 64 + i * (cardW + 24), 250, cardW, 210, 16);
+    const cardW = (w - 104 - 22) / 2;
+    work.forEach((entry, i) => {
+      const x = 52 + i * (cardW + 22);
+      ctx.fillStyle = i === 0 ? "#cad7d5" : "#dad2bd";
+      roundRect(ctx, x, 227, cardW, 282, 9);
+      ctx.fillStyle = i === 0 ? "#476966" : "#9a8a67";
+      roundRect(ctx, x + 22, 250, cardW - 44, 158, 4);
+      ctx.fillStyle = i === 0 ? "#dbe7e2" : "#eee5cd";
+      roundRect(ctx, x + 45, 271, cardW - 90, 111, 3);
+      ctx.fillStyle = "#252a28";
+      ctx.font = "500 27px Segoe UI, sans-serif";
+      ctx.fillText(entry.title, x + 22, 455, cardW - 44);
+      ctx.fillStyle = "#5d6460";
+      ctx.font = "400 17px Segoe UI, sans-serif";
+      ctx.fillText(`${entry.collection}  ·  ${entry.year}`, x + 22, 484);
     });
-    ctx.fillStyle = "#c9c5bd";
-    roundRect(ctx, 64, 500, w - 128, 12, 6);
-    roundRect(ctx, 64, 528, (w - 128) * 0.6, 12, 6);
+    ctx.fillStyle = "#bcb8b0";
+    ctx.fillRect(52, 547, w - 104, 1);
+    ctx.fillStyle = "#5f5c56";
+    ctx.font = "400 17px Segoe UI, sans-serif";
+    ctx.fillText("Work  /  Research  /  Make  /  Journal", 52, 585);
   });
 
 /**

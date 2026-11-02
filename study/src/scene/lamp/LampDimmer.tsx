@@ -1,6 +1,6 @@
 import { useCursor } from "@react-three/drei";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { dialAngleForBrightness } from "../../interaction/lampControl";
 import {
@@ -108,22 +108,41 @@ export function LampDimmer() {
   const [dragging, setDragging] = useState(false);
   useCursor(hovered || dragging, dragging ? "grabbing" : "grab", "auto");
 
-  const finishGesture = (pointerId: number) => {
+  const finishGesture = useCallback((pointerId: number) => {
     const active = gesture.current;
     if (!active || active.pointerId !== pointerId) return null;
 
-    try {
-      captureTarget.current?.releasePointerCapture(pointerId);
-    } catch {
-      // A browser may release capture before a cancellation handler runs.
-    }
+    const target = captureTarget.current;
     gesture.current = null;
     captureTarget.current = null;
     pressTarget.current = 0;
     setDragging(false);
     setLampInteracting(false);
+    try {
+      target?.releasePointerCapture(pointerId);
+    } catch {
+      // A browser may release capture before a cancellation handler runs.
+    }
     return active;
-  };
+  }, [setLampInteracting]);
+
+  const cancelGesture = useCallback((pointerId: number) => {
+    const active = finishGesture(pointerId);
+    if (active?.phase === "dragging") setLampBrightness(active.startBrightness);
+  }, [finishGesture, setLampBrightness]);
+
+  useEffect(() => {
+    // R3F's web event manager consumes pointercancel for hover cleanup instead
+    // of dispatching it to meshes. Listen at the DOM boundary so a browser
+    // touch cancellation restores the starting value.
+    const cancel = (event: PointerEvent) => cancelGesture(event.pointerId);
+    window.addEventListener("pointercancel", cancel, true);
+    window.addEventListener("lostpointercapture", cancel, true);
+    return () => {
+      window.removeEventListener("pointercancel", cancel, true);
+      window.removeEventListener("lostpointercapture", cancel, true);
+    };
+  }, [cancelGesture]);
 
   useEffect(
     () => () => {
@@ -253,12 +272,9 @@ export function LampDimmer() {
   };
 
   const onPointerCancel = (event: ThreeEvent<PointerEvent>) => {
-    const active = finishGesture(event.pointerId);
-    if (!active) return;
+    if (!gesture.current || gesture.current.pointerId !== event.pointerId) return;
     event.stopPropagation();
-    // Cancellation is not a hidden click. Roll an in-flight drag back to the
-    // value at its initial contact and leave power untouched.
-    if (active.phase === "dragging") setLampBrightness(active.startBrightness);
+    cancelGesture(event.pointerId);
   };
 
   return (
