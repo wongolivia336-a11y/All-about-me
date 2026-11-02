@@ -44,7 +44,7 @@ Each entry needs a collection, a year, one concise summary, and its real public 
 - `src/scene/` — the 3D room, layout, materials, and camera choreography
 - `src/interaction/` — room state and object interaction
 - `src/ui/loading/LoadingManager.tsx` — shared real-work loading coordinator
-- `src/ui/AsciiLoader.tsx` — full-viewport Canvas ASCII flow field
+- `src/ui/SpeechCodeLoader.tsx` — full-viewport speech-code flow field
 - `src/ui/Archive.tsx` — the accessible Index interface
 - `src/data/library.ts` — curated portfolio content
 - `src/data/hotspots.ts` — physical room objects and their focus positions
@@ -55,14 +55,15 @@ The room should stay an experience, rather than becoming the only route to infor
 
 ## Loading sequence
 
-The boot screen is a full-viewport Canvas ASCII portrait of Steve Jobs. Its
-local source image is sampled into stable typed-array character density, while
-cached glyph tiles, a restrained flow field, and damped pointer impulses keep
-the typographic surface alive without losing the subject. `GlobalLoadingProvider`
-owns real loading tasks across the application; entering the Room waits for its
-committed Canvas frame and reports R3F resource progress when assets expose it.
-There is no simulated percentage or external ASCII conversion service. See
-`docs/loading-sequence.md` for the loading API and performance limits.
+The page transition uses a short excerpt from Steve Jobs' 2005 Stanford address
+as raw material: every character, including spaces and punctuation, becomes a
+three-digit ASCII value. Those values form Olivia's `OW` mark in a slow wave
+field, with a moving light band and damped pointer response. The foreground
+belongs to Olivia, and a folded page corner turns the current Room or Index
+surface away to reveal the field underneath. `GlobalLoadingProvider` owns real
+loading tasks and the short visual handoff; entering the Room still waits for
+its committed Canvas frame. There is no simulated percentage or external ASCII
+conversion service. See `docs/loading-sequence.md` for the loading API and timing.
 
 ## 3D development checks
 

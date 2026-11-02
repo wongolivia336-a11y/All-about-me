@@ -1,67 +1,47 @@
-# Global ASCII loading field
+# ASCII interlude and page turn
 
 ## Intent
 
-The loading experience is a full-viewport, living ASCII portrait of Steve
-Jobs—not a scaled photo or a fake progress screen. The portrait is first
-rasterized into stable character-density arrays, then rendered entirely with
-glyphs. A lower-contrast full-viewport field fills the remaining space, while
-the portrait remains the visual subject through every frame.
+The site remains Olivia Wong's personal space. The transition foreground is
+her name; a short excerpt from the [2005 Stanford address](https://news.stanford.edu/stories/2005/06/youve-got-find-love-jobs-says)
+is source material for the moving field. `SpeechCodeLoader.tsx` converts every
+character in that excerpt, including spaces and punctuation, to a three-digit
+decimal ASCII value. The repeated codes form an `OW` mask. The address is
+credited in a small footer link rather than presented as the site's subject.
 
 ## Architecture
 
 ```text
 GlobalLoadingProvider
-  ├─ explicit real-work tasks (begin / report / done / fail)
-  ├─ AsciiLoader overlay and its enter/exit lifecycle
-  └─ retry affordance for a failed task
+  ├─ app-shell and Room resource tasks
+  ├─ two-frame Index handoff task
+  ├─ Page turn task, begun before either view folds away
+  └─ SpeechCodeLoader overlay and retry affordance
 
 App
+  ├─ Room / Index page sheet + upper-right folded corner
+  ├─ 850 ms sheet turn over the ASCII interlude
   └─ Room task → RoomScene first committed frame
-       └─ Drei useProgress → real R3F asset progress, when assets are present
 ```
 
-`GlobalLoadingProvider` is mounted in `src/main.tsx`, so future routes and
-async content can use `useLoading().begin(...)` without creating their own
-overlays. Progress is stored only when a real loader exposes it; the UI never
-invents a percentage.
+Clicking a corner starts the loader behind the current page, then rotates that
+page around its upper-right edge. After the 850 ms turn, the next view mounts
+beneath the loader. The overlay stays visible for at least 2.6 seconds from
+the beginning of the transition, then fades for 520 ms. Direct hash changes
+and browser history use the same fold. Reduced motion skips the rotation and
+uses a static field with a 0.9-second exposure.
 
-## ASCII field
+## Field and performance
 
-`src/ui/AsciiLoader.tsx` uses Canvas 2D and typed arrays for per-cell phase,
-density, displacement, velocity and energy. The actual glyphs are cached into
-small off-screen Canvas tiles whenever the viewport changes, avoiding repeated
-text layout during each animation frame.
+The numeric grid is sampled into a stable cell array; a small off-screen atlas
+caches each ASCII code at 16 colors. Neighboring cells share two slow wave
+phases. A diagonal band travels through the color ramp during each transition,
+and pointer movement adds bounded velocity and energy to nearby cells. Spring
+restoration returns the digits to their cells. The field paints at most 20 fps
+and caps DPR at 1.5 on desktop and 1.25 on small screens. Reduced motion draws
+once, without a retained animation loop or pointer disturbance.
 
-- `public/images/steve-jobs-macintosh.png` is sampled only when the source or
-  viewport changes. It is never drawn to the visible Canvas.
-- The resulting `portraitDensity` map stays immutable during animation; flow
-  and pointer energy only change glyph position, tone and opacity around it.
-- The face has an additional motion shield. Its character values stay stable,
-  while the surrounding room can breathe more freely.
-- Within the portrait, two density-aligned woven tracks carry the repeating
-  text `STAY HUNGRY, STAY FOOLISH.`. They are deliberately stable and more
-  legible than the surrounding density glyphs, while the source map still
-  determines where the text is visible.
-- Rows are staggered to form a subtle scale / textile rhythm.
-- Three offset, low-frequency waves make density and drift vary by location.
-- Dark masks are stable across frames, preserving negative space instead of
-  producing a wall of random characters.
-- Pointer movement adds a bounded local velocity field; spring restoration and
-  damping let repeated passes overlap and fade naturally.
-- DPR is capped at 1.5 on desktop and 1.25 on small screens. On mobile the
-  source crops only peripheral room detail, keeping Steve and the Macintosh
-  complete at a denser character resolution.
-- `prefers-reduced-motion` draws a static field and does not retain a RAF loop.
-
-## Transitions and failures
-
-The field waits until the local portrait has been sampled, then keeps a 1.75 s
-visual handoff so the subject is visible even after a very fast app-shell
-paint. On completion, interaction is released immediately; the Canvas field
-settles and fades without exposing a blank frame.
-
-Tasks can call `fail(message, retry)` to retain the field and expose a compact
-Retry action. The current Room path starts a task when the Room is requested,
-reports Drei's real asset progress when available, and completes only after the
-Canvas has committed its first frame.
+`useLoading().begin(label)` remains available for future real work. A task may
+report measured progress or call `fail(message, retry)`; the UI never invents
+a percentage. The current Room path completes after the first committed Canvas
+frame and reports Drei's resource progress when assets expose it.

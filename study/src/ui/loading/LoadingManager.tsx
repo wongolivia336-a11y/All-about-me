@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type PropsWithChildren } from "react";
-import { AsciiLoader } from "../AsciiLoader";
+import { SpeechCodeLoader } from "../SpeechCodeLoader";
 import { LoadingContext, type LoadingContextValue, type LoadingTaskController } from "./LoadingContext";
 
 type Retry = () => void;
@@ -16,9 +16,9 @@ type LoadingTask = {
 const clamp = (value: number) => Math.min(1, Math.max(0, value));
 
 /**
- * A small, app-wide loading coordinator. It tracks real work only: callers
- * explicitly begin and finish a task, and may report measurable progress when
- * a loader provides it. The ASCII field intentionally has no fake percentage.
+ * A small, app-wide loading coordinator. Callers can track real work or a
+ * two-frame visual handoff for a local view switch. The ASCII field holds
+ * either one for a short minimum exposure and never shows fake progress.
  */
 export function GlobalLoadingProvider({ children }: PropsWithChildren) {
   const tasks = useRef(
@@ -95,7 +95,7 @@ export function GlobalLoadingProvider({ children }: PropsWithChildren) {
   return (
     <LoadingContext.Provider value={value}>
       {children}
-      <AsciiLoader
+      <SpeechCodeLoader
         active={active}
         error={failed?.error ?? null}
         onRetry={

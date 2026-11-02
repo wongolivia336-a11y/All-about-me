@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   collectionLabels,
   collections,
@@ -19,11 +19,6 @@ export function Archive({ initialCollection, onClose }: ArchiveProps) {
   const [collection, setCollection] = useState<Collection>(initialCollection);
   const entries = entriesFor(collection);
   const [selectedId, setSelectedId] = useState<string | null>(entries[0]?.id ?? null);
-  const closeButton = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    closeButton.current?.focus();
-  }, []);
 
   useEffect(() => {
     const nextEntries = entriesFor(initialCollection);
@@ -45,13 +40,14 @@ export function Archive({ initialCollection, onClose }: ArchiveProps) {
         <header className="archive__bar">
           <h1 className="archive__name">Olivia Wong</h1>
           <button
-            ref={closeButton}
-            className="archive__close"
+            className="archive__close page-corner page-corner--index"
             type="button"
             onClick={onClose}
+            aria-label="翻页进入 Room"
+            title="翻页进入 Room"
           >
-            <span aria-hidden="true">←</span>
-            <span>Room</span>
+            <span className="page-corner__label">Room</span>
+            <span className="page-corner__fold" aria-hidden="true" />
           </button>
         </header>
 
