@@ -101,8 +101,8 @@ large GLB files.
 5. The lamp has a deliberately engineered state model: **power** and
    **brightness** are separate. Never re-couple them while changing its model
    or materials.
-6. The ASCII Steve Jobs loader is a separate Canvas system. Do not replace it
-   with a static image, video, or arbitrary page transition while doing 3D work.
+6. The speech-code loader is a separate Canvas system. Preserve its text-derived
+   code field and the page-turn transition while doing 3D work.
 7. Do not claim a visual, mobile, GPU or performance result that was not tested
    on the corresponding device/browser.
 8. Do not add decorative labels, cards or explanatory microcopy to compensate
@@ -189,7 +189,7 @@ study/src/
 └── ui/
     ├── Archive.tsx                  # accessible Index
     ├── Surface.tsx                  # focused-object panels
-    ├── AsciiLoader.tsx              # independent global Canvas loading artwork
+    ├── SpeechCodeLoader.tsx         # independent global Canvas loading artwork
     └── loading/                     # real loading task coordinator
 ```
 
@@ -266,9 +266,9 @@ the light model.
 
 `RoomScene` is dynamically imported so Index does not load WebGL until the room
 is intentionally entered. Preserve this boundary. `GlobalLoadingProvider` and
-`AsciiLoader` coordinate real Room work and present an ASCII Steve Jobs
-portrait. A room visual upgrade must not add an artificial timer or block Index
-on non-critical room assets.
+`SpeechCodeLoader` coordinates real Room work and presents an ASCII-code field
+drawn from a short speech excerpt. The page turn has a short visual exposure;
+Room asset loading is still tied to the committed Canvas frame.
 
 ## Visual direction
 

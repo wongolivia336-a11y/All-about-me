@@ -10,6 +10,7 @@ import { Archive } from "./ui/Archive";
 import { Surface } from "./ui/Surface";
 import { useLoading, type LoadingTaskController } from "./ui/loading/LoadingContext";
 import type { RoomAssetProgress } from "./scene/RoomScene";
+import "./PageTurn.css";
 
 type View = "index" | "room";
 
@@ -37,11 +38,16 @@ export default function App() {
     volume,
   } = useStudy();
   const [indexMode, setIndexMode] = useState(() => viewFromHash() === "index");
+  const viewRef = useRef<View>(viewFromHash());
   const [activeCollection, setActiveCollection] = useState<Collection>("work");
   const audioRef = useRef<HTMLAudioElement>(null);
   const indexTrigger = useRef<HTMLButtonElement>(null);
   const roomTask = useRef<LoadingTaskController | null>(null);
   const roomFailed = useRef(false);
+  const foldTask = useRef<LoadingTaskController | null>(null);
+  const foldTimer = useRef<number | null>(null);
+  const foldingRef = useRef(false);
+  const [folding, setFolding] = useState(false);
 
   const beginRoomLoading = useCallback(() => {
     if (roomTask.current) return;
@@ -53,6 +59,13 @@ export default function App() {
     roomTask.current = null;
     roomFailed.current = false;
   }, []);
+
+  const beginIndexTransition = useCallback(() => {
+    // Index is local and paints quickly; the visual handoff is deliberately
+    // held by SpeechCodeLoader so switching back from Room still has an interlude.
+    const task = begin("Index transition");
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => task.done()));
+  }, [begin]);
 
   const reportRoomProgress = useCallback(
     ({ active, progress, errors }: RoomAssetProgress) => {
@@ -67,19 +80,6 @@ export default function App() {
     },
     [beginRoomLoading],
   );
-
-  useEffect(() => {
-    if (!window.location.hash) window.history.replaceState(null, "", "#index");
-
-    const syncView = () => {
-      const nextView = viewFromHash();
-      setIndexMode(nextView === "index");
-      if (nextView === "room") beginRoomLoading();
-      else settleRoomLoading();
-    };
-    window.addEventListener("popstate", syncView);
-    return () => window.removeEventListener("popstate", syncView);
-  }, [beginRoomLoading, settleRoomLoading]);
 
   useEffect(() => {
     const syncTime = () => setNightMode(isNightNow());
@@ -105,17 +105,55 @@ export default function App() {
   }, [musicPlaying]);
 
   const setView = useCallback((view: View) => {
+    if (view === viewRef.current) return;
+    viewRef.current = view;
     const hash = view === "room" ? "#room" : "#index";
     if (window.location.hash !== hash) window.history.pushState(null, "", hash);
+    if (view === "index") beginIndexTransition();
     setIndexMode(view === "index");
     if (view === "room") beginRoomLoading();
     else settleRoomLoading();
-  }, [beginRoomLoading, settleRoomLoading]);
+  }, [beginIndexTransition, beginRoomLoading, settleRoomLoading]);
+
+  const turnPage = useCallback((view: View) => {
+    if (view === viewRef.current || foldingRef.current) return;
+    foldingRef.current = true;
+    foldTask.current = begin("Page turn");
+    setFolding(true);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    foldTimer.current = window.setTimeout(() => {
+      setView(view);
+      foldTask.current?.done();
+      foldTask.current = null;
+      foldTimer.current = null;
+      foldingRef.current = false;
+      setFolding(false);
+      if (view === "room") window.requestAnimationFrame(() => indexTrigger.current?.focus());
+    }, reduced ? 0 : 850);
+  }, [begin, setView]);
+
+  useEffect(() => {
+    if (!window.location.hash) window.history.replaceState(null, "", "#index");
+    const syncView = () => {
+      const nextView = viewFromHash();
+      if (nextView !== viewRef.current) turnPage(nextView);
+    };
+    window.addEventListener("popstate", syncView);
+    window.addEventListener("hashchange", syncView);
+    return () => {
+      window.removeEventListener("popstate", syncView);
+      window.removeEventListener("hashchange", syncView);
+    };
+  }, [turnPage]);
+
+  useEffect(() => () => {
+    if (foldTimer.current !== null) window.clearTimeout(foldTimer.current);
+    foldTask.current?.done();
+  }, []);
 
   const closeIndex = useCallback(() => {
-    setView("room");
-    window.requestAnimationFrame(() => indexTrigger.current?.focus());
-  }, [setView]);
+    turnPage("room");
+  }, [turnPage]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -131,8 +169,8 @@ export default function App() {
   const openIndex = useCallback((collection: Collection = "work") => {
     focus(null);
     setActiveCollection(collection);
-    setView("index");
-  }, [setView]);
+    turnPage("index");
+  }, [turnPage]);
 
   useEffect(() => {
     if (!archiveRequest) return;
@@ -153,7 +191,7 @@ export default function App() {
   return (
     <div className={["app", isNight && "app--evening"].filter(Boolean).join(" ")}>
       {!indexMode && (
-        <>
+        <div className={["page-sheet", "page-sheet--room", folding && "page-sheet--folding"].filter(Boolean).join(" ")}>
           <Suspense
             fallback={<div className="room-loading" role="status" aria-label="加载 Room" />}
           >
@@ -204,25 +242,31 @@ export default function App() {
               >
                 <span aria-hidden="true">{tactileMuted ? "○" : "⌁"}</span>
               </button>
-              <button
-                ref={indexTrigger}
-                className="hud__btn"
-                type="button"
-                onClick={() => openIndex()}
-              >
-                Index
-              </button>
             </div>
           </header>
 
           <Surface />
-        </>
+          <button
+            ref={indexTrigger}
+            className="page-corner page-corner--room"
+            type="button"
+            onClick={() => openIndex()}
+            aria-label="翻页进入 Index"
+            title="翻页进入 Index"
+            disabled={folding}
+          >
+            <span className="page-corner__label">Index</span>
+            <span className="page-corner__fold" aria-hidden="true" />
+          </button>
+        </div>
       )}
 
       <audio ref={audioRef} src="/audio/now-playing.mp3" loop preload="none" />
 
       {indexMode && (
-        <Archive initialCollection={activeCollection} onClose={closeIndex} />
+        <div className={["page-sheet", "page-sheet--index", folding && "page-sheet--folding"].filter(Boolean).join(" ")}>
+          <Archive initialCollection={activeCollection} onClose={closeIndex} />
+        </div>
       )}
     </div>
   );
