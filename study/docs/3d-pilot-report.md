@@ -82,5 +82,8 @@ warning for a >500 kB minified Room chunk remains.
 
 ## Preview
 
-Preview URL: pending deployment. Stable production deployment settings were not
-changed.
+Preview URL: [Olivia Wong — The Study Preview](https://all-about-me-git-codex-room-b25898-wongolivia336-a11ys-projects.vercel.app/#room).
+GitHub's Vercel commit status reported **Deployment has completed** for
+`3abd744`; the Vercel Preview Comments check exposed this URL. A direct HTTP
+request from this workstation timed out, so remote page rendering is not
+claimed as verified. Stable production deployment settings were not changed.
