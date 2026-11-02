@@ -162,6 +162,39 @@ export function makeFabric(
   };
 }
 
+/** Low-contrast, directional coat grain for Domi; drawn locally, no image asset. */
+export function makeFur(): Maps {
+  const S = 256;
+  const { c, ctx } = canvas(S, S);
+  const { c: bc, ctx: bctx } = canvas(S, S);
+  ctx.fillStyle = "#ebe9e4";
+  ctx.fillRect(0, 0, S, S);
+  bctx.fillStyle = "#808080";
+  bctx.fillRect(0, 0, S, S);
+
+  for (let i = 0; i < 4800; i++) {
+    const x = rand(i + 111) * S;
+    const y = rand(i + 237) * S;
+    const length = 1.5 + rand(i + 19) * 3.5;
+    const shade = rand(i + 71) > 0.48 ? "255,255,255" : "100,94,88";
+    ctx.strokeStyle = `rgba(${shade},${0.028 + rand(i + 43) * 0.045})`;
+    ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + (rand(i + 59) - 0.5) * 0.8, y + length);
+    ctx.stroke();
+    bctx.fillStyle = rand(i + 83) > 0.5 ? "#888888" : "#777777";
+    bctx.globalAlpha = 0.2;
+    bctx.fillRect(x, y, 1, length);
+  }
+  bctx.globalAlpha = 1;
+
+  return {
+    map: toTexture(c, [2, 2], true),
+    bumpMap: toTexture(bc, [2, 2], false),
+  };
+}
+
 /** Painted plaster: almost flat, just enough tooth to catch raking light. */
 export function makePlaster(base: string, repeat: [number, number] = [3, 2]): Maps {
   const S = 512;

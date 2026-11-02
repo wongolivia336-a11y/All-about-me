@@ -1,5 +1,6 @@
 import { Bloom, EffectComposer, N8AO, SMAA, Vignette } from "@react-three/postprocessing";
 import { usePostFXLighting } from "../interaction/studyStore";
+import { sceneDebug } from "./debug";
 
 /**
  * Post-processing.
@@ -26,28 +27,28 @@ export function PostFX() {
   const vignetteDarkness = isNight ? 0.52 - effectiveBrightness * 0.13 : 0.34;
 
   return (
-    <EffectComposer multisampling={0} enableNormalPass>
-      <N8AO
+    <EffectComposer multisampling={0}>
+      {sceneDebug.aoEnabled && <N8AO
         aoRadius={0.35}
         distanceFalloff={0.6}
         intensity={aoIntensity}
         quality="medium"
         color="#2a2018"
         halfRes
-      />
+      />}
       {/*
         The lamp bulb is rendered above one luminance with tone mapping off.
         A threshold of 1 therefore gives it a private, warm bloom without
         making whiteboards, windows or interface textures haze over.
       */}
-      <Bloom
+      {sceneDebug.bloomEnabled && <Bloom
         intensity={bloomIntensity}
         luminanceThreshold={1}
         luminanceSmoothing={0.16}
         mipmapBlur
-      />
-      <Vignette offset={0.28} darkness={vignetteDarkness} />
-      <SMAA />
+      />}
+      {sceneDebug.vignetteEnabled && <Vignette offset={0.28} darkness={vignetteDarkness} />}
+      {sceneDebug.smaaEnabled && <SMAA />}
     </EffectComposer>
   );
 }

@@ -49,6 +49,7 @@ Each entry needs a collection, a year, one concise summary, and its real public 
 - `src/data/library.ts` — curated portfolio content
 - `src/data/hotspots.ts` — physical room objects and their focus positions
 - `docs/3d-audit.md` — structural audit, debug overlay, collision method, and asset roadmap
+- `docs/3d-visual-upgrade-handoff.md` — implementation-ready handoff for the next 3D visual-refinement agent
 
 The room should stay an experience, rather than becoming the only route to information. New content normally starts in `library.ts`; add or remap a room object only when the object gives it a meaningful physical metaphor.
 

@@ -68,9 +68,10 @@ export const hotspots: Hotspot[] = [
     label: "Work",
     blurb: "作品与系统",
     path: "/work",
-    // sight line straight into the lid, which sits at the back of the base
-    ...at([layout.laptop.pos[0], 0.75, layout.laptop.pos[2] - 0.11], 0.11, [
-      0, 0.06, 0.42,
+    // Back off enough to keep the complete lid, keyboard and front edge in
+    // view beside the DOM work panel. The target stays tied to layout.laptop.
+    ...at([layout.laptop.pos[0] + 0.09, 0.75, layout.laptop.pos[2] - 0.02], 0.08, [
+      0, 0.18, 0.66,
     ]),
   },
   {
@@ -148,7 +149,8 @@ export const hotspots: Hotspot[] = [
     label: "Domi",
     blurb: "我家多米",
     path: "/domi",
-    ...at([layout.chair.pos[0], 0.62, layout.chair.pos[2]], 0.15, [-0.4, 0.18, 0.6]),
+    // Include the seat and tail in the portrait; leave room for the DOM panel.
+    ...at([layout.chair.pos[0] + 0.13, 0.56, layout.chair.pos[2]], 0.1, [-0.57, 0.25, 0.91]),
   },
   {
     id: "lamp",

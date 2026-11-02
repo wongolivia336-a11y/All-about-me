@@ -1,0 +1,394 @@
+{
+  "browser": "Edge DevTools",
+  "sampledAt": "2026-11-02T10:42:26.150Z",
+  "checks": [
+    {
+      "name": "Index opens without WebGL",
+      "passed": true,
+      "observed": {
+        "hash": "#index",
+        "archive": true,
+        "hud": false,
+        "panel": null,
+        "canvas": false,
+        "lamp": null,
+        "brightness": null
+      }
+    },
+    {
+      "name": "Index starts with keyboard focus",
+      "passed": true,
+      "observed": "←Room"
+    },
+    {
+      "name": "Room entry and ASCII loader settle",
+      "passed": true,
+      "observed": {
+        "hash": "#room",
+        "archive": false,
+        "hud": true,
+        "panel": null,
+        "canvas": true,
+        "lamp": "打开台灯",
+        "brightness": "72"
+      }
+    },
+    {
+      "name": "Room restores Index trigger focus",
+      "passed": true,
+      "observed": "Index"
+    },
+    {
+      "name": "Three Room reentries show no resource growth",
+      "passed": true,
+      "observed": [
+        {
+          "geometries": 476,
+          "textures": 90,
+          "programs": 45
+        },
+        {
+          "geometries": 476,
+          "textures": 89,
+          "programs": 45
+        },
+        {
+          "geometries": 476,
+          "textures": 89,
+          "programs": 45
+        }
+      ]
+    },
+    {
+      "name": "Browser history returns to Room",
+      "passed": true,
+      "observed": {
+        "hash": "#room",
+        "archive": false,
+        "hud": true,
+        "panel": null,
+        "canvas": true,
+        "lamp": "打开台灯",
+        "brightness": "72"
+      }
+    },
+    {
+      "name": "HUD power switches on",
+      "passed": true,
+      "observed": {
+        "hash": "#room",
+        "archive": false,
+        "hud": true,
+        "panel": null,
+        "canvas": true,
+        "lamp": "关闭台灯",
+        "brightness": "72"
+      }
+    },
+    {
+      "name": "HUD range keyboard reaches 100%",
+      "passed": true,
+      "observed": {
+        "hash": "#room",
+        "archive": false,
+        "hud": true,
+        "panel": null,
+        "canvas": true,
+        "lamp": "关闭台灯",
+        "brightness": "100"
+      }
+    },
+    {
+      "name": "HUD power switches off and retains preset",
+      "passed": true,
+      "observed": {
+        "initialLamp": {
+          "hash": "#room",
+          "archive": false,
+          "hud": true,
+          "panel": null,
+          "canvas": true,
+          "lamp": "打开台灯",
+          "brightness": "72"
+        },
+        "state": {
+          "hash": "#room",
+          "archive": false,
+          "hud": true,
+          "panel": null,
+          "canvas": true,
+          "lamp": "打开台灯",
+          "brightness": "100"
+        }
+      }
+    },
+    {
+      "name": "Focus surface: laptop",
+      "passed": true,
+      "observed": "代码与网页"
+    },
+    {
+      "name": "Focus surface: phone",
+      "passed": true,
+      "observed": "我写的东西"
+    },
+    {
+      "name": "Focus surface: portfolio",
+      "passed": true,
+      "observed": null
+    },
+    {
+      "name": "Focus surface: shelf",
+      "passed": true,
+      "observed": "书单与笔记"
+    },
+    {
+      "name": "Focus surface: camera",
+      "passed": true,
+      "observed": "摄影"
+    },
+    {
+      "name": "Focus surface: board",
+      "passed": true,
+      "observed": "关于我"
+    },
+    {
+      "name": "Focus surface: marshall",
+      "passed": true,
+      "observed": "在听什么"
+    },
+    {
+      "name": "Focus surface: posters",
+      "passed": true,
+      "observed": "片单"
+    },
+    {
+      "name": "Focus surface: domi",
+      "passed": true,
+      "observed": "多米"
+    },
+    {
+      "name": "Focus surface: sketchbook",
+      "passed": true,
+      "observed": "手稿"
+    },
+    {
+      "name": "Focus surface: materials",
+      "passed": true,
+      "observed": "材料样本"
+    },
+    {
+      "name": "Focus surface: whiteboard",
+      "passed": true,
+      "observed": "还没想清楚的部分"
+    },
+    {
+      "name": "Lamp camera focus",
+      "passed": true,
+      "observed": [
+        -0.6799999999999999,
+        0.79,
+        -1.242
+      ]
+    },
+    {
+      "name": "Domi pointer opens content",
+      "passed": true,
+      "observed": {
+        "hash": "#room",
+        "archive": false,
+        "hud": true,
+        "panel": "多米",
+        "canvas": true,
+        "lamp": "打开台灯",
+        "brightness": "100"
+      }
+    },
+    {
+      "name": "Escape closes object focus",
+      "passed": true,
+      "observed": {
+        "hash": "#room",
+        "archive": false,
+        "hud": true,
+        "panel": null,
+        "canvas": true,
+        "lamp": "打开台灯",
+        "brightness": "100"
+      }
+    },
+    {
+      "name": "Laptop pointer routes to Work Index",
+      "passed": true,
+      "observed": {
+        "hash": "#index",
+        "archive": true,
+        "hud": false,
+        "panel": null,
+        "canvas": false,
+        "lamp": null,
+        "brightness": null
+      }
+    },
+    {
+      "name": "Whiteboard pointer routes to Research Index",
+      "passed": true,
+      "observed": {
+        "hash": "#index",
+        "archive": true,
+        "hud": false,
+        "panel": null,
+        "canvas": false,
+        "lamp": null,
+        "brightness": null
+      }
+    },
+    {
+      "name": "Shelf pointer opens Reading",
+      "passed": true,
+      "observed": {
+        "hash": "#room",
+        "archive": false,
+        "hud": true,
+        "panel": "书单与笔记",
+        "canvas": true,
+        "lamp": "打开台灯",
+        "brightness": "100"
+      }
+    },
+    {
+      "name": "Physical dial short press changes power",
+      "passed": true,
+      "observed": {
+        "before": "打开台灯",
+        "after": "关闭台灯"
+      }
+    },
+    {
+      "name": "Physical dial drag changes continuous brightness",
+      "passed": true,
+      "observed": {
+        "beforeDrag": 50,
+        "after": "66"
+      }
+    },
+    {
+      "name": "Rapid physical drag keeps power stable",
+      "passed": true,
+      "observed": {
+        "hash": "#room",
+        "archive": false,
+        "hud": true,
+        "panel": null,
+        "canvas": true,
+        "lamp": "关闭台灯",
+        "brightness": "80"
+      }
+    },
+    {
+      "name": "Cancelled physical drag restores preset",
+      "passed": true,
+      "observed": {
+        "duringCancel": "75",
+        "after": "50"
+      }
+    },
+    {
+      "name": "Mobile touch operates lamp HUD",
+      "passed": true,
+      "observed": {
+        "hash": "#room",
+        "archive": false,
+        "hud": true,
+        "panel": null,
+        "canvas": true,
+        "lamp": "关闭台灯",
+        "brightness": "72"
+      }
+    },
+    {
+      "name": "Mobile touch opens Index fallback",
+      "passed": true,
+      "observed": {
+        "hash": "#index",
+        "archive": true,
+        "hud": false,
+        "panel": null,
+        "canvas": false,
+        "lamp": null,
+        "brightness": null
+      }
+    },
+    {
+      "name": "Domi idles with ordinary motion preference",
+      "passed": true,
+      "observed": [
+        {
+          "rootScale": 1.0044612422940615,
+          "headRotation": [
+            -0.022722960868394225,
+            0.15068605921415926,
+            0
+          ],
+          "eyeScale": 0.9999999971949769,
+          "tailRotation": 0.09392917352471916
+        },
+        {
+          "rootScale": 1.0010013913676539,
+          "headRotation": [
+            -0.022722964040754464,
+            0.15068663013711736,
+            0
+          ],
+          "eyeScale": 0.9999999999999998,
+          "tailRotation": -0.06964819296222269
+        }
+      ]
+    },
+    {
+      "name": "Reduced motion media query is available",
+      "passed": true,
+      "observed": true
+    },
+    {
+      "name": "Reduced motion holds Domi's idle pose",
+      "passed": true,
+      "observed": [
+        {
+          "rootScale": 1,
+          "headRotation": [
+            0,
+            0,
+            0
+          ],
+          "eyeScale": 1,
+          "tailRotation": 0
+        },
+        {
+          "rootScale": 1,
+          "headRotation": [
+            0,
+            0,
+            0
+          ],
+          "eyeScale": 1,
+          "tailRotation": 0
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "text": "Uncaught",
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5",
+      "line": 9468,
+      "description": "TypeError: Cannot read properties of null (reading 'addEventListener')\n    at Object.connect (http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:9469:12)\n    at onCreated (http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:9654:52)\n    at http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:9216:18\n    at Object.react_stack_bottom_frame (http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:7587:28)\n    at B (http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:2526:55)\n    at ca (http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:5406:80)\n    at Pf (http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:5394:20)\n    at yn (http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:5677:26)\n    at rt (http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:6040:63)\n    at yn (http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:5688:21)"
+    },
+    {
+      "text": "Uncaught",
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5",
+      "line": 9468,
+      "description": "TypeError: Cannot read properties of null (reading 'addEventListener')\n    at Object.connect (http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:9469:12)\n    at onCreated (http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:9654:52)\n    at http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:9216:18\n    at Object.react_stack_bottom_frame (http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:7587:28)\n    at B (http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:2526:55)\n    at ca (http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:5406:80)\n    at Pf (http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:5394:20)\n    at yn (http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:5677:26)\n    at rt (http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:6040:63)\n    at yn (http://127.0.0.1:5173/node_modules/.vite/deps/react-three-fiber.esm-gD9C_fCX.js?v=b8691ff5:5688:21)"
+    }
+  ]
+}

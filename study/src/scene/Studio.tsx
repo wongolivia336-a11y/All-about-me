@@ -108,6 +108,9 @@ export function Studio({ isNight }: StudioProps) {
       <ContactShadows
         position={[0, 0.002, -0.9]}
         scale={7}
+        // Furniture is static; baking this depth pass once avoids redrawing
+        // the whole room into four shadow targets on every animation frame.
+        frames={1}
         resolution={1024}
         blur={2.6}
         opacity={isNight ? 0.38 : 0.5}

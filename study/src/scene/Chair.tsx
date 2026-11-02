@@ -1,17 +1,26 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { RoundedBox } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import type { Group } from "three";
+import {
+  CatmullRomCurve3,
+  ExtrudeGeometry,
+  MeshPhysicalMaterial,
+  Shape,
+  SphereGeometry,
+  TubeGeometry,
+  Vector3,
+  type Group,
+} from "three";
 import { Hotspot } from "../interaction/Hotspot";
 import { currentVolume } from "../interaction/studyStore";
 import { layout } from "./layout";
 import { palette } from "./theme";
-import { makeFabric, makeWood } from "./textures";
+import { makeFabric, makeFur, makeWood } from "./textures";
 
 const SEAT_Y = 0.44;
 
 const fur = {
-  coat: "#f1efeb",
+  coat: "#ebe9e4",
   stripe: "#b9b6b0",
   innerEar: "#eeb0b4",
   nose: "#e0949a",
@@ -19,6 +28,54 @@ const fur = {
   pupil: "#26303a",
   tailTip: "#3a3a3c",
 };
+
+function makeBodyGeometry() {
+  const geometry = new SphereGeometry(1, 36, 28);
+  const points = geometry.attributes.position;
+  for (let i = 0; i < points.count; i++) {
+    const x = points.getX(i);
+    const y = points.getY(i);
+    const z = points.getZ(i);
+    const shoulder = Math.max(0, y);
+    points.setXYZ(i, x * (1 - shoulder * 0.27), y < -0.62 ? -0.62 + (y + 0.62) * 0.55 : y, z * (1 - shoulder * 0.13));
+  }
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+function makeHeadGeometry() {
+  const geometry = new SphereGeometry(1, 36, 28);
+  const points = geometry.attributes.position;
+  for (let i = 0; i < points.count; i++) {
+    const x = points.getX(i);
+    const y = points.getY(i);
+    const z = points.getZ(i);
+    const cheek = 1 + 0.12 * (1 - Math.abs(y)) - 0.06 * y;
+    points.setXYZ(i, x * cheek, y < -0.48 ? -0.48 + (y + 0.48) * 0.65 : y, z * (1 - Math.max(0, y) * 0.08));
+  }
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+function makeEarGeometry() {
+  const shape = new Shape();
+  shape.moveTo(-0.028, -0.021);
+  shape.quadraticCurveTo(-0.026, 0.015, -0.006, 0.050);
+  shape.quadraticCurveTo(0.001, 0.058, 0.009, 0.047);
+  shape.quadraticCurveTo(0.028, 0.012, 0.028, -0.021);
+  shape.quadraticCurveTo(0, -0.031, -0.028, -0.021);
+  const geometry = new ExtrudeGeometry(shape, {
+    depth: 0.005,
+    bevelEnabled: true,
+    bevelThickness: 0.002,
+    bevelSize: 0.002,
+    bevelSegments: 2,
+    curveSegments: 7,
+  });
+  geometry.translate(0, 0, -0.0025);
+  geometry.computeVertexNormals();
+  return geometry;
+}
 
 export function ReadingChair() {
   const { pos, rotY } = layout.chair;
@@ -131,9 +188,8 @@ function meow() {
 }
 
 /**
- * Domi, assembled from spheres and cones to match the room's language.
- * Proportions are deliberately kitten-ish — big head, small body — because a
- * correctly proportioned cat built from primitives reads as a sack of balls.
+ * Domi keeps the room's procedural language, but uses shaped masses and a
+ * continuous tail so the close camera reads an animal rather than toy parts.
  *
  * She is the one thing in the room that moves on its own: breathing, blinking,
  * looking around, tail going. A still cat reads as an ornament; an idling one
@@ -144,6 +200,72 @@ function Domi() {
   const head = useRef<Group>(null);
   const tail = useRef<Group>(null);
   const eyes = useRef<Group>(null);
+  const reducedMotion = useRef(false);
+  const furMaps = useMemo(makeFur, []);
+  const coatMaterial = useMemo(() => new MeshPhysicalMaterial({
+    map: furMaps.map,
+    bumpMap: furMaps.bumpMap,
+    bumpScale: 0.012,
+    roughness: 0.96,
+    sheen: 0.48,
+    sheenColor: "#f7f1e9",
+  }), [furMaps]);
+  const bodyGeometry = useMemo(makeBodyGeometry, []);
+  const headGeometry = useMemo(makeHeadGeometry, []);
+  const earGeometry = useMemo(makeEarGeometry, []);
+  const tailCurve = useMemo(() => new CatmullRomCurve3([
+    new Vector3(0, 0, 0),
+    new Vector3(0.043, 0.018, -0.022),
+    new Vector3(0.106, 0.023, -0.005),
+    new Vector3(0.155, 0.035, 0.038),
+    new Vector3(0.149, 0.058, 0.079),
+  ]), []);
+  const tailBaseCurve = useMemo(() => new CatmullRomCurve3([
+    tailCurve.getPoint(0),
+    tailCurve.getPoint(0.18),
+    tailCurve.getPoint(0.36),
+    tailCurve.getPoint(0.54),
+    tailCurve.getPoint(0.70),
+  ]), [tailCurve]);
+  const tailGeometry = useMemo(() => new TubeGeometry(tailBaseCurve, 20, 0.014, 8, false), [tailBaseCurve]);
+  const tailTipCurve = useMemo(() => new CatmullRomCurve3([
+    tailCurve.getPoint(0.70),
+    tailCurve.getPoint(0.81),
+    tailCurve.getPoint(0.91),
+    tailCurve.getPoint(1),
+  ]), [tailCurve]);
+  const tailTipGeometry = useMemo(() => new TubeGeometry(tailTipCurve, 10, 0.014, 8, false), [tailTipCurve]);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => { reducedMotion.current = media.matches; };
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const debugWindow = window as Window & { __studyDomiPose?: () => object };
+    debugWindow.__studyDomiPose = () => ({
+      rootScale: root.current?.scale.x ?? null,
+      headRotation: head.current?.rotation.toArray().slice(0, 3) ?? null,
+      eyeScale: eyes.current?.scale.y ?? null,
+      tailRotation: tail.current?.rotation.y ?? null,
+    });
+    return () => { delete debugWindow.__studyDomiPose; };
+  }, []);
+
+  useEffect(() => () => {
+    coatMaterial.dispose();
+    furMaps.map.dispose();
+    furMaps.bumpMap.dispose();
+    bodyGeometry.dispose();
+    headGeometry.dispose();
+    earGeometry.dispose();
+    tailGeometry.dispose();
+    tailTipGeometry.dispose();
+  }, [bodyGeometry, coatMaterial, earGeometry, furMaps, headGeometry, tailGeometry, tailTipGeometry]);
 
   // one mutable bag rather than state — none of this should trigger a re-render
   const beat = useRef({
@@ -165,6 +287,13 @@ function Domi() {
   };
 
   useFrame((state, dt) => {
+    if (reducedMotion.current) {
+      root.current?.scale.setScalar(1);
+      if (head.current) head.current.rotation.set(0, 0, 0);
+      if (eyes.current) eyes.current.scale.y = 1;
+      if (tail.current) tail.current.rotation.y = 0;
+      return;
+    }
     const t = state.clock.getElapsedTime();
     const b = beat.current;
 
@@ -206,29 +335,11 @@ function Domi() {
     }
   });
 
-  const tailSegments = useMemo(
-    () =>
-      Array.from({ length: 9 }, (_, i) => {
-        const t = i / 8;
-        const a = 0.2 + t * 2.4;
-        return {
-          pos: [
-            Math.sin(a) * 0.075,
-            t * 0.028,
-            (1 - Math.cos(a)) * 0.075,
-          ] as [number, number, number],
-          r: 0.019 - t * 0.005,
-          dark: t > 0.7,
-        };
-      }),
-    [],
-  );
-
   const stripes = useMemo(
     () => [
-      { pos: [0, 0.2, -0.055], s: [0.05, 0.014, 0.026] },
-      { pos: [0, 0.155, -0.07], s: [0.058, 0.014, 0.026] },
-      { pos: [0, 0.108, -0.072], s: [0.055, 0.013, 0.024] },
+      { pos: [0, 0.205, -0.078], s: [0.05, 0.011, 0.011] },
+      { pos: [0, 0.159, -0.094], s: [0.058, 0.011, 0.011] },
+      { pos: [0, 0.112, -0.097], s: [0.054, 0.01, 0.011] },
     ],
     [],
   );
@@ -237,21 +348,8 @@ function Domi() {
     <Hotspot id="domi" labelAt={[0, SEAT_Y + 0.52, 0]} onActivate={poke}>
       {/* turned out of the chair so her face catches the default camera */}
       <group ref={root} position={[0, SEAT_Y + 0.09, 0.01]} rotation={[0, 0.95, 0]}>
-        {/*
-          One continuous teardrop body rather than a stack of spheres. Two
-          stacked balls plus a third for the head reads as a snowman; a sitting
-          cat is a single tapering mass with the head sitting proud of it.
-        */}
-        <mesh position={[0, 0.125, -0.01]} scale={[0.9, 1.28, 0.86]} castShadow>
-          <sphereGeometry args={[0.088, 32, 24]} />
-          <meshStandardMaterial color={fur.coat} roughness={0.88} />
-        </mesh>
-
-        {/* chest ruff, fills the neck so the head does not float */}
-        <mesh position={[0, 0.212, 0.038]} scale={[0.95, 0.8, 0.9]}>
-          <sphereGeometry args={[0.06, 24, 18]} />
-          <meshStandardMaterial color={fur.coat} roughness={0.9} />
-        </mesh>
+        {/* Shaped shoulders and a flattened seated base form one coat mass. */}
+        <mesh geometry={bodyGeometry} material={coatMaterial} position={[0, 0.13, -0.01]} scale={[0.102, 0.15, 0.09]} castShadow receiveShadow />
 
         {stripes.map((s, i) => (
           <mesh
@@ -266,80 +364,67 @@ function Domi() {
 
         {/* everything from here up turns together when she looks around */}
         <group ref={head} position={[0, 0.285, 0.022]}>
-          <mesh scale={[1.06, 0.94, 0.96]} castShadow>
-            <sphereGeometry args={[0.072, 32, 24]} />
-            <meshStandardMaterial color={fur.coat} roughness={0.88} />
-          </mesh>
+          <mesh geometry={headGeometry} material={coatMaterial} scale={[0.081, 0.07, 0.069]} castShadow receiveShadow />
 
-          {[-1, 1].map((side) => (
-            <mesh
-              key={side}
-              position={[side * 0.052, -0.017, 0.016]}
-              scale={[0.8, 0.85, 0.8]}
-            >
-              <sphereGeometry args={[0.032, 18, 14]} />
-              <meshStandardMaterial color={fur.coat} roughness={0.9} />
-            </mesh>
-          ))}
-
-          {/* forehead markings — what reads first at a distance */}
-          <mesh position={[0, 0.04, -0.008]} scale={[0.026, 0.012, 0.022]}>
-            <sphereGeometry args={[1, 14, 10]} />
-            <meshStandardMaterial color={fur.stripe} roughness={0.9} />
+          {/* Low-relief markings follow the forehead instead of floating on it. */}
+          <mesh position={[0, 0.045, 0.050]} scale={[0.017, 0.014, 0.004]}>
+            <sphereGeometry args={[1, 18, 12]} />
+            <meshStandardMaterial color={fur.stripe} roughness={0.94} />
           </mesh>
           {[-1, 1].map((side) => (
             <mesh
               key={side}
-              position={[side * 0.03, 0.033, 0.004]}
-              scale={[0.014, 0.01, 0.018]}
+              position={[side * 0.029, 0.037, 0.051]}
+              scale={[0.009, 0.013, 0.0035]}
             >
-              <sphereGeometry args={[1, 12, 10]} />
-              <meshStandardMaterial color={fur.stripe} roughness={0.9} />
+              <sphereGeometry args={[1, 16, 10]} />
+              <meshStandardMaterial color={fur.stripe} roughness={0.94} />
             </mesh>
           ))}
 
-          {/* ears */}
+          {/* Thin, folded ear shells replace the visible cone tips. */}
           {[-1, 1].map((side) => (
             <group
               key={side}
-              position={[side * 0.05, 0.06, -0.01]}
-              rotation={[0.08, 0, side * 0.3]}
+              position={[side * 0.052, 0.061, -0.008]}
+              rotation={[0.08, 0, -side * 0.18]}
             >
-              <mesh castShadow>
-                <coneGeometry args={[0.036, 0.072, 18]} />
-                <meshStandardMaterial color={fur.coat} roughness={0.88} />
-              </mesh>
-              <mesh position={[0, -0.006, 0.016]} scale={[0.6, 0.68, 0.6]}>
-                <coneGeometry args={[0.036, 0.072, 18]} />
-                <meshStandardMaterial color={fur.innerEar} roughness={0.85} />
+              <mesh geometry={earGeometry} material={coatMaterial} castShadow />
+              <mesh geometry={earGeometry} position={[0, -0.007, 0.005]} scale={[0.57, 0.67, 0.5]}>
+                <meshStandardMaterial color={fur.innerEar} roughness={0.93} />
               </mesh>
             </group>
           ))}
 
-          {/* muzzle + nose */}
-          <mesh position={[0, -0.027, 0.054]} scale={[1.35, 0.78, 0.85]}>
-            <sphereGeometry args={[0.031, 20, 16]} />
-            <meshStandardMaterial color={fur.coat} roughness={0.86} />
-          </mesh>
-          <mesh position={[0, -0.017, 0.077]}>
-            <sphereGeometry args={[0.0095, 14, 12]} />
-            <meshStandardMaterial color={fur.nose} roughness={0.55} />
+          {/* Paired jowls and a small nose keep the face legible when she blinks. */}
+          {[-1, 1].map((side) => (
+            <mesh key={side} position={[side * 0.018, -0.028, 0.060]} scale={[0.026, 0.016, 0.018]} material={coatMaterial}>
+              <sphereGeometry args={[1, 20, 14]} />
+            </mesh>
+          ))}
+          <mesh position={[0, -0.021, 0.081]} scale={[1, 0.72, 0.58]}>
+            <sphereGeometry args={[0.008, 14, 10]} />
+            <meshStandardMaterial color={fur.nose} roughness={0.73} />
           </mesh>
 
-          {/* eyes — the green is the most recognisably Domi thing about her */}
+          {/* Domi's green eyes sit in shallow almond-shaped lids. */}
           <group ref={eyes}>
             {[-1, 1].map((side) => (
-              <group key={side} position={[side * 0.031, 0.011, 0.04]}>
-                <mesh>
-                  <sphereGeometry args={[0.021, 20, 16]} />
-                  <meshStandardMaterial color={fur.eye} roughness={0.25} />
+              <group key={side} position={[side * 0.031, 0.007, 0.062]}>
+                <mesh scale={[0.022, 0.015, 0.004]}>
+                  <sphereGeometry args={[1, 20, 14]} />
+                  <meshStandardMaterial color="#6f7770" roughness={0.9} />
                 </mesh>
-                <mesh position={[0, 0, 0.014]} scale={[0.55, 1, 0.5]}>
-                  <sphereGeometry args={[0.011, 16, 12]} />
-                  <meshStandardMaterial color={fur.pupil} roughness={0.18} />
+                <mesh position={[0, 0, 0.003]} scale={[0.017, 0.012, 0.004]}>
+                  <sphereGeometry args={[1, 20, 14]} />
+                  <meshStandardMaterial color={fur.eye} roughness={0.47} />
                 </mesh>
-                <mesh position={[0.006, 0.007, 0.018]}>
-                  <sphereGeometry args={[0.004, 10, 8]} />
+                <mesh position={[0, 0, 0.006]} scale={[0.0036, 0.009, 0.003]}>
+                  <sphereGeometry args={[1, 12, 10]} />
+                  <meshStandardMaterial color={fur.pupil} roughness={0.38} />
+                </mesh>
+                <mesh position={[0.005, 0.005, 0.008]}>
+                  <sphereGeometry args={[0.0025, 8, 6]} />
                   <meshBasicMaterial color="#ffffff" />
                 </mesh>
               </group>
@@ -347,31 +432,27 @@ function Domi() {
           </group>
         </group>
 
-        {/* front legs, tucked close together the way she actually sits */}
+        {/* Low oval paws meet the cushion without separate vertical stumps. */}
         {[-1, 1].map((side) => (
-          <group key={side} position={[side * 0.03, 0, 0.062]}>
-            <mesh position={[0, 0.052, 0]} castShadow>
-              <cylinderGeometry args={[0.017, 0.019, 0.104, 16]} />
-              <meshStandardMaterial color={fur.coat} roughness={0.88} />
-            </mesh>
-            <mesh position={[0, 0.013, 0.014]} scale={[1, 0.75, 1.3]}>
-              <sphereGeometry args={[0.021, 16, 14]} />
-              <meshStandardMaterial color={fur.coat} roughness={0.88} />
-            </mesh>
-          </group>
+          <mesh key={side} position={[side * 0.043, 0.022, 0.052]} scale={[0.031, 0.022, 0.039]} material={coatMaterial} castShadow>
+            <sphereGeometry args={[1, 20, 14]} />
+          </mesh>
         ))}
 
-        {/* tail, curling round to the front with the dark tip she actually has */}
-        <group ref={tail} position={[0.055, 0.028, -0.075]}>
-          {tailSegments.map((seg, i) => (
-            <mesh key={i} position={seg.pos} castShadow>
-              <sphereGeometry args={[seg.r, 14, 12]} />
-              <meshStandardMaterial
-                color={seg.dark ? fur.tailTip : fur.coat}
-                roughness={0.88}
-              />
-            </mesh>
-          ))}
+        {/* One continuous curve, with her dark tip over the final section. */}
+        <group ref={tail} position={[0.055, 0.034, -0.075]}>
+          <mesh geometry={tailGeometry} material={coatMaterial} castShadow />
+          <mesh geometry={tailTipGeometry} castShadow>
+            <meshStandardMaterial color={fur.tailTip} roughness={0.94} />
+          </mesh>
+          <mesh position={tailCurve.getPoint(0.70)} castShadow>
+            <sphereGeometry args={[0.014, 10, 8]} />
+            <meshStandardMaterial color={fur.tailTip} roughness={0.94} />
+          </mesh>
+          <mesh position={tailCurve.getPoint(1)} castShadow>
+            <sphereGeometry args={[0.014, 10, 8]} />
+            <meshStandardMaterial color={fur.tailTip} roughness={0.94} />
+          </mesh>
         </group>
       </group>
     </Hotspot>

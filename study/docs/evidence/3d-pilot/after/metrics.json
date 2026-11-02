@@ -1,0 +1,287 @@
+{
+  "stage": "after",
+  "browser": "Edge DevTools",
+  "sampledAt": "2026-11-02T10:42:36.832Z",
+  "views": {
+    "overview-day": {
+      "viewport": [
+        1280,
+        800
+      ],
+      "webgl": {
+        "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (Intel)",
+        "maxTextureSize": 16384
+      },
+      "frameMsMean": 44.98059701492536,
+      "frameMsP99": 69.60000000000036,
+      "fpsMean": 22.231808076450882,
+      "fpsLow1Percent": 14.367816091953948,
+      "drawCallsMean": 1227,
+      "trianglesMean": 1653404.6666666823,
+      "sampledFrames": 67,
+      "activeFrames": 67,
+      "resourceTransferBytes": 15900,
+      "resourceDecodedBytes": 26079418,
+      "resourceCount": 69,
+      "canvasCount": 2,
+      "rendererInfo": {
+        "geometries": 476,
+        "textures": 90,
+        "programs": 45
+      },
+      "hudVisible": true,
+      "indexVisible": false,
+      "loaderClass": "ascii-loader ascii-loader--hidden"
+    },
+    "overview-night-off": {
+      "viewport": [
+        1280,
+        800
+      ],
+      "webgl": {
+        "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (Intel)",
+        "maxTextureSize": 16384
+      },
+      "frameMsMean": 36.375,
+      "frameMsP99": 76.5,
+      "fpsMean": 27.491408934707902,
+      "fpsLow1Percent": 13.071895424836601,
+      "drawCallsMean": 1227,
+      "trianglesMean": 1653404.666666683,
+      "sampledFrames": 84,
+      "activeFrames": 84,
+      "resourceTransferBytes": 15900,
+      "resourceDecodedBytes": 26079418,
+      "resourceCount": 69,
+      "canvasCount": 2,
+      "rendererInfo": {
+        "geometries": 476,
+        "textures": 91,
+        "programs": 45
+      },
+      "hudVisible": true,
+      "indexVisible": false,
+      "loaderClass": "ascii-loader ascii-loader--hidden"
+    },
+    "overview-night-50": {
+      "viewport": [
+        1280,
+        800
+      ],
+      "webgl": {
+        "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (Intel)",
+        "maxTextureSize": 16384
+      },
+      "frameMsMean": 37.80864197530864,
+      "frameMsP99": 76.39999999999782,
+      "fpsMean": 26.448979591836736,
+      "fpsLow1Percent": 13.089005235602468,
+      "drawCallsMean": 1227,
+      "trianglesMean": 1653404.666666683,
+      "sampledFrames": 81,
+      "activeFrames": 81,
+      "resourceTransferBytes": 15900,
+      "resourceDecodedBytes": 26079418,
+      "resourceCount": 69,
+      "canvasCount": 2,
+      "rendererInfo": {
+        "geometries": 476,
+        "textures": 91,
+        "programs": 45
+      },
+      "hudVisible": true,
+      "indexVisible": false,
+      "loaderClass": "ascii-loader ascii-loader--hidden"
+    },
+    "overview-night-100": {
+      "viewport": [
+        1280,
+        800
+      ],
+      "webgl": {
+        "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (Intel)",
+        "maxTextureSize": 16384
+      },
+      "frameMsMean": 27.650458715596343,
+      "frameMsP99": 55.5,
+      "fpsMean": 36.16576528750123,
+      "fpsLow1Percent": 18.01801801801802,
+      "drawCallsMean": 1227,
+      "trianglesMean": 1653404.6666666837,
+      "sampledFrames": 109,
+      "activeFrames": 109,
+      "resourceTransferBytes": 15900,
+      "resourceDecodedBytes": 26079418,
+      "resourceCount": 69,
+      "canvasCount": 2,
+      "rendererInfo": {
+        "geometries": 476,
+        "textures": 91,
+        "programs": 45
+      },
+      "hudVisible": true,
+      "indexVisible": false,
+      "loaderClass": "ascii-loader ascii-loader--hidden"
+    },
+    "laptop-focus": {
+      "viewport": [
+        1280,
+        800
+      ],
+      "webgl": {
+        "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (Intel)",
+        "maxTextureSize": 16384
+      },
+      "frameMsMean": 22.569166666666693,
+      "frameMsP99": 34.70000000000073,
+      "fpsMean": 44.308237639847825,
+      "fpsLow1Percent": 28.81844380403398,
+      "drawCallsMean": 407.05,
+      "trianglesMean": 549292.0499999993,
+      "sampledFrames": 120,
+      "activeFrames": 120,
+      "resourceTransferBytes": 15900,
+      "resourceDecodedBytes": 26079418,
+      "resourceCount": 74,
+      "canvasCount": 2,
+      "rendererInfo": {
+        "geometries": 476,
+        "textures": 92,
+        "programs": 45
+      },
+      "hudVisible": true,
+      "indexVisible": false,
+      "loaderClass": "ascii-loader ascii-loader--hidden"
+    },
+    "domi-focus": {
+      "viewport": [
+        1280,
+        800
+      ],
+      "webgl": {
+        "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (Intel)",
+        "maxTextureSize": 16384
+      },
+      "frameMsMean": 14.98833333333332,
+      "frameMsP99": 21.099999999998545,
+      "fpsMean": 66.71855887912827,
+      "fpsLow1Percent": 47.39336492891322,
+      "drawCallsMean": 362,
+      "trianglesMean": 442955.66666666936,
+      "sampledFrames": 120,
+      "activeFrames": 120,
+      "resourceTransferBytes": 15900,
+      "resourceDecodedBytes": 26079418,
+      "resourceCount": 74,
+      "canvasCount": 2,
+      "rendererInfo": {
+        "geometries": 476,
+        "textures": 92,
+        "programs": 45
+      },
+      "hudVisible": true,
+      "indexVisible": false,
+      "loaderClass": "ascii-loader ascii-loader--hidden"
+    },
+    "lamp-focus": {
+      "viewport": [
+        1280,
+        800
+      ],
+      "webgl": {
+        "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (Intel)",
+        "maxTextureSize": 16384
+      },
+      "frameMsMean": 15.452500000000024,
+      "frameMsP99": 20.900000000001455,
+      "fpsMean": 64.71444750040436,
+      "fpsLow1Percent": 47.84688995214978,
+      "drawCallsMean": 359,
+      "trianglesMean": 459941.0000000005,
+      "sampledFrames": 120,
+      "activeFrames": 120,
+      "resourceTransferBytes": 15900,
+      "resourceDecodedBytes": 26079418,
+      "resourceCount": 74,
+      "canvasCount": 2,
+      "rendererInfo": {
+        "geometries": 476,
+        "textures": 92,
+        "programs": 45
+      },
+      "hudVisible": true,
+      "indexVisible": false,
+      "loaderClass": "ascii-loader ascii-loader--hidden"
+    },
+    "shelf-window-focus": {
+      "viewport": [
+        1280,
+        800
+      ],
+      "webgl": {
+        "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (Intel)",
+        "maxTextureSize": 16384
+      },
+      "frameMsMean": 18.459999999999976,
+      "frameMsP99": 34.799999999995634,
+      "fpsMean": 54.17118093174438,
+      "fpsLow1Percent": 28.73563218391165,
+      "drawCallsMean": 467,
+      "trianglesMean": 528979.6666666697,
+      "sampledFrames": 120,
+      "activeFrames": 120,
+      "resourceTransferBytes": 15900,
+      "resourceDecodedBytes": 26079418,
+      "resourceCount": 74,
+      "canvasCount": 2,
+      "rendererInfo": {
+        "geometries": 476,
+        "textures": 92,
+        "programs": 45
+      },
+      "hudVisible": true,
+      "indexVisible": false,
+      "loaderClass": "ascii-loader ascii-loader--hidden"
+    },
+    "overview-mobile": {
+      "viewport": [
+        390,
+        844
+      ],
+      "webgl": {
+        "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (Intel)",
+        "maxTextureSize": 16384
+      },
+      "frameMsMean": 18.113333333333323,
+      "frameMsP99": 34.69999999999709,
+      "fpsMean": 55.207949944792084,
+      "fpsLow1Percent": 28.818443804037,
+      "drawCallsMean": 1215,
+      "trianglesMean": 1637134.666666684,
+      "sampledFrames": 120,
+      "activeFrames": 120,
+      "resourceTransferBytes": 15900,
+      "resourceDecodedBytes": 26079418,
+      "resourceCount": 74,
+      "canvasCount": 2,
+      "rendererInfo": {
+        "geometries": 476,
+        "textures": 92,
+        "programs": 45
+      },
+      "hudVisible": true,
+      "indexVisible": false,
+      "loaderClass": "ascii-loader ascii-loader--hidden"
+    }
+  },
+  "errors": []
+}

@@ -4,6 +4,9 @@ A personal site built as a 3D study. Every piece of content lives on a physical
 object in the room — the laptop holds web work, the phone holds app work, the
 open book on the desk holds the portfolio, the shelf holds reading notes.
 
+For a complete current-state brief before changing the 3D scene, start with
+[`study/docs/3d-visual-upgrade-handoff.md`](study/docs/3d-visual-upgrade-handoff.md).
+
 The room is assembled entirely from primitives. There are no imported models:
 rounded boxes, cylinders and spheres, carried by material response and a
 softbox lighting rig rather than by geometry detail.

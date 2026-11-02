@@ -1,0 +1,221 @@
+{
+  "stage": "effect-probe",
+  "browser": "Edge DevTools",
+  "sampledAt": "2026-11-02T10:17:18.181Z",
+  "views": {
+    "fx-all": {
+      "viewport": [
+        1280,
+        800
+      ],
+      "webgl": {
+        "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (Intel)",
+        "maxTextureSize": 16384
+      },
+      "frameMsMean": 33.41111111111111,
+      "frameMsP99": 48.80000000000109,
+      "fpsMean": 29.93016295310941,
+      "fpsLow1Percent": 20.491803278688067,
+      "drawCallsMean": 1686,
+      "trianglesMean": 2298460.3333333437,
+      "sampledFrames": 90,
+      "activeFrames": 90,
+      "resourceTransferBytes": 65492,
+      "resourceDecodedBytes": 26071867,
+      "resourceCount": 69,
+      "canvasCount": 2,
+      "hudVisible": true,
+      "indexVisible": false,
+      "loaderClass": "ascii-loader ascii-loader--hidden"
+    },
+    "fx-no-ao": {
+      "viewport": [
+        1280,
+        800
+      ],
+      "webgl": {
+        "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (Intel)",
+        "maxTextureSize": 16384
+      },
+      "frameMsMean": 25.539830508474566,
+      "frameMsP99": 55.5,
+      "fpsMean": 39.1545276570329,
+      "fpsLow1Percent": 18.01801801801802,
+      "drawCallsMean": 1669,
+      "trianglesMean": 2284790.0000000075,
+      "sampledFrames": 118,
+      "activeFrames": 118,
+      "resourceTransferBytes": 15900,
+      "resourceDecodedBytes": 25294353,
+      "resourceCount": 69,
+      "canvasCount": 2,
+      "hudVisible": true,
+      "indexVisible": false,
+      "loaderClass": "ascii-loader ascii-loader--hidden"
+    },
+    "fx-no-bloom": {
+      "viewport": [
+        1280,
+        800
+      ],
+      "webgl": {
+        "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (Intel)",
+        "maxTextureSize": 16384
+      },
+      "frameMsMean": 34.800000000000004,
+      "frameMsP99": 69.39999999999964,
+      "fpsMean": 28.73563218390804,
+      "fpsLow1Percent": 14.409221902017366,
+      "drawCallsMean": 1670,
+      "trianglesMean": 2298444.3333333437,
+      "sampledFrames": 87,
+      "activeFrames": 87,
+      "resourceTransferBytes": 15900,
+      "resourceDecodedBytes": 25294353,
+      "resourceCount": 69,
+      "canvasCount": 2,
+      "hudVisible": true,
+      "indexVisible": false,
+      "loaderClass": "ascii-loader ascii-loader--hidden"
+    },
+    "fx-no-vignette": {
+      "viewport": [
+        1280,
+        800
+      ],
+      "webgl": {
+        "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (Intel)",
+        "maxTextureSize": 16384
+      },
+      "frameMsMean": 38.95974025974026,
+      "frameMsP99": 69.5,
+      "fpsMean": 25.667522250741694,
+      "fpsLow1Percent": 14.388489208633093,
+      "drawCallsMean": 1686,
+      "trianglesMean": 2298460.333333344,
+      "sampledFrames": 77,
+      "activeFrames": 77,
+      "resourceTransferBytes": 15900,
+      "resourceDecodedBytes": 25294353,
+      "resourceCount": 69,
+      "canvasCount": 2,
+      "hudVisible": true,
+      "indexVisible": false,
+      "loaderClass": "ascii-loader ascii-loader--hidden"
+    },
+    "fx-no-smaa": {
+      "viewport": [
+        1280,
+        800
+      ],
+      "webgl": {
+        "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (Intel)",
+        "maxTextureSize": 16384
+      },
+      "frameMsMean": 33.796666666666674,
+      "frameMsP99": 62.5,
+      "fpsMean": 29.588716835979874,
+      "fpsLow1Percent": 16,
+      "drawCallsMean": 1683,
+      "trianglesMean": 2298457.3333333437,
+      "sampledFrames": 90,
+      "activeFrames": 90,
+      "resourceTransferBytes": 15900,
+      "resourceDecodedBytes": 25294353,
+      "resourceCount": 69,
+      "canvasCount": 2,
+      "hudVisible": true,
+      "indexVisible": false,
+      "loaderClass": "ascii-loader ascii-loader--hidden"
+    },
+    "fx-none": {
+      "viewport": [
+        1280,
+        800
+      ],
+      "webgl": {
+        "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (Intel)",
+        "maxTextureSize": 16384
+      },
+      "frameMsMean": 28.834285714285702,
+      "frameMsP99": 48.599999999998545,
+      "fpsMean": 34.680935394371794,
+      "fpsLow1Percent": 20.576131687243414,
+      "drawCallsMean": 1190,
+      "trianglesMean": 1639714.3333333442,
+      "sampledFrames": 105,
+      "activeFrames": 105,
+      "resourceTransferBytes": 15900,
+      "resourceDecodedBytes": 25294353,
+      "resourceCount": 69,
+      "canvasCount": 2,
+      "hudVisible": true,
+      "indexVisible": false,
+      "loaderClass": "ascii-loader ascii-loader--hidden"
+    },
+    "shadows-none": {
+      "viewport": [
+        1280,
+        800
+      ],
+      "webgl": {
+        "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (Intel)",
+        "maxTextureSize": 16384
+      },
+      "frameMsMean": 25.288333333333338,
+      "frameMsP99": 35,
+      "fpsMean": 39.54392671192249,
+      "fpsLow1Percent": 28.571428571428573,
+      "drawCallsMean": 1406,
+      "trianglesMean": 1935196.0000000277,
+      "sampledFrames": 120,
+      "activeFrames": 120,
+      "resourceTransferBytes": 15900,
+      "resourceDecodedBytes": 25294353,
+      "resourceCount": 69,
+      "canvasCount": 2,
+      "hudVisible": true,
+      "indexVisible": false,
+      "loaderClass": "ascii-loader ascii-loader--hidden"
+    },
+    "fx-and-shadows-none": {
+      "viewport": [
+        1280,
+        800
+      ],
+      "webgl": {
+        "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (Intel)",
+        "maxTextureSize": 16384
+      },
+      "frameMsMean": 20.485833333333343,
+      "frameMsP99": 27.899999999999636,
+      "fpsMean": 48.81422120977909,
+      "fpsLow1Percent": 35.842293906810504,
+      "drawCallsMean": 911,
+      "trianglesMean": 1278157.6666666674,
+      "sampledFrames": 120,
+      "activeFrames": 120,
+      "resourceTransferBytes": 15900,
+      "resourceDecodedBytes": 25294353,
+      "resourceCount": 69,
+      "canvasCount": 2,
+      "hudVisible": true,
+      "indexVisible": false,
+      "loaderClass": "ascii-loader ascii-loader--hidden"
+    }
+  },
+  "errors": [
+    "Failed to load resource: the server responded with a status of 403 ()",
+    "Failed to load resource: the server responded with a status of 403 ()",
+    "Failed to load resource: the server responded with a status of 403 ()",
+    "Failed to load resource: the server responded with a status of 403 ()"
+  ]
+}
