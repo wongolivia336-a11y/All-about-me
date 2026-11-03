@@ -249,9 +249,11 @@ export function Heartwheel({ activeTheme, onThemeChange }: HeartwheelProps) {
                   style={{ "--leaf-accent": themeConfig[theme].accent, "--leaf-ink": themeConfig[theme].ink } as CSSProperties}
                   transform={`rotate(${themeConfig[theme].leafAngle} 0 0)`}
                 >
-                  <path className="heartwheel__leaf-fill" d={HEART_PATH} />
-                  <path className="heartwheel__leaf-outline" d={HEART_PATH} />
-                  <HeartTextTexture theme={theme} clipId={`heart-clip-${theme}`} />
+                  <g className="heartwheel__leaf-visual">
+                    <path className="heartwheel__leaf-fill" d={HEART_PATH} />
+                    <path className="heartwheel__leaf-outline" d={HEART_PATH} />
+                    <HeartTextTexture theme={theme} clipId={`heart-clip-${theme}`} />
+                  </g>
                   <path
                     className="heartwheel__leaf-hit"
                     d={HEART_PATH}

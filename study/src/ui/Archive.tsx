@@ -7,7 +7,6 @@ import {
 import { CONTACT_EMAIL, GITHUB_USER } from "../data/links";
 import { themeConfig } from "../data/themeConfig";
 import { Heartwheel } from "../brand/Heartwheel";
-import { PaperCorner } from "./PaperCorner";
 
 interface ArchiveProps {
   initialTheme: ThemeId;
@@ -25,7 +24,17 @@ const featuredEntries = visibleEntries
   .filter((entry) => entry.featured)
   .sort((a, b) => (a.featuredOrder ?? 99) - (b.featuredOrder ?? 99));
 
-function ProjectCard({ entry, onOpen, compact = false }: { entry: ArchiveEntry; onOpen: () => void; compact?: boolean }) {
+function ProjectCard({
+  entry,
+  onOpen,
+  compact = false,
+  featured = false,
+}: {
+  entry: ArchiveEntry;
+  onOpen: () => void;
+  compact?: boolean;
+  featured?: boolean;
+}) {
   const definition = themeConfig[entry.primaryTheme];
   const style = {
     "--card-accent": definition.accent,
@@ -33,7 +42,12 @@ function ProjectCard({ entry, onOpen, compact = false }: { entry: ArchiveEntry; 
   } as CSSProperties;
 
   return (
-    <article className={["project-card", compact && "project-card--compact"].filter(Boolean).join(" ")} style={style}>
+    <article
+      className={["project-card", compact && "project-card--compact", featured && "project-card--featured"]
+        .filter(Boolean)
+        .join(" ")}
+      style={style}
+    >
       <button className="project-card__open" type="button" onClick={onOpen}>
         <span className="project-card__visual">
           {entry.cover ? (
@@ -164,14 +178,6 @@ export function Archive({ initialTheme, showThemeArchive, projectId, onClose, on
           </div>
         </header>
 
-        <PaperCorner
-          className="page-corner--index"
-          label="Room"
-          ariaLabel="Enter Room"
-          title="Enter Room"
-          onClick={onClose}
-        />
-
         <section className="archive__hero" aria-labelledby="archive-title">
           <div className="archive__identity">
             <p className="archive__eyebrow">Design engineer / AI products / creative technology</p>
@@ -191,9 +197,6 @@ export function Archive({ initialTheme, showThemeArchive, projectId, onClose, on
               <span>Human-centred systems</span>
             </div>
           </div>
-          <div className="archive__wheel-wrap">
-            <Heartwheel activeTheme={activeTheme} onThemeChange={selectTheme} />
-          </div>
         </section>
 
         {selectedProject ? (
@@ -206,37 +209,57 @@ export function Archive({ initialTheme, showThemeArchive, projectId, onClose, on
             tabIndex={-1}
             aria-labelledby="theme-title"
           >
-            <div className="archive__section-heading">
-              <div>
-                <p className="archive__eyebrow">{showThemeArchive ? "Theme archive" : "The archive"} / {currentDefinition.label}</p>
-                <h2 id="theme-title">{currentDefinition.shortLabel}</h2>
-              </div>
-              <p>{currentDefinition.description}</p>
-            </div>
-
-            <div
-              className="theme-preview"
-              style={{ "--theme-accent": currentDefinition.accent, "--theme-ink": currentDefinition.ink } as CSSProperties}
-            >
-              <div className="theme-preview__intro">
-                <span className="theme-preview__index">0{themeConfig[activeTheme].id === "keep" ? 4 : themeConfig[activeTheme].id === "play" ? 3 : themeConfig[activeTheme].id === "question" ? 2 : 1}</span>
-                <p>{currentDefinition.verb}</p>
-                <button type="button" onClick={() => onThemeChange(activeTheme, !showThemeArchive)}>
-                  {showThemeArchive ? "← Back to Index" : `View all ${currentDefinition.label} ↗`}
-                </button>
-              </div>
-              {themeEntries.length > 0 ? (
-                <div className="theme-preview__entries">
-                  {(showThemeArchive ? themeEntries : themeEntries.slice(0, 2)).map((entry) => (
-                    <ProjectCard key={entry.id} entry={entry} compact onOpen={() => openProject(entry)} />
-                  ))}
+            <div className="archive__theme-showcase">
+              <div className="archive__theme-selector">
+                <div className="archive__theme-selector-heading">
+                  <p className="archive__eyebrow">Four directions</p>
+                  <span>Choose a thread</span>
                 </div>
-              ) : (
-                <div className="theme-preview__empty">
+                <Heartwheel activeTheme={activeTheme} onThemeChange={selectTheme} />
+              </div>
+
+              <div
+                className="theme-preview"
+                style={{ "--theme-accent": currentDefinition.accent, "--theme-ink": currentDefinition.ink } as CSSProperties}
+              >
+                <div className="theme-preview__intro">
+                  <span className="theme-preview__index">0{themeConfig[activeTheme].id === "keep" ? 4 : themeConfig[activeTheme].id === "play" ? 3 : themeConfig[activeTheme].id === "question" ? 2 : 1}</span>
+                  <div>
+                    <p className="theme-preview__label">{showThemeArchive ? "Theme archive" : "Active theme"}</p>
+                    <h2 id="theme-title">{currentDefinition.label}</h2>
+                    <p className="theme-preview__description">{currentDefinition.description}</p>
+                  </div>
+                  <p className="theme-preview__verb">{currentDefinition.verb}</p>
+                  <button type="button" onClick={() => onThemeChange(activeTheme, !showThemeArchive)}>
+                    {showThemeArchive ? "← Back to Index" : `View all ${currentDefinition.label} ↗`}
+                  </button>
+                </div>
+                {themeEntries.length > 0 ? (
+                  showThemeArchive ? (
+                    <div className="theme-preview__entries theme-preview__entries--archive">
+                      {themeEntries.map((entry) => (
+                        <ProjectCard key={entry.id} entry={entry} compact onOpen={() => openProject(entry)} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="theme-preview__entries theme-preview__entries--showcase">
+                      <ProjectCard entry={themeEntries[0]} featured onOpen={() => openProject(themeEntries[0])} />
+                      {themeEntries.length > 1 && (
+                        <div className="theme-preview__secondary">
+                          {themeEntries.slice(1, 3).map((entry) => (
+                            <ProjectCard key={entry.id} entry={entry} compact onOpen={() => openProject(entry)} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                ) : (
+                  <div className="theme-preview__empty">
                     <strong>No entries here yet.</strong>
                     <p>I would rather leave this shelf open than invent a collection.</p>
-                </div>
-              )}
+                  </div>
+                )}
+              </div>
             </div>
           </section>
         )}

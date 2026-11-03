@@ -1,3 +1,12 @@
+:root {
+  --layer-index-surface: 4;
+  --layer-room-surface: 5;
+  --layer-room-error: 10;
+  --layer-room-controls: 12;
+  --layer-room-peek: 28;
+  --layer-paper-corner: 30;
+}
+
 .page-sheet {
   position: absolute;
   inset: 0;
@@ -15,92 +24,209 @@
   background: #171419;
 }
 
-.page-sheet--folding {
-  z-index: 50;
-  pointer-events: none;
-  transform-origin: 100% 0;
-  backface-visibility: hidden;
-  will-change: transform, filter;
-  animation: page-turn-away 760ms cubic-bezier(0.22, 1, 0.36, 1) both;
+.page-sheet--index {
+  z-index: var(--layer-index-surface);
 }
 
-.page-sheet--folding::before,
-.page-sheet--folding::after {
+.page-sheet--index-covered {
+  visibility: hidden;
+}
+
+.room-reveal-surface {
   position: absolute;
-  z-index: 20;
+  z-index: var(--layer-room-surface);
   inset: 0;
-  content: "";
-  pointer-events: none;
+  overflow: hidden;
+  background: #e8e3da;
+  isolation: isolate;
+  will-change: clip-path;
 }
 
-.page-sheet--folding::before {
+.room-loading-error {
+  position: fixed;
+  z-index: var(--layer-room-error);
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(32, 35, 32, 0.18);
+  background: rgba(247, 247, 245, 0.92);
+  color: #202320;
+  font: 12px/1.4 var(--font-mono, ui-monospace, monospace);
+  transform: translate(-50%, -50%);
+}
+
+.room-loading-error button {
+  min-width: 44px;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.app--evening .room-reveal-surface {
+  background: #171419;
+}
+
+.room-peek {
+  position: fixed;
+  z-index: var(--layer-room-peek);
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  width: 176px;
+  height: 176px;
+  overflow: hidden;
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
   background:
-    linear-gradient(112deg, transparent 0 55%, rgba(75, 60, 42, 0.08) 63%, transparent 76%),
-    repeating-linear-gradient(0deg, rgba(85, 69, 49, 0.024) 0 1px, transparent 1px 4px);
+    linear-gradient(145deg, rgba(255, 255, 255, 0.08), transparent 52%),
+    #202320;
+  color: #f7f7f5;
   opacity: 0;
-  mix-blend-mode: multiply;
-  animation: paper-turn-grain 760ms ease-out both;
+  pointer-events: none;
+  transform: translate(10px, -10px) scale(0.92);
+  transform-origin: 100% 0;
+  transition: opacity 260ms ease, transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.page-sheet--folding::after {
-  background: linear-gradient(116deg, transparent 46%, rgba(31, 25, 18, 0.24) 59%, transparent 73%);
-  opacity: 0;
-  animation: paper-turn-shadow 760ms ease-out both;
+.room-peek[data-visible="true"] {
+  opacity: 1;
+  transform: translate(0, 0) scale(1);
 }
 
-@keyframes page-turn-away {
-  0% {
-    transform: perspective(1800px) rotateY(0deg) rotateX(0deg) translateZ(0);
-    filter: saturate(1);
-  }
-
-  42% {
-    transform: perspective(1800px) rotateY(26deg) rotateX(-1.4deg) translateZ(8px);
-    filter: saturate(0.94);
-  }
-
-  100% {
-    transform: perspective(1800px) rotateY(92deg) rotateX(-2deg) translateZ(0);
-    filter: saturate(0.82);
-  }
+.room-peek__grid {
+  position: absolute;
+  inset: 24px;
+  background:
+    linear-gradient(90deg, transparent 49%, rgba(247, 247, 245, 0.16) 50%, transparent 51%),
+    linear-gradient(0deg, transparent 49%, rgba(247, 247, 245, 0.16) 50%, transparent 51%);
+  background-size: 28px 28px;
+  opacity: 0.5;
 }
 
-@keyframes paper-turn-grain {
-  0%,
-  18% {
-    opacity: 0;
-  }
-
-  38%,
-  70% {
-    opacity: 0.7;
-  }
-
-  100% {
-    opacity: 0;
-  }
+.room-peek__copy {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  display: grid;
+  gap: 4px;
+  text-align: right;
 }
 
-@keyframes paper-turn-shadow {
-  0%,
-  24% {
-    opacity: 0;
+.room-peek__copy strong {
+  font: 500 18px/1 var(--font-sans, system-ui, sans-serif);
+}
+
+.room-peek__copy small {
+  color: rgba(247, 247, 245, 0.66);
+  font: 10px/1 var(--font-mono, ui-monospace, monospace);
+  letter-spacing: 0.04em;
+}
+
+.room-exit {
+  position: fixed;
+  z-index: var(--layer-room-controls);
+  top: max(16px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #202320;
+  color: #f7f7f5;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
+  transition: background-color 180ms ease, transform 180ms var(--motion-standard), box-shadow 180ms ease;
+}
+
+.room-reveal-surface > .hud {
+  padding-right: clamp(86px, 8vw, 116px);
+}
+
+.room-exit > span {
+  position: relative;
+  display: block;
+  width: 17px;
+  height: 17px;
+  transition: transform 180ms var(--motion-standard);
+}
+
+.room-exit > span::before,
+.room-exit > span::after {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  width: 17px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: currentColor;
+  content: "";
+}
+
+.room-exit > span::before {
+  transform: rotate(45deg);
+}
+
+.room-exit > span::after {
+  transform: rotate(-45deg);
+}
+
+.room-exit:hover,
+.room-exit:focus-visible {
+  background: #171918;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.room-exit:hover > span,
+.room-exit:focus-visible > span {
+  transform: rotate(45deg);
+}
+
+.room-exit:focus-visible {
+  outline: 2px solid #f7f7f5;
+  outline-offset: 4px;
+}
+
+@media (max-width: 720px) {
+  .room-peek {
+    width: 142px;
+    height: 142px;
   }
 
-  48%,
-  72% {
-    opacity: 0.8;
+  .room-peek__grid {
+    inset: 18px;
+    background-size: 22px 22px;
   }
 
-  100% {
-    opacity: 0;
+  .room-peek__copy {
+    right: 18px;
+    bottom: 18px;
+  }
+
+  .room-exit {
+    top: max(12px, env(safe-area-inset-top));
+    right: max(12px, env(safe-area-inset-right));
+    width: 44px;
+    height: 44px;
+  }
+
+  .room-reveal-surface > .hud {
+    padding-right: 72px;
   }
 }
 
 /* A quiet, physical corner rather than a bright sticker. */
 .paper-corner {
   position: fixed;
-  z-index: 30;
+  z-index: var(--layer-paper-corner);
   top: max(12px, env(safe-area-inset-top));
   right: max(12px, env(safe-area-inset-right));
   display: block;
@@ -115,6 +241,14 @@
 
 .paper-corner:disabled {
   cursor: wait;
+}
+
+.paper-corner--opening {
+  pointer-events: none;
+}
+
+.paper-corner--opening .paper-corner__label {
+  opacity: 0;
 }
 
 .paper-corner__label {
@@ -220,10 +354,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .page-sheet--folding,
-  .page-sheet--folding::before,
-  .page-sheet--folding::after {
-    animation-duration: 0.01ms;
+  .room-peek,
+  .room-exit {
+    transition-duration: 0.01ms;
   }
 
   .paper-corner__leaf,

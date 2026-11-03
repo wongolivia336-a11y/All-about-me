@@ -41,6 +41,12 @@
   transition: opacity 180ms ease;
 }
 
+.heartwheel__leaf-visual {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 220ms var(--motion-standard);
+}
+
 .heartwheel__leaf-fill {
   fill: color-mix(in srgb, var(--leaf-accent) 6%, var(--color-paper, var(--archive-paper)));
   opacity: 0.72;
@@ -72,6 +78,10 @@
 .heartwheel__leaf--active .heartwheel__leaf-outline {
   stroke: var(--leaf-ink);
   stroke-width: 1.2;
+}
+
+.heartwheel__leaf--active .heartwheel__leaf-visual {
+  transform: scale(1.04);
 }
 
 .heartwheel__texture {
@@ -183,6 +193,10 @@
   .heartwheel__label,
   .heartwheel__leaf-fill,
   .heartwheel__leaf-outline {
+    transition-duration: 0.01ms;
+  }
+
+  .heartwheel__leaf-visual {
     transition-duration: 0.01ms;
   }
 }

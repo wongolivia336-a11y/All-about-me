@@ -5,6 +5,7 @@ interface PaperCornerProps {
   ariaLabel: string;
   title: string;
   onClick: () => void;
+  onPeekChange?: (peeking: boolean) => void;
   disabled?: boolean;
   className?: string;
 }
@@ -19,6 +20,7 @@ export const PaperCorner = forwardRef<HTMLButtonElement, PaperCornerProps>(funct
     ariaLabel,
     title,
     onClick,
+    onPeekChange,
     disabled = false,
     className,
   },
@@ -80,6 +82,10 @@ export const PaperCorner = forwardRef<HTMLButtonElement, PaperCornerProps>(funct
       className={["paper-corner", className].filter(Boolean).join(" ")}
       type="button"
       onClick={onClick}
+      onPointerEnter={() => onPeekChange?.(true)}
+      onPointerLeave={() => onPeekChange?.(false)}
+      onFocus={() => onPeekChange?.(true)}
+      onBlur={() => onPeekChange?.(false)}
       aria-label={ariaLabel}
       title={title}
       disabled={disabled}
