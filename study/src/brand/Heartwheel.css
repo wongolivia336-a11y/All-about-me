@@ -1,0 +1,188 @@
+.heartwheel {
+  display: grid;
+  justify-items: center;
+  width: min(100%, 420px);
+  color: var(--color-ink, var(--archive-ink));
+}
+.heartwheel__stage {
+  position: relative;
+  width: min(100%, 400px);
+  aspect-ratio: 1;
+  touch-action: pan-y;
+  user-select: none;
+  cursor: grab;
+}
+
+.heartwheel__stage--dragging {
+  cursor: grabbing;
+}
+
+.heartwheel__orbit {
+  position: absolute;
+  inset: 0;
+  transform: rotate(var(--heartwheel-rotation));
+  transition: none;
+  will-change: transform;
+}
+
+.heartwheel__stage--dragging .heartwheel__orbit {
+  transition: none;
+}
+
+.heartwheel__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.heartwheel__leaf {
+  color: var(--leaf-ink);
+  transition: opacity 180ms ease;
+}
+
+.heartwheel__leaf-fill {
+  fill: color-mix(in srgb, var(--leaf-accent) 6%, var(--color-paper, var(--archive-paper)));
+  opacity: 0.72;
+  transition: fill 180ms ease, opacity 180ms ease, transform 180ms ease;
+}
+
+.heartwheel__leaf-outline {
+  fill: none;
+  stroke: color-mix(in srgb, var(--leaf-ink) 42%, var(--color-line, var(--archive-line)));
+  stroke-width: 1.05;
+  vector-effect: non-scaling-stroke;
+  transition: stroke 180ms ease, stroke-width 180ms ease;
+}
+
+.heartwheel__leaf-hit {
+  cursor: pointer;
+}
+
+.heartwheel__leaf--hovered .heartwheel__leaf-fill {
+  fill: color-mix(in srgb, var(--leaf-accent) 24%, var(--color-paper, var(--archive-paper)));
+  opacity: 0.82;
+}
+
+.heartwheel__leaf--active .heartwheel__leaf-fill {
+  fill: color-mix(in srgb, var(--leaf-accent) 58%, var(--color-paper, var(--archive-paper)));
+  opacity: 0.9;
+}
+
+.heartwheel__leaf--active .heartwheel__leaf-outline {
+  stroke: var(--leaf-ink);
+  stroke-width: 1.2;
+}
+
+.heartwheel__texture {
+  font: 500 3.3px/1 var(--font-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
+  letter-spacing: 0.1px;
+  opacity: 0.24;
+}
+
+.heartwheel__hub {
+  fill: var(--color-ink, var(--archive-ink));
+  opacity: 0.8;
+}
+
+.heartwheel__labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.heartwheel__label {
+  position: absolute;
+  top: 25%;
+  left: 50%;
+  display: grid;
+  width: 31%;
+  min-height: 54px;
+  place-content: center;
+  gap: 5px;
+  padding: 8px 5px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--label-ink);
+  font: inherit;
+  text-align: center;
+  transform: translate(-50%, -50%) rotate(calc(var(--heartwheel-rotation) * -1));
+  transform-origin: center;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.heartwheel__label:nth-child(2) {
+  top: 50%;
+  left: 75%;
+}
+
+.heartwheel__label:nth-child(3) {
+  top: 75%;
+  left: 50%;
+}
+
+.heartwheel__label:nth-child(4) {
+  top: 50%;
+  left: 25%;
+}
+
+.heartwheel__stage--dragging .heartwheel__label {
+  transition: none;
+}
+
+.heartwheel__label span {
+  font: 600 clamp(11px, 1.3vw, 15px)/1 var(--font-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
+  letter-spacing: 0.06em;
+}
+
+.heartwheel__label small {
+  color: color-mix(in srgb, var(--label-ink) 72%, transparent);
+  font-size: 10px;
+  line-height: 1.1;
+}
+
+.heartwheel__label:hover,
+.heartwheel__label:focus-visible,
+.heartwheel__label--selected {
+  border-color: color-mix(in srgb, var(--label-ink) 42%, transparent);
+  background: color-mix(in srgb, var(--label-accent) 24%, transparent);
+}
+
+.heartwheel__label:focus-visible {
+  outline: 2px solid var(--label-ink);
+  outline-offset: 4px;
+}
+
+.heartwheel__hint {
+  margin: -4px 0 0;
+  color: var(--archive-muted);
+  font: 11px/1.2 var(--font-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 620px) {
+  .heartwheel__stage {
+    width: min(100%, 360px);
+  }
+
+  .heartwheel__label {
+    width: 36%;
+    min-height: 48px;
+  }
+
+  .heartwheel__label small {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heartwheel__orbit,
+  .heartwheel__label,
+  .heartwheel__leaf-fill,
+  .heartwheel__leaf-outline {
+    transition-duration: 0.01ms;
+  }
+}

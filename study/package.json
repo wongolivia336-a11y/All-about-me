@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint src",
+    "test:heartwheel": "node scripts/verify-heartwheel-geometry.mjs",
     "proof:posters": "node scripts/proof-posters.mjs",
     "preview": "vite preview"
   },

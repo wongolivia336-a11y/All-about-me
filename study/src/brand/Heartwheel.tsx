@@ -1,0 +1,323 @@
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import type { ThemeId } from "../data/library";
+import { themeConfig, themeOrder } from "../data/themeConfig";
+import { HEART_PATH, HeartTextTexture } from "./HeartTextTexture";
+import "./Heartwheel.css";
+
+interface HeartwheelProps {
+  activeTheme: ThemeId;
+  onThemeChange: (theme: ThemeId) => void;
+}
+type Gesture = {
+  pointerId: number;
+  startX: number;
+  startRotation: number;
+  dragging: boolean;
+};
+
+type SettleAnimation = {
+  target: number;
+  velocity: number;
+};
+
+const SNAP_ANGLE = 90;
+const SPRING_STIFFNESS = 210;
+const SPRING_DAMPING = 29;
+const SPRING_MASS = 1;
+const mod = (value: number, divisor: number) => ((value % divisor) + divisor) % divisor;
+
+const targetForTheme = (theme: ThemeId) => themeConfig[theme].focusRotation;
+
+const angularDistance = (rotation: number, target: number) => {
+  const wrapped = ((rotation - target + 180) % 360 + 360) % 360 - 180;
+  return Math.abs(wrapped);
+};
+
+const nearestTarget = (rotation: number, theme: ThemeId) => {
+  const target = targetForTheme(theme);
+  return target + Math.round((rotation - target) / 360) * 360;
+};
+
+const themeForRotation = (rotation: number) => {
+  const nearestTheme = themeOrder.reduce((best, theme) => {
+    const currentDistance = angularDistance(rotation, targetForTheme(theme));
+    const bestDistance = angularDistance(rotation, targetForTheme(best));
+    return currentDistance < bestDistance ? theme : best;
+  }, themeOrder[0]);
+  return nearestTheme;
+};
+
+export function Heartwheel({ activeTheme, onThemeChange }: HeartwheelProps) {
+  const [rotation, setRotation] = useState(() => targetForTheme(activeTheme));
+  const [dragging, setDragging] = useState(false);
+  const [hoveredTheme, setHoveredTheme] = useState<ThemeId | null>(null);
+  const rotationRef = useRef(rotation);
+  const gesture = useRef<Gesture | null>(null);
+  const suppressClick = useRef(false);
+  const targetRotation = useRef(rotation);
+  const animationFrame = useRef<number | null>(null);
+  const animationRef = useRef<SettleAnimation | null>(null);
+  const lastFrameAt = useRef<number | null>(null);
+  const angularVelocity = useRef(0);
+
+  const cancelSettle = (resetVelocity = true) => {
+    if (animationFrame.current !== null) {
+      window.cancelAnimationFrame(animationFrame.current);
+      animationFrame.current = null;
+    }
+    animationRef.current = null;
+    lastFrameAt.current = null;
+    if (resetVelocity) angularVelocity.current = 0;
+  };
+
+  const applyRotation = (next: number) => {
+    rotationRef.current = next;
+    setRotation(next);
+  };
+
+  const animateToRotation = (target: number) => {
+    const from = rotationRef.current;
+    const initialVelocity = angularVelocity.current;
+    targetRotation.current = target;
+    cancelSettle(false);
+
+    if (Math.abs(target - from) < 0.01 && Math.abs(initialVelocity) < 0.1) {
+      applyRotation(target);
+      return;
+    }
+
+    const animation: SettleAnimation = {
+      target,
+      velocity: initialVelocity,
+    };
+    animationRef.current = animation;
+    lastFrameAt.current = performance.now();
+
+    const tick = (now: number) => {
+      if (animationRef.current !== animation) return;
+      const elapsed = Math.min(0.032, Math.max(0.001, (now - (lastFrameAt.current ?? now)) / 1000));
+      const displacement = animation.target - rotationRef.current;
+      const acceleration =
+        (SPRING_STIFFNESS * displacement - SPRING_DAMPING * animation.velocity) / SPRING_MASS;
+      animation.velocity += acceleration * elapsed;
+      const next = rotationRef.current + animation.velocity * elapsed;
+      lastFrameAt.current = now;
+      angularVelocity.current = animation.velocity;
+      applyRotation(next);
+
+      if (Math.abs(animation.target - next) > 0.05 || Math.abs(animation.velocity) > 0.05) {
+        animationFrame.current = window.requestAnimationFrame(tick);
+      } else {
+        applyRotation(animation.target);
+        animationFrame.current = null;
+        animationRef.current = null;
+        lastFrameAt.current = null;
+        angularVelocity.current = 0;
+      }
+    };
+
+    animationFrame.current = window.requestAnimationFrame(tick);
+  };
+
+  useEffect(() => {
+    if (gesture.current?.dragging) return;
+    const next = nearestTarget(rotationRef.current, activeTheme);
+    if (Math.abs(next - targetRotation.current) < 0.01) return;
+    animateToRotation(next);
+  }, [activeTheme]);
+
+  const chooseTheme = (theme: ThemeId) => {
+    const next = nearestTarget(rotationRef.current, theme);
+    animateToRotation(next);
+    onThemeChange(theme);
+  };
+
+  const commitGesture = () => {
+    const current = rotationRef.current;
+    const snapped = Math.round(current / SNAP_ANGLE) * SNAP_ANGLE;
+    const theme = themeForRotation(snapped);
+    animateToRotation(snapped);
+    onThemeChange(theme);
+  };
+
+  const finishGesture = (pointerId: number) => {
+    const active = gesture.current;
+    if (!active || active.pointerId !== pointerId) return;
+    gesture.current = null;
+    setDragging(false);
+    if (active.dragging) {
+      suppressClick.current = true;
+      commitGesture();
+      window.setTimeout(() => {
+        suppressClick.current = false;
+      }, 0);
+    }
+  };
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest("button")) return;
+    if (gesture.current) return;
+    cancelSettle();
+    targetRotation.current = rotationRef.current;
+    const target = event.currentTarget;
+    target.setPointerCapture(event.pointerId);
+    gesture.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startRotation: rotationRef.current,
+      dragging: false,
+    };
+  };
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const active = gesture.current;
+    if (!active || active.pointerId !== event.pointerId) return;
+    const distance = event.clientX - active.startX;
+    if (!active.dragging && Math.abs(distance) < 7) return;
+    if (!active.dragging) {
+      active.dragging = true;
+      setDragging(true);
+    }
+    event.preventDefault();
+    applyRotation(active.startRotation + distance * 0.72);
+  };
+
+  const handlePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const active = gesture.current;
+    if (!active || active.pointerId !== event.pointerId) return;
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {
+      // Capture may already have been released by the browser.
+    }
+    finishGesture(event.pointerId);
+  };
+
+  const handlePointerCancel = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!gesture.current || gesture.current.pointerId !== event.pointerId) return;
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {
+      // Capture may already have been released by the browser.
+    }
+    finishGesture(event.pointerId);
+  };
+
+  const wheelStyle = {
+    "--heartwheel-rotation": `${rotation}deg`,
+  } as CSSProperties;
+
+  const handleLeafClick = (theme: ThemeId) => {
+    if (suppressClick.current) {
+      suppressClick.current = false;
+      return;
+    }
+    chooseTheme(theme);
+  };
+
+  useEffect(() => () => cancelSettle(), []);
+
+  return (
+    <div className="heartwheel" aria-label="Four Hearts 主题导航">
+      <div
+        className={["heartwheel__stage", dragging && "heartwheel__stage--dragging"].filter(Boolean).join(" ")}
+        style={wheelStyle}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
+        onLostPointerCapture={() => {
+          if (gesture.current) finishGesture(gesture.current.pointerId);
+        }}
+      >
+        <div className="heartwheel__orbit">
+          <svg className="heartwheel__svg" viewBox="-170 -170 340 340" role="presentation">
+            <defs>
+              {themeOrder.map((theme) => (
+                <clipPath key={theme} id={`heart-clip-${theme}`} clipPathUnits="userSpaceOnUse">
+                  <path d={HEART_PATH} />
+                </clipPath>
+              ))}
+            </defs>
+            {themeOrder.map((theme) => {
+              const active = activeTheme === theme;
+              const hovered = hoveredTheme === theme;
+              return (
+                <g
+                  key={theme}
+                  className={["heartwheel__leaf", active && "heartwheel__leaf--active", hovered && "heartwheel__leaf--hovered"].filter(Boolean).join(" ")}
+                  style={{ "--leaf-accent": themeConfig[theme].accent, "--leaf-ink": themeConfig[theme].ink } as CSSProperties}
+                  transform={`rotate(${themeConfig[theme].leafAngle} 0 0)`}
+                >
+                  <path className="heartwheel__leaf-fill" d={HEART_PATH} />
+                  <path className="heartwheel__leaf-outline" d={HEART_PATH} />
+                  <HeartTextTexture theme={theme} clipId={`heart-clip-${theme}`} />
+                  <path
+                    className="heartwheel__leaf-hit"
+                    d={HEART_PATH}
+                    fill="#ffffff"
+                    fillOpacity="0"
+                    pointerEvents="all"
+                    onMouseEnter={() => setHoveredTheme(theme)}
+                    onMouseLeave={() => setHoveredTheme(null)}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleLeafClick(theme);
+                    }}
+                    aria-label={`选择 ${themeConfig[theme].label}`}
+                  />
+                </g>
+              );
+            })}
+            <circle className="heartwheel__hub" cx="0" cy="0" r="6" />
+          </svg>
+
+          <div className="heartwheel__labels" role="tablist" aria-label="Four Hearts 主题">
+            {themeOrder.map((theme, index) => {
+              const selected = activeTheme === theme;
+              const labelStyle = {
+                "--label-accent": themeConfig[theme].accent,
+                "--label-ink": themeConfig[theme].ink,
+              } as CSSProperties;
+              return (
+                <button
+                  key={theme}
+                  className={["heartwheel__label", selected && "heartwheel__label--selected"].filter(Boolean).join(" ")}
+                  style={labelStyle}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  aria-controls="theme-panel"
+                  tabIndex={selected ? 0 : -1}
+                  onMouseEnter={() => setHoveredTheme(theme)}
+                  onMouseLeave={() => setHoveredTheme(null)}
+                  onFocus={() => setHoveredTheme(theme)}
+                  onBlur={() => setHoveredTheme(null)}
+                  onClick={() => chooseTheme(theme)}
+                  onKeyDown={(event) => {
+                    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+                    event.preventDefault();
+                    const nextIndex = mod(index + (event.key === "ArrowRight" ? 1 : -1), themeOrder.length);
+                    const nextTheme = themeOrder[nextIndex];
+                    chooseTheme(nextTheme);
+                    requestAnimationFrame(() => {
+                      document.querySelector<HTMLButtonElement>(`[data-heart-theme="${nextTheme}"]`)?.focus();
+                    });
+                  }}
+                  data-heart-theme={theme}
+                >
+                  <span>{themeConfig[theme].label}</span>
+                  <small>{themeConfig[theme].descriptor}</small>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+      <p className="heartwheel__hint">drag to turn · select a leaf</p>
+      <p className="sr-only" aria-live="polite">
+        当前主题：{themeConfig[activeTheme].label}，{themeConfig[activeTheme].shortLabel}
+      </p>
+    </div>
+  );
+}
