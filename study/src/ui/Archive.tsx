@@ -6,7 +6,7 @@ import {
 } from "../data/library";
 import { CONTACT_EMAIL, GITHUB_USER } from "../data/links";
 import { themeConfig } from "../data/themeConfig";
-import { Heartwheel } from "../brand/Heartwheel";
+import { LeafCanvas, type ThemeSelectionSource } from "./LeafCanvas";
 
 interface ArchiveProps {
   initialTheme: ThemeId;
@@ -128,6 +128,7 @@ function ProjectDetail({ entry, onBack }: { entry: ArchiveEntry; onBack: () => v
 
 export function Archive({ initialTheme, showThemeArchive, projectId, onClose, onThemeChange, onProjectOpen }: ArchiveProps) {
   const [activeTheme, setActiveTheme] = useState<ThemeId>(initialTheme);
+  const [viewMode, setViewMode] = useState<"overview" | "focused">("overview");
   const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(projectId);
   const projectReturnFocus = useRef<HTMLButtonElement | null>(null);
 
@@ -143,8 +144,12 @@ export function Archive({ initialTheme, showThemeArchive, projectId, onClose, on
     ? visibleEntries.find((entry) => entry.id === selectedProjectId)
     : undefined;
 
-  const selectTheme = (theme: ThemeId) => {
+  const selectTheme = (theme: ThemeId, source: ThemeSelectionSource = "select") => {
+    // Only a deliberate second click on an active leaf toggles Overview.
+    // Drag-and-snap of the same leaf keeps the focus intact.
+    const zoomOut = source === "select" && activeTheme === theme && viewMode === "focused";
     setActiveTheme(theme);
+    setViewMode(zoomOut ? "overview" : "focused");
     setSelectedProjectId(undefined);
     onThemeChange(theme, false);
   };
@@ -205,62 +210,44 @@ export function Archive({ initialTheme, showThemeArchive, projectId, onClose, on
           <section
             id="theme-panel"
             className="archive__theme-section"
-            role="tabpanel"
+            role="region"
             tabIndex={-1}
             aria-labelledby="theme-title"
           >
-            <div className="archive__theme-showcase">
-              <div className="archive__theme-selector">
-                <div className="archive__theme-selector-heading">
-                  <p className="archive__eyebrow">Four directions</p>
-                  <span>Choose a thread</span>
-                </div>
-                <Heartwheel activeTheme={activeTheme} onThemeChange={selectTheme} />
-              </div>
-
-              <div
-                className="theme-preview"
-                style={{ "--theme-accent": currentDefinition.accent, "--theme-ink": currentDefinition.ink } as CSSProperties}
-              >
-                <div className="theme-preview__intro">
-                  <span className="theme-preview__index">0{themeConfig[activeTheme].id === "keep" ? 4 : themeConfig[activeTheme].id === "play" ? 3 : themeConfig[activeTheme].id === "question" ? 2 : 1}</span>
+            {showThemeArchive ? (
+              <div className="leaf-canvas__archive">
+                <div className="leaf-canvas__archive-bar">
                   <div>
-                    <p className="theme-preview__label">{showThemeArchive ? "Theme archive" : "Active theme"}</p>
-                    <h2 id="theme-title">{currentDefinition.label}</h2>
-                    <p className="theme-preview__description">{currentDefinition.description}</p>
+                    <p className="archive__eyebrow">THE ARCHIVE / {currentDefinition.label}</p>
+                    <h2 id="theme-title">{currentDefinition.shortLabel}</h2>
                   </div>
-                  <p className="theme-preview__verb">{currentDefinition.verb}</p>
-                  <button type="button" onClick={() => onThemeChange(activeTheme, !showThemeArchive)}>
-                    {showThemeArchive ? "← Back to Index" : `View all ${currentDefinition.label} ↗`}
+                  <button className="leaf-canvas__archive-back" type="button" onClick={() => onThemeChange(activeTheme, false)}>
+                    ← Back to Living Index
                   </button>
                 </div>
                 {themeEntries.length > 0 ? (
-                  showThemeArchive ? (
-                    <div className="theme-preview__entries theme-preview__entries--archive">
-                      {themeEntries.map((entry) => (
-                        <ProjectCard key={entry.id} entry={entry} compact onOpen={() => openProject(entry)} />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="theme-preview__entries theme-preview__entries--showcase">
-                      <ProjectCard entry={themeEntries[0]} featured onOpen={() => openProject(themeEntries[0])} />
-                      {themeEntries.length > 1 && (
-                        <div className="theme-preview__secondary">
-                          {themeEntries.slice(1, 3).map((entry) => (
-                            <ProjectCard key={entry.id} entry={entry} compact onOpen={() => openProject(entry)} />
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )
-                ) : (
-                  <div className="theme-preview__empty">
-                    <strong>No entries here yet.</strong>
-                    <p>I would rather leave this shelf open than invent a collection.</p>
+                  <div className="leaf-canvas__archive-list">
+                    {themeEntries.map((entry) => (
+                      <ProjectCard key={entry.id} entry={entry} compact onOpen={() => openProject(entry)} />
+                    ))}
                   </div>
+                ) : (
+                  <p className="archive__empty">No published entries for this theme yet.</p>
                 )}
               </div>
-            </div>
+            ) : (
+              <LeafCanvas
+                activeTheme={activeTheme}
+                focused={viewMode === "focused"}
+                onThemeChange={selectTheme}
+                onProjectOpen={openProject}
+                onViewAll={(theme) => {
+                  setActiveTheme(theme);
+                  setViewMode("focused");
+                  onThemeChange(theme, true);
+                }}
+              />
+            )}
           </section>
         )}
 

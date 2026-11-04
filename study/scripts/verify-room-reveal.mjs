@@ -27,9 +27,9 @@ assert.doesNotMatch(pageTurn, /page-turn-away|\.page-sheet--folding/);
 assert.match(paperCorner, /onPeekChange/);
 assert.match(app, /pointerEvents: route\.view === "room" \? "none" : "auto"/);
 assert.match(app, /roomInteractive && \(/);
-assert.match(archive, /archive__theme-showcase/);
-assert.match(archive, /<Heartwheel activeTheme=\{activeTheme\}/);
+assert.match(archive, /<LeafCanvas/);
+assert.match(archive, /viewMode === "focused"/);
 assert.match(heartwheel, /heartwheel__leaf-visual/);
 assert.match(heartwheelCss, /\.heartwheel__leaf--active \.heartwheel__leaf-visual/);
 
-console.log("Room reveal and spatial showcase assertions passed.");
+console.log("Room reveal and Leaf & Canvas spatial assertions passed.");

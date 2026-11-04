@@ -6,7 +6,8 @@ import "./Heartwheel.css";
 
 interface HeartwheelProps {
   activeTheme: ThemeId;
-  onThemeChange: (theme: ThemeId) => void;
+  focused?: boolean;
+  onThemeChange: (theme: ThemeId, source?: "select" | "drag") => void;
 }
 type Gesture = {
   pointerId: number;
@@ -47,14 +48,14 @@ const themeForRotation = (rotation: number) => {
   return nearestTheme;
 };
 
-export function Heartwheel({ activeTheme, onThemeChange }: HeartwheelProps) {
-  const [rotation, setRotation] = useState(() => targetForTheme(activeTheme));
+export function Heartwheel({ activeTheme, focused = true, onThemeChange }: HeartwheelProps) {
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const [dragging, setDragging] = useState(false);
   const [hoveredTheme, setHoveredTheme] = useState<ThemeId | null>(null);
-  const rotationRef = useRef(rotation);
+  const rotationRef = useRef(targetForTheme(activeTheme));
   const gesture = useRef<Gesture | null>(null);
   const suppressClick = useRef(false);
-  const targetRotation = useRef(rotation);
+  const targetRotation = useRef(targetForTheme(activeTheme));
   const animationFrame = useRef<number | null>(null);
   const animationRef = useRef<SettleAnimation | null>(null);
   const lastFrameAt = useRef<number | null>(null);
@@ -72,13 +73,18 @@ export function Heartwheel({ activeTheme, onThemeChange }: HeartwheelProps) {
 
   const applyRotation = (next: number) => {
     rotationRef.current = next;
-    setRotation(next);
+    stageRef.current?.style.setProperty("--heartwheel-rotation", `${next}deg`);
   };
 
   const animateToRotation = (target: number) => {
     const from = rotationRef.current;
     const initialVelocity = angularVelocity.current;
     targetRotation.current = target;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      cancelSettle();
+      applyRotation(target);
+      return;
+    }
     cancelSettle(false);
 
     if (Math.abs(target - from) < 0.01 && Math.abs(initialVelocity) < 0.1) {
@@ -129,7 +135,7 @@ export function Heartwheel({ activeTheme, onThemeChange }: HeartwheelProps) {
   const chooseTheme = (theme: ThemeId) => {
     const next = nearestTarget(rotationRef.current, theme);
     animateToRotation(next);
-    onThemeChange(theme);
+    onThemeChange(theme, "select");
   };
 
   const commitGesture = () => {
@@ -137,7 +143,7 @@ export function Heartwheel({ activeTheme, onThemeChange }: HeartwheelProps) {
     const snapped = Math.round(current / SNAP_ANGLE) * SNAP_ANGLE;
     const theme = themeForRotation(snapped);
     animateToRotation(snapped);
-    onThemeChange(theme);
+    onThemeChange(theme, "drag");
   };
 
   const finishGesture = (pointerId: number) => {
@@ -204,7 +210,7 @@ export function Heartwheel({ activeTheme, onThemeChange }: HeartwheelProps) {
   };
 
   const wheelStyle = {
-    "--heartwheel-rotation": `${rotation}deg`,
+    "--heartwheel-rotation": `${rotationRef.current}deg`,
   } as CSSProperties;
 
   const handleLeafClick = (theme: ThemeId) => {
@@ -221,6 +227,7 @@ export function Heartwheel({ activeTheme, onThemeChange }: HeartwheelProps) {
     <div className="heartwheel" aria-label="Four Hearts 主题导航">
       <div
         className={["heartwheel__stage", dragging && "heartwheel__stage--dragging"].filter(Boolean).join(" ")}
+        ref={stageRef}
         style={wheelStyle}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -240,7 +247,7 @@ export function Heartwheel({ activeTheme, onThemeChange }: HeartwheelProps) {
               ))}
             </defs>
             {themeOrder.map((theme) => {
-              const active = activeTheme === theme;
+              const active = focused && activeTheme === theme;
               const hovered = hoveredTheme === theme;
               return (
                 <g
@@ -274,9 +281,9 @@ export function Heartwheel({ activeTheme, onThemeChange }: HeartwheelProps) {
             <circle className="heartwheel__hub" cx="0" cy="0" r="6" />
           </svg>
 
-          <div className="heartwheel__labels" role="tablist" aria-label="Four Hearts 主题">
+          <div className="heartwheel__labels" role="group" aria-label="Four Hearts 主题">
             {themeOrder.map((theme, index) => {
-              const selected = activeTheme === theme;
+              const selected = focused && activeTheme === theme;
               const labelStyle = {
                 "--label-accent": themeConfig[theme].accent,
                 "--label-ink": themeConfig[theme].ink,
@@ -287,10 +294,7 @@ export function Heartwheel({ activeTheme, onThemeChange }: HeartwheelProps) {
                   className={["heartwheel__label", selected && "heartwheel__label--selected"].filter(Boolean).join(" ")}
                   style={labelStyle}
                   type="button"
-                  role="tab"
-                  aria-selected={selected}
-                  aria-controls="theme-panel"
-                  tabIndex={selected ? 0 : -1}
+                  aria-pressed={selected}
                   onMouseEnter={() => setHoveredTheme(theme)}
                   onMouseLeave={() => setHoveredTheme(null)}
                   onFocus={() => setHoveredTheme(theme)}
