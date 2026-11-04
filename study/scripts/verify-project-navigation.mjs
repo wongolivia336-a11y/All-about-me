@@ -112,6 +112,7 @@ try {
     send("Runtime.enable"),
     send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false }),
   ]);
+  await evaluate("localStorage.setItem('four-hearts-language', 'en')");
   await navigate("#index");
   await sleep(450);
   await capture("index-overview-1440x900");

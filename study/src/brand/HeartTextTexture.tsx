@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { ThemeId } from "../data/library";
-import { themeConfig } from "../data/themeConfig";
+import { themeText, useLanguage } from "../i18n";
 
 export const HEART_PATH =
   "M 0 0 C -8 -18 -58 -46 -66 -88 C -73 -126 -28 -150 0 -116 C 28 -150 73 -126 66 -88 C 58 -46 8 -18 0 0 Z";
@@ -10,7 +10,8 @@ interface HeartTextTextureProps {
   clipId: string;
 }
 export function HeartTextTexture({ theme, clipId }: HeartTextTextureProps) {
-  const words = themeConfig[theme].texture;
+  const { language } = useLanguage();
+  const words = themeText(theme, language).texture;
   const lines = useMemo(
     () => Array.from({ length: 8 }, (_, index) => {
       const first = words[index % words.length];

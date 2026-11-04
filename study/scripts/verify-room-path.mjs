@@ -77,13 +77,15 @@ try {
     send("Page.enable"),
     send("Runtime.enable"),
     send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false }),
+    send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "no-preference" }] }),
   ]);
+  await evaluate("localStorage.setItem('four-hearts-language', 'en')");
   await navigate("#index");
   await until("Boolean(document.querySelector('.archive'))");
   await until("!document.querySelector('.speech-loader:not(.speech-loader--hidden)')");
   await evaluate("window.__auditFocusTrace=[];const originalFocus=HTMLElement.prototype.focus;" +
-    "HTMLElement.prototype.focus=function(){window.__auditFocusTrace.push(this.getAttribute('aria-label')||this.className||this.tagName);" +
-    "return originalFocus.apply(this,arguments)}");
+    "HTMLElement.prototype.focus=function(){const requested=this.getAttribute('aria-label')||this.className||this.tagName;" +
+    "const result=originalFocus.apply(this,arguments);window.__auditFocusTrace.push({requested,active:document.activeElement===this});return result}");
   const indexState = await evaluate("({hash:location.hash,archive:Boolean(document.querySelector('.archive'))," +
     "enterRoom:Boolean(document.querySelector('button[aria-label=\"Enter Room\"]'))})");
   check("Index exposes the Room entry", indexState.archive && indexState.enterRoom, indexState);
@@ -100,8 +102,9 @@ try {
   await capture("room-overview-1280x800");
   check("Room loads and becomes interactive", roomState.hash === "#room" && roomState.hud &&
     roomState.canvasCount > 0 && roomState.revealInteractive === "true" && roomState.exit, roomState);
-  const roomFocus = await evaluate("document.activeElement===document.querySelector('button[aria-label=\"Return to Index\"]')");
-  check("Room entry moves focus to its exit control", roomFocus, roomFocus);
+  const roomFocus = await evaluate("({active:document.activeElement===document.querySelector('button[aria-label=\"Return to Index\"]')," +
+    "focusCall:window.__auditFocusTrace.find(entry=>entry.requested==='Return to Index')||null})");
+  check("Room entry moves focus to its exit control", roomFocus.active && roomFocus.focusCall?.active, roomFocus);
 
   const objectIds = ["laptop", "phone", "portfolio", "shelf", "camera", "board", "marshall", "posters", "domi", "sketchbook", "materials", "whiteboard"];
   for (const id of objectIds) {
@@ -121,6 +124,7 @@ try {
   await evaluate("(() => {const button=document.querySelector('button[aria-label=\"Return to Index\"]');button.focus();button.click()})()");
   await until("Boolean(document.querySelector('.archive') && !document.querySelector('.room-reveal-surface[data-reveal-interactive=\"true\"]'))");
   await until("!document.querySelector('.room-reveal-surface')");
+  await until("document.activeElement===document.querySelector('button[aria-label=\"Enter Room\"]')");
   await sleep(100);
   const exitState = await evaluate("({hash:location.hash,archive:Boolean(document.querySelector('.archive'))," +
     "roomMounted:Boolean(document.querySelector('.room-reveal-surface'))," +

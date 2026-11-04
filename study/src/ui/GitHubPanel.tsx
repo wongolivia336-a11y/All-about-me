@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { GITHUB_USER, deskAccounts } from "../data/links";
 import { focus } from "../interaction/studyStore";
+import { useLanguage } from "../i18n";
 
 interface Profile {
   avatar_url: string;
@@ -31,6 +32,7 @@ interface Repo {
  * showing a cached snapshot while claiming it is live.
  */
 export function GitHubPanel() {
+  const { copy } = useLanguage();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [repos, setRepos] = useState<Repo[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +43,7 @@ export function GitHubPanel() {
 
     Promise.all([
       fetch(`${base}/users/${GITHUB_USER}`).then((r) => {
-        if (r.status === 403) throw new Error("GitHub 接口调用频率超限，稍后再试");
+        if (r.status === 403) throw new Error("RATE_LIMIT");
         if (!r.ok) throw new Error(`GitHub ${r.status}`);
         return r.json();
       }),
@@ -65,15 +67,15 @@ export function GitHubPanel() {
 
   return (
     <aside className="panel panel--wide">
-      <button className="panel__close" onClick={() => focus(null)} aria-label="返回房间">
+      <button className="panel__close" onClick={() => focus(null)} aria-label={copy.closePanel}>
         ✕
       </button>
 
-      <p className="panel__kicker">Web · GitHub</p>
-      <h2 className="panel__title">代码与网页</h2>
+      <p className="panel__kicker">{copy.githubKicker}</p>
+      <h2 className="panel__title">{copy.githubTitle}</h2>
 
-      {error && <p className="panel__body">{error}</p>}
-      {!profile && !error && <p className="panel__body">正在读取 GitHub…</p>}
+      {error && <p className="panel__body">{error === "RATE_LIMIT" ? copy.githubRateLimit : error}</p>}
+      {!profile && !error && <p className="panel__body">{copy.githubLoading}</p>}
 
       {profile && (
         <>
@@ -82,7 +84,7 @@ export function GitHubPanel() {
             <div>
               <p className="gh__name">{profile.name ?? profile.login}</p>
               <p className="gh__meta">
-                {profile.public_repos} repos · {profile.followers} followers
+                {profile.public_repos} {copy.githubRepos} · {profile.followers} {copy.githubFollowers}
               </p>
             </div>
             <span className="gh__live">LIVE</span>
@@ -106,7 +108,7 @@ export function GitHubPanel() {
           </ul>
 
           <a className="panel__cta" href={profile.html_url} target="_blank" rel="noreferrer">
-            打开 GitHub 主页
+            {copy.githubOpen}
           </a>
         </>
       )}
@@ -117,7 +119,7 @@ export function GitHubPanel() {
             LinkedIn
           </a>
         ) : (
-          <>LinkedIn 链接待补 — 它没有公开 API，只能静态跳转</>
+          copy.linkedinMissing
         )}
       </p>
     </aside>

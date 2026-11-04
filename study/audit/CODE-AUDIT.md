@@ -10,6 +10,11 @@
 | `src/ui/Archive.tsx`, `src/index.css` | Detail image had a fixed HTML height attribute but no CSS height override; it rendered 474×1000. | Set `height: auto` while retaining its 1.6 source ratio. |
 | `src/brand/Heartwheel.tsx` | `pointercancel` and lost pointer capture shared the successful gesture-commit path. | Add `cancelGesture`; cancellation suppresses synthetic click and returns to the prior target without selecting a theme. |
 | `src/ui/LeafCanvas.tsx` / `.css` | The four tiles already stayed mounted, but supporting copy was repetitive and mobile pushed the matrix down. | Keep spatial model; remove redundant copy and tune title / wheel scale below 480px. |
+| `src/App.tsx`, `src/PageTurn.css`, `src/ui/PaperCorner.tsx` | The fold preview and corner trigger remained as competing layers during the Room reveal. | Removed preview state and unmounted the trigger outside idle Index; one reveal clip path remains. |
+| `src/brand/Heartwheel.tsx`, `src/brand/Heartwheel.css` | Permanent outline paths and button borders made each leaf look like a separate outlined control. | Removed idle outlines/borders; retained an outline only for keyboard `:focus-visible`. |
+| `src/i18n.tsx`, `src/ui/LanguageSwitch.tsx`, Room / archive UI | Interface had no persistent bilingual state; labels and generated device-screen copy could diverge. | Added EN / 中文 provider and localized copy/data helpers; both views expose the same persisted toggle. |
+| `src/index.css`, `src/ui/LanguageSwitch.css` | Evening palette changed `--ink`, but `.app` inherited the already-computed root `color`, leaving Room panels dark; the broad night selector also made Index language tabs white on paper. | Bind `.app` color to `var(--ink)` and scope white language-tab styling to `.hud` in the Room. |
+| `src/App.tsx` | Focus was scheduled in the same frame as transition state updates, before the destination control was guaranteed to be mounted. | Track pending destination focus and run it from an effect after the settled destination render. |
 
 ## Architecture reconstructed
 
@@ -19,6 +24,7 @@
 - `Heartwheel.tsx` rotates SVG leaves from click, drag and an interruptible animation loop.
 - Room object focus is shared through `interaction/studyStore.ts`; hotspot labels and camera poses read `data/hotspots.ts`, which derives object targets from `scene/layout.ts`.
 - `GlobalLoadingProvider` and `SpeechCodeLoader` manage the loading overlay; `RoomRevealSurface` uses the shared reveal progress.
+- `LanguageProvider` is mounted above both route surfaces. Room canvas textures are regenerated from the active language and disposed on locale change / unmount.
 
 ## Repository baseline
 

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { cloverArt } from "../data/clover";
+import { useLanguage } from "../i18n";
 import "./SpeechCodeLoader.css";
 
 type SpeechCodeLoaderProps = {
@@ -47,6 +48,7 @@ const glyphsFromArt = (width: number, height: number, fontSize: number): Glyph[]
 };
 
 export function SpeechCodeLoader({ active, error = null, onRetry, onReturnToIndex }: SpeechCodeLoaderProps) {
+  const { language, copy } = useLanguage();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const shownAt = useRef(0);
   const [presented, setPresented] = useState(active);
@@ -163,14 +165,14 @@ export function SpeechCodeLoader({ active, error = null, onRetry, onReturnToInde
 
   return (
     <div className={["speech-loader", !presented && "speech-loader--hidden", leaving && "speech-loader--leaving"].filter(Boolean).join(" ")} aria-hidden={!presented}>
-      <span className="sr-only" role="status" aria-live="polite">王心蕊，四叶草缓冲页</span>
+      <span className="sr-only" role="status" aria-live="polite">{language === "zh" ? "王心蕊，四叶草缓冲页" : "Olivia Wong, Four Hearts loading screen"}</span>
       <canvas ref={canvasRef} className="speech-loader__canvas" aria-hidden="true" />
       {error && onRetry && (
         <div className="speech-loader__error">
-          <span>{error}</span>
-          <button type="button" onClick={onRetry}>Retry</button>
+          <span>{copy.roomLoadError}</span>
+          <button type="button" onClick={onRetry}>{copy.retry}</button>
           {onReturnToIndex && (
-            <button type="button" onClick={onReturnToIndex}>Return to Index</button>
+            <button type="button" onClick={onReturnToIndex}>{copy.returnToIndex}</button>
           )}
         </div>
       )}

@@ -49,6 +49,7 @@ body {
   position: relative;
   height: 100%;
   width: 100%;
+  color: var(--ink);
   transition: background 600ms ease;
 }
 
@@ -913,6 +914,13 @@ body {
 .hud__name {
   font-size: 14px;
   letter-spacing: 0.02em;
+}
+
+.hud__identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  pointer-events: auto;
 }
 
 .hud__btn--icon {
@@ -2021,6 +2029,11 @@ input:focus-visible {
   gap: 4px;
 }
 
+.archive__language {
+  justify-self: start;
+  margin-top: 3px;
+}
+
 .archive__monogram,
 .archive__eyebrow,
 .archive__project-meta,
@@ -2686,6 +2699,26 @@ input:focus-visible {
 }
 
 @media (max-width: 620px) {
+  .hud {
+    align-items: flex-start;
+    padding: 16px 16px;
+  }
+
+  .hud__identity {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .hud__actions {
+    gap: 6px;
+  }
+
+  .hud__light {
+    width: 58px;
+    padding: 0 8px;
+  }
+
   .archive__shell {
     padding: 20px 20px 42px;
   }

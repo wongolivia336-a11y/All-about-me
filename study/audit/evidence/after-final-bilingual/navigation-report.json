@@ -1,0 +1,281 @@
+{
+  "stage": "after-final-bilingual",
+  "url": "http://127.0.0.1:5174/",
+  "viewport": [
+    1440,
+    900
+  ],
+  "mobileViewport": [
+    390,
+    844
+  ],
+  "checks": [
+    {
+      "name": "all mapped portfolio art assets are served",
+      "passed": true,
+      "observed": [
+        {
+          "path": "/portfolio/mono/01_bioaz-research_wide.png",
+          "status": 200,
+          "bytes": 233882,
+          "type": "image/png"
+        },
+        {
+          "path": "/portfolio/mono/01_bioaz-research.png",
+          "status": 200,
+          "bytes": 533402,
+          "type": "image/png"
+        },
+        {
+          "path": "/portfolio/mono/07_healther-daily_wide.png",
+          "status": 200,
+          "bytes": 231201,
+          "type": "image/png"
+        },
+        {
+          "path": "/portfolio/mono/07_healther-daily.png",
+          "status": 200,
+          "bytes": 486060,
+          "type": "image/png"
+        },
+        {
+          "path": "/portfolio/mono/04_meow-gallery-cat_wide.png",
+          "status": 200,
+          "bytes": 398073,
+          "type": "image/png"
+        },
+        {
+          "path": "/portfolio/mono/04_meow-gallery-cat.png",
+          "status": 200,
+          "bytes": 766122,
+          "type": "image/png"
+        },
+        {
+          "path": "/portfolio/mono/02_knock-knock-presence_wide.png",
+          "status": 200,
+          "bytes": 143697,
+          "type": "image/png"
+        },
+        {
+          "path": "/portfolio/mono/02_knock-knock-presence.png",
+          "status": 200,
+          "bytes": 335770,
+          "type": "image/png"
+        },
+        {
+          "path": "/portfolio/mono/06_mirror-two-sides_wide.png",
+          "status": 200,
+          "bytes": 208810,
+          "type": "image/png"
+        },
+        {
+          "path": "/portfolio/mono/06_mirror-two-sides.png",
+          "status": 200,
+          "bytes": 474733,
+          "type": "image/png"
+        },
+        {
+          "path": "/portfolio/mono/03_qiaopi-letter_wide.png",
+          "status": 200,
+          "bytes": 303140,
+          "type": "image/png"
+        },
+        {
+          "path": "/portfolio/mono/03_qiaopi-letter.png",
+          "status": 200,
+          "bytes": 635995,
+          "type": "image/png"
+        },
+        {
+          "path": "/portfolio/mono/05_film-shelf_wide.png",
+          "status": 200,
+          "bytes": 450601,
+          "type": "image/png"
+        },
+        {
+          "path": "/portfolio/mono/05_film-shelf.png",
+          "status": 200,
+          "bytes": 707726,
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "project detail is placed in reading view",
+      "passed": true,
+      "observed": {
+        "hash": "#index/build/bioaz-agent-workbench",
+        "scrollTop": 458,
+        "detailTop": 0.421875,
+        "headingVisible": true,
+        "art": {
+          "imageLoaded": true,
+          "naturalSize": [
+            1600,
+            1000
+          ],
+          "renderedSize": [
+            474,
+            296
+          ],
+          "caption": "Conceptual artwork · not a project screenshot or result."
+        },
+        "focusOnDetail": true,
+        "title": "BioAZ Agent Workbench — Olivia Wong / Four Hearts",
+        "project": "BioAZ Agent Workbench"
+      }
+    },
+    {
+      "name": "detail receives keyboard focus",
+      "passed": true,
+      "observed": true
+    },
+    {
+      "name": "document title follows the selected project",
+      "passed": true,
+      "observed": "BioAZ Agent Workbench — Olivia Wong / Four Hearts"
+    },
+    {
+      "name": "project slug is present in the URL",
+      "passed": true,
+      "observed": "#index/build/bioaz-agent-workbench"
+    },
+    {
+      "name": "project art keeps its source ratio and conceptual provenance",
+      "passed": true,
+      "observed": {
+        "imageLoaded": true,
+        "naturalSize": [
+          1600,
+          1000
+        ],
+        "renderedSize": [
+          474,
+          296
+        ],
+        "caption": "Conceptual artwork · not a project screenshot or result."
+      }
+    },
+    {
+      "name": "return restores source scroll position",
+      "passed": true,
+      "observed": {
+        "origin": 923,
+        "returned": 923
+      }
+    },
+    {
+      "name": "return restores source focus",
+      "passed": true,
+      "observed": {
+        "hash": "#index",
+        "scrollTop": 923,
+        "focusContext": "selected",
+        "focusEntry": "bioaz-agent-workbench",
+        "title": "Olivia Wong — Four Hearts"
+      }
+    },
+    {
+      "name": "browser Back leaves project detail",
+      "passed": true,
+      "observed": {
+        "hash": "#index",
+        "detail": false
+      }
+    },
+    {
+      "name": "browser Forward restores project detail",
+      "passed": true,
+      "observed": {
+        "hash": "#index/build/bioaz-agent-workbench",
+        "detail": true
+      }
+    },
+    {
+      "name": "refresh restores the project route",
+      "passed": true,
+      "observed": {
+        "hash": "#index/build/bioaz-agent-workbench",
+        "title": "BioAZ Agent Workbench — Olivia Wong / Four Hearts",
+        "focused": true,
+        "headingVisible": true
+      }
+    },
+    {
+      "name": "build theme selects matching artwork",
+      "passed": true,
+      "observed": {
+        "selected": "true",
+        "tileActive": "true",
+        "imageLoaded": true,
+        "title": "BioAZ Agent Workbench"
+      }
+    },
+    {
+      "name": "question theme selects matching artwork",
+      "passed": true,
+      "observed": {
+        "selected": "true",
+        "tileActive": "true",
+        "imageLoaded": true,
+        "title": "Two Sides of a Mirror"
+      }
+    },
+    {
+      "name": "play theme selects matching artwork",
+      "passed": true,
+      "observed": {
+        "selected": "true",
+        "tileActive": "true",
+        "imageLoaded": true,
+        "title": "meow gallery"
+      }
+    },
+    {
+      "name": "keep theme selects matching artwork",
+      "passed": true,
+      "observed": {
+        "selected": "true",
+        "tileActive": "true",
+        "imageLoaded": true,
+        "title": "Film shelf"
+      }
+    },
+    {
+      "name": "touch pointer cancel restores the starting theme rotation",
+      "passed": true,
+      "observed": {
+        "start": {
+          "hash": "#index",
+          "mode": "overview",
+          "rotation": 89.88473621016918
+        },
+        "end": {
+          "hash": "#index",
+          "mode": "overview",
+          "rotation": 89.94813463671736
+        }
+      }
+    },
+    {
+      "name": "reduced motion uses a static theme transition",
+      "passed": true,
+      "observed": {
+        "preferred": true,
+        "tileTransition": "0s",
+        "copyAnimation": "none",
+        "mode": "focused"
+      }
+    },
+    {
+      "name": "mobile index has no horizontal overflow",
+      "passed": true,
+      "observed": {
+        "viewport": 390,
+        "pageWidth": 390,
+        "archiveWidth": 390,
+        "tileCount": 4
+      }
+    }
+  ]
+}

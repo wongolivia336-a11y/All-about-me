@@ -14,9 +14,14 @@
 
 ## Motion / performance evidence
 
-- No recorded video or Mid-transition frame series for theme expansion, project arrival, page reveal, camera focus or loaders.
+- One Room reveal mid-transition frame is retained. No video or frame series was captured for theme expansion, project arrival, camera focus or loaders.
 - No Lighthouse/Web Vitals, LCP/CLS/INP, long-task, GPU, frame-time or repeated-navigation memory measurements. Do not infer performance from the successful build.
-- `npm run build` reports `RoomScene` at 1,384.08 KB minified (443.91 KB gzip). The 14 new PNGs total 5.64 MiB. Consider measured code splitting or lossless alternatives after device/network testing; no lossy conversion was applied to the stippled illustrations.
+- `npm run build` reports `RoomScene` at 1,384.66 KB minified (444.47 KB gzip), above Vite's chunk advisory threshold. The 14 new PNGs total 5.64 MiB. Consider measured code splitting or lossless alternatives after device/network testing; no lossy conversion was applied to the stippled illustrations.
+
+## Bilingual content boundary
+
+- Authored interface copy, project records, room labels / panels, accessibility labels and generated device-screen text follow EN / 中文. Names, product brands and text returned live by GitHub retain their source language because the source belongs to the external profile / repository.
+- Book, poster and sketchbook entries still use author-source placeholders. They were translated for legibility but not replaced with invented personal material.
 
 ## Visual disagreements / limitations
 

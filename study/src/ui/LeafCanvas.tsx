@@ -2,6 +2,7 @@ import { useMemo, type CSSProperties } from "react";
 import { Heartwheel } from "../brand/Heartwheel";
 import { library, type ArchiveEntry, type ThemeId } from "../data/library";
 import { themeConfig, themeOrder } from "../data/themeConfig";
+import { projectText, themeText, useLanguage } from "../i18n";
 import "./LeafCanvas.css";
 
 export type ThemeSelectionSource = "select" | "drag";
@@ -23,6 +24,7 @@ interface LeafCanvasProps {
 export function LeafCanvas({
   activeTheme, focused, onThemeChange, onProjectOpen, onViewAll,
 }: LeafCanvasProps) {
+  const { language, copy } = useLanguage();
   const representatives = useMemo(() =>
     Object.fromEntries(themeOrder.map((theme) => [theme,
       library.find((entry) => entry.primaryTheme === theme &&
@@ -30,7 +32,7 @@ export function LeafCanvas({
     ])) as Record<ThemeId, ArchiveEntry | undefined>, []);
 
   const current = representatives[activeTheme];
-  const definition = themeConfig[activeTheme];
+  const definition = themeText(activeTheme, language);
 
   return (
     <div className="leaf-canvas" data-mode={focused ? "focused" : "overview"}>
@@ -41,9 +43,9 @@ export function LeafCanvas({
             type="button"
             onClick={() => focused && onThemeChange(activeTheme, "select")}
             disabled={!focused}
-            aria-label="返回四个主题概览"
+            aria-label={copy.overviewAria}
           >
-            {focused ? "← Overview" : "Overview · 4 themes"}
+            {focused ? copy.overview : copy.overviewAll}
           </button>
         </div>
         <Heartwheel
@@ -55,15 +57,17 @@ export function LeafCanvas({
 
       <div className="leaf-canvas__content">
         <div className="leaf-canvas__topline">
-          <span>THE LIVING INDEX</span>
+          <span>{copy.fourThemeIndex}</span>
           <span>{focused ? `0${themeOrder.indexOf(activeTheme) + 1} / 04` : "01 — 04"}</span>
         </div>
-        <div className="leaf-canvas__viewport" aria-label="四主题作品视觉索引">
+        <div className="leaf-canvas__viewport" aria-label={copy.portfolioMapAria}>
           {themeOrder.map((theme, i) => {
             const entry = representatives[theme];
             const isCurrent = theme === activeTheme;
             const expanded = focused && isCurrent;
             const def = themeConfig[theme];
+            const localizedTheme = themeText(theme, language);
+            const localizedEntry = entry ? projectText(entry, language) : null;
             return (
               <button
                 type="button"
@@ -74,8 +78,8 @@ export function LeafCanvas({
                 tabIndex={focused && !isCurrent ? -1 : 0}
                 aria-hidden={focused && !isCurrent ? true : undefined}
                 aria-label={expanded
-                  ? entry ? `查看项目详情：${entry.title}` : `${def.label} 暂无公开项目封面`
-                  : `聚焦 ${def.label}，${entry?.title ?? "暂无公开封面"}`}
+                  ? entry ? `${copy.seeProject}${localizedEntry?.title}` : `${localizedTheme.label} · ${copy.noThemeCover}`
+                  : `${copy.focusTheme}${localizedTheme.label}, ${localizedEntry?.title ?? copy.noPublicCover}`}
                 data-project-entry={entry?.id}
                 data-project-context="theme-tile"
                 onClick={() => {
@@ -97,14 +101,14 @@ export function LeafCanvas({
                   <img src={entry.cover} alt="" width="1800" height="630" loading="eager" decoding="async" />
                 ) : (
                   <span className="leaf-canvas__cover-empty" aria-hidden="true">
-                    <span>PRIVATE INDEX</span>
-                    <span>NO PUBLIC COVER</span>
+                    <span>{copy.privateIndex}</span>
+                    <span>{copy.noPublicCover}</span>
                   </span>
                 )}
                 <span className="leaf-canvas__tile-shade" aria-hidden="true" />
                 <span className="leaf-canvas__tile-marker">
-                  <span>0{i + 1} / {def.label}</span>
-                  <strong>{entry?.title ?? def.shortLabel}</strong>
+                  <span>0{i + 1} / {localizedTheme.label}</span>
+                  <strong>{localizedEntry?.title ?? localizedTheme.shortLabel}</strong>
                 </span>
                 <span className="leaf-canvas__tile-corner" aria-hidden="true">↗</span>
               </button>
@@ -117,25 +121,25 @@ export function LeafCanvas({
             <div className="leaf-canvas__focus-copy" key={activeTheme}>
               <div>
                 <p className="leaf-canvas__eyebrow">{definition.label} / {definition.shortLabel}</p>
-                <h2 id="theme-title">{current?.title ?? definition.shortLabel}</h2>
-                <p>{current?.summary ?? definition.description}</p>
+                <h2 id="theme-title">{current ? projectText(current, language).title : definition.shortLabel}</h2>
+                <p>{current ? projectText(current, language).summary : definition.description}</p>
               </div>
               <div className="leaf-canvas__actions">
-                {current && <button type="button" onClick={() => onProjectOpen(current)}>Explore project ↗</button>}
-                <button type="button" onClick={() => onViewAll(activeTheme)}>View all {definition.label} ↗</button>
+                {current && <button type="button" onClick={() => onProjectOpen(current)}>{copy.exploreProject}</button>}
+                <button type="button" onClick={() => onViewAll(activeTheme)}>{copy.viewAllTheme}{definition.label} ↗</button>
               </div>
             </div>
           ) : (
             <div className="leaf-canvas__overview-copy">
               <div>
-                <h2 id="theme-title">Four hearts. Four ways of seeing.</h2>
-                <p>A selection of real projects, questions, experiments and things worth keeping.</p>
+                <h2 id="theme-title">{copy.overviewTitle}</h2>
+                <p>{copy.overviewDescription}</p>
               </div>
             </div>
           )}
         </div>
         <span className="sr-only" role="status">
-          {focused ? `${definition.label} 已展开。再次选择该叶片返回概览。` : "四主题概览已打开。"}
+          {focused ? `${definition.label}${copy.focusAnnouncement}` : copy.overviewAnnouncement}
         </span>
       </div>
     </div>

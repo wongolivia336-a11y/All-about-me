@@ -70,3 +70,51 @@
 - **Observed:** RoomScene is 1,384 KB minified / 443.91 KB gzip; the 14 PNGs total about 5.64 MiB.
 - **Correction:** Measure LCP/CLS/INP and request timing on target devices before deciding on code splitting or lossless asset conversion.
 - **Status:** **Open — no performance improvement claimed.**
+
+## FH-08 — Room reveal layers compete at the fold
+
+- **Priority:** P1 · **Evidence:** Confirmed in component state and Edge mid-transition capture
+- **Location:** `src/App.tsx`, `src/PageTurn.css`, `src/ui/PaperCorner.tsx`
+- **Observed:** The old preview mask and the persistent corner trigger overlapped the Room reveal.
+- **Root cause:** Preview state and trigger lifetime extended across the transition boundary.
+- **Correction:** Remove the preview layer and mount the corner trigger only while Index is idle; keep one clipped reveal surface.
+- **Acceptance:** Mid-transition has no paper corner or preview layer; Room becomes interactive after reveal.
+- **Status:** **Fixed and verified.**
+
+## FH-09 — Four Heartwheel leaves have persistent outlines
+
+- **Priority:** P2 · **Evidence:** Confirmed in SVG / CSS and browser computed styles
+- **Location:** `src/brand/Heartwheel.tsx`, `src/brand/Heartwheel.css`
+- **Observed:** Every leaf and label button carried an idle outline / border.
+- **Correction:** Remove decorative outlines and borders; retain `:focus-visible` for keyboard navigation.
+- **Acceptance:** Zero outline paths and zero idle button border; visible keyboard focus remains.
+- **Status:** **Fixed and verified.**
+
+## FH-10 — Index and Room lack a shared bilingual mode
+
+- **Priority:** P1 · **Evidence:** Confirmed in code; 10 Edge bilingual checks
+- **Location:** `src/i18n.tsx`, `src/ui/LanguageSwitch.tsx`, Index / Room UI and canvas textures
+- **Observed:** Page copy, project metadata, hotspots and generated screens could not follow one language selection.
+- **Correction:** Add persisted EN / 中文 state and localized copy helpers across both views.
+- **Acceptance:** Language stays selected across route changes; title, theme, project, hotspot and document-language values agree.
+- **Status:** **Fixed and verified for authored UI; live third-party descriptions keep their source language.**
+
+## FH-11 — Night Room panels inherit the wrong text color
+
+- **Priority:** P1 · **Evidence:** Confirmed from computed browser color and screenshot
+- **Location:** `src/index.css`
+- **Observed:** Dark night panel background with dark text; the night language-tab selector also made Index tabs too light against paper.
+- **Root cause:** `.app--evening` changed `--ink`, but `.app` inherited the root’s computed `color`; the language-tab night rule was scoped to every view.
+- **Correction:** Set `.app { color: var(--ink) }` and scope the light switch colors to `.hud` in Room.
+- **Acceptance:** Room panel text uses the light palette at night; Index tabs retain their dark palette regardless of time.
+- **Status:** **Fixed and verified.**
+
+## FH-12 — Room transition focus can run before its target mounts
+
+- **Priority:** P1 · **Evidence:** Reproduced in Edge by a focus handoff check
+- **Location:** `src/App.tsx`
+- **Observed:** Exit focus sometimes remained on `body` after the Room reveal closed.
+- **Root cause:** Focus was requested in the same animation-frame callback as state changes that mount the destination button.
+- **Correction:** Defer pending transition focus to an effect that runs after the settled destination render.
+- **Acceptance:** Room entry focuses Room exit; exit focuses the Room entry; browser Back / Forward remains usable.
+- **Status:** **Fixed and verified.**

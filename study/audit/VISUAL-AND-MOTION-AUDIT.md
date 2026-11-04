@@ -27,3 +27,15 @@ Opening a project now creates a visible reading state, with back navigation, pro
 ## Evidence limits
 
 The screenshots capture settled states, not a frame-by-frame video or performance trace. No FPS, INP, GPU, memory or image LCP/CLS measurement is claimed. Room hotspot content paths were exercised through the shared store, but every physical object hit area and camera move was not recorded frame-by-frame. Safari was not available in this run.
+
+## UX revisit — 2026-11-04
+
+| Interaction | Confirmed cause | Refinement and evidence |
+|---|---|---|
+| Index → Room fold | The corner trigger and preview mask survived over the reveal surface, creating competing edges and layers. | The corner trigger now exists only in idle Index; the reveal uses one clip path. `room-reveal-mid-1440x900.png` captures the intermediate state. |
+| Four leaves | A decorative SVG stroke outlined every leaf independently of selection. | Removed permanent strokes and button borders. Selection uses fill / scale; keyboard focus keeps a separate visible focus ring. |
+| Room entry / return | Focus restoration was scheduled before the destination control was guaranteed to be mounted. | A state-aware effect waits for the settled destination and then focuses its control. Edge confirmed both handoffs and Back / Forward. |
+| Night palette | `.app--evening` changed CSS variables, but the app did not rebind inherited `color`; its language-switch selector also made Index tabs white on paper. | `.app` now declares `color: var(--ink)` and night switch styling is scoped to the Room HUD. Both the dark Room panel and light Index tabs stay legible. |
+| Language switch | Interface copy and Canvas textures had no shared language state. | Persistent EN / 中文 state now updates Index, project detail, Room panels, accessibility labels and generated screen textures. 390×844 shows no overflow or fold overlap; each switch control is 44px tall. |
+
+Edge/CDP evidence: [10 bilingual UX checks](evidence/ux-revisit/rehearsal-report.json), [18 Index / project checks](evidence/after-final-bilingual/navigation-report.json), and [20 Room checks](evidence/after-final/room-navigation-report.json). See the image set in [UX-REVISIT.md](UX-REVISIT.md).

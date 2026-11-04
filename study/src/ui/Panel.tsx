@@ -1,20 +1,21 @@
-import { content } from "../data/content";
 import { hotspotById } from "../data/hotspots";
 import { useFocusedRoom } from "../interaction/studyStore";
+import { sectionText, useLanguage } from "../i18n";
 
 /** The content surface that slides in once the camera is pushed into an object. */
 export function Panel() {
+  const { language, copy } = useLanguage();
   const { focused, focus } = useFocusedRoom();
   if (!focused) return null;
 
-  const section = content[focused];
+  const section = sectionText(focused, language);
   if (!section) return null;
 
   const spot = hotspotById(focused);
 
   return (
     <aside className="panel" key={focused}>
-      <button className="panel__close" onClick={() => focus(null)} aria-label="返回房间">
+      <button className="panel__close" onClick={() => focus(null)} aria-label={copy.closePanel}>
         ✕
       </button>
 

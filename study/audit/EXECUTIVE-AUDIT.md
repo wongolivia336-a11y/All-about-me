@@ -48,3 +48,13 @@ Four Hearts 已有清晰的作者身份：四叶草主题导航、作品画布�
 - [Room 浏览器报告](evidence/after-final/room-navigation-report.json)
 
 诊断分类与证据边界见 [CODE-AUDIT.md](CODE-AUDIT.md) 和 [REMAINING-ISSUES.md](REMAINING-ISSUES.md)。
+
+## UX 复核补充 — 2026-11-04
+
+- **Confirmed — 折页叠层：**旧预览蒙版与常驻折角按钮会同时覆盖揭页。现在 Room 过渡期间卸载折角入口，只保留一个连续的揭示裁切面。
+- **Confirmed — 叶片描边：**移除四片叶子的常驻 SVG 描边与按钮边框；键盘 `:focus-visible` 仍有明确焦点提示。
+- **Confirmed — 双语与夜间可读性：**增加持久化 EN / 中文切换，覆盖 Index、项目详情、Room 面板和程序绘制的设备屏幕；修正夜间 Room 文本继承白天颜色的问题。
+- **Confirmed — 焦点交接：**进出 Room 后，焦点在目标控件完成挂载后恢复，避免转场状态更新与 DOM 提交竞争。
+- 验证：Edge/CDP 双语走查 10 项通过；Index / 项目回归 18 项通过；Room 路径 20 项通过。源码检查和构建检查通过。
+
+截图与逐项结果见 [UX 复核与动效走查](UX-REVISIT.md)。

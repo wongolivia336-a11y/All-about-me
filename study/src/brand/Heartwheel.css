@@ -53,14 +53,6 @@
   transition: fill 180ms ease, opacity 180ms ease, transform 180ms ease;
 }
 
-.heartwheel__leaf-outline {
-  fill: none;
-  stroke: color-mix(in srgb, var(--leaf-ink) 42%, var(--color-line, var(--archive-line)));
-  stroke-width: 1.05;
-  vector-effect: non-scaling-stroke;
-  transition: stroke 180ms ease, stroke-width 180ms ease;
-}
-
 .heartwheel__leaf-hit {
   cursor: pointer;
 }
@@ -73,11 +65,6 @@
 .heartwheel__leaf--active .heartwheel__leaf-fill {
   fill: color-mix(in srgb, var(--leaf-accent) 58%, var(--color-paper, var(--archive-paper)));
   opacity: 0.9;
-}
-
-.heartwheel__leaf--active .heartwheel__leaf-outline {
-  stroke: var(--leaf-ink);
-  stroke-width: 1.2;
 }
 
 .heartwheel__leaf--active .heartwheel__leaf-visual {
@@ -111,7 +98,7 @@
   place-content: center;
   gap: 5px;
   padding: 8px 5px;
-  border: 1px solid transparent;
+  border: 0;
   border-radius: 2px;
   background: transparent;
   color: var(--label-ink);
@@ -121,7 +108,7 @@
   transform-origin: center;
   pointer-events: auto;
   cursor: pointer;
-  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+  transition: background 180ms ease, color 180ms ease;
 }
 
 .heartwheel__label:nth-child(2) {
@@ -157,7 +144,6 @@
 .heartwheel__label:hover,
 .heartwheel__label:focus-visible,
 .heartwheel__label--selected {
-  border-color: color-mix(in srgb, var(--label-ink) 42%, transparent);
   background: color-mix(in srgb, var(--label-accent) 24%, transparent);
 }
 
@@ -185,10 +171,6 @@
   .heartwheel__orbit,
   .heartwheel__label,
   .heartwheel__leaf-fill,
-  .heartwheel__leaf-outline {
-    transition-duration: 0.01ms;
-  }
-
   .heartwheel__leaf-visual {
     transition-duration: 0.01ms;
   }

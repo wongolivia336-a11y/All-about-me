@@ -1,5 +1,6 @@
 import { phoneApps } from "../data/links";
 import { focus, useMusicState } from "../interaction/studyStore";
+import { useLanguage } from "../i18n";
 
 /**
  * The speaker.
@@ -9,33 +10,31 @@ import { focus, useMusicState } from "../interaction/studyStore";
  * until you touch an object.
  */
 export function MusicPanel() {
+  const { copy } = useLanguage();
   const { musicPlaying, musicUnavailable, setMusicPlaying, volume, setVolume } =
     useMusicState();
   const netease = phoneApps.find((a) => a.id === "netease");
 
   return (
     <aside className="panel">
-      <button className="panel__close" onClick={() => focus(null)} aria-label="返回房间">
+      <button className="panel__close" onClick={() => focus(null)} aria-label={copy.closePanel}>
         ✕
       </button>
 
-      <p className="panel__kicker">Music</p>
-      <h2 className="panel__title">在听什么</h2>
-      <p className="panel__body">
-        点一下音箱就开始放。放一个音频文件到 <code>public/audio/now-playing.mp3</code>
-        ，这里就会播它。
-      </p>
+      <p className="panel__kicker">{copy.musicKicker}</p>
+      <h2 className="panel__title">{copy.musicTitle}</h2>
+      <p className="panel__body">{copy.musicBody}</p>
 
       <button
         className="panel__cta panel__cta--button"
         onClick={() => setMusicPlaying(!musicPlaying)}
       >
-        {musicPlaying ? "⏸  暂停" : "▶  播放"}
+        {musicPlaying ? copy.pause : copy.play}
       </button>
 
       {/* the cat's meow rides the same setting, so one control covers the room */}
       <label className="volume">
-        <span className="volume__label">音量</span>
+        <span className="volume__label">{copy.volume}</span>
         <input
           className="volume__slider"
           type="range"
@@ -44,27 +43,25 @@ export function MusicPanel() {
           step={1}
           value={Math.round(volume * 100)}
           onChange={(e) => setVolume(Number(e.target.value) / 100)}
-          aria-label="音量"
+          aria-label={copy.volume}
         />
         <span className="volume__value">{Math.round(volume * 100)}</span>
       </label>
 
       {musicUnavailable && (
-        <p className="panel__note panel__note--warn">
-          放不出来——<code>public/audio/now-playing.mp3</code> 还不存在。放一个音频文件进去就能播了。
-        </p>
+        <p className="panel__note panel__note--warn">{copy.audioMissing}</p>
       )}
 
       {netease?.href ? (
         <a className="panel__note-link" href={netease.href} target="_blank" rel="noreferrer">
-          在网易云打开完整歌单 →
+          {copy.openPlaylist}
         </a>
       ) : (
-        <p className="panel__note">网易云歌单链接待补（填在 src/data/links.ts）</p>
+        <p className="panel__note">{copy.playlistMissing}</p>
       )}
 
       <p className="panel__note">
-        注意：公开网站上播放有版权的音乐同样需要授权，自己的录音或授权素材最稳妥。
+        {copy.musicRights}
       </p>
     </aside>
   );

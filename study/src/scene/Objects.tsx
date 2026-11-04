@@ -1,9 +1,13 @@
 import { useMemo } from "react";
 import { RoundedBox } from "@react-three/drei";
 import { Hotspot } from "../interaction/Hotspot";
+import { useLanguage, type Language } from "../i18n";
 import { layout } from "./layout";
 import { DeskLamp } from "./lamp/DeskLamp";
 import { makeSpreadTexture, palette } from "./theme";
+import { useLocalizedCanvasTexture } from "./useLocalizedCanvasTexture";
+
+const makePortfolioSpread = (language: Language) => makeSpreadTexture(language);
 
 export function DeskProps() {
   return (
@@ -20,7 +24,8 @@ export function DeskProps() {
 
 /** The open portfolio — this is where the PDF lives. */
 function PortfolioSpread() {
-  const spread = useMemo(makeSpreadTexture, []);
+  const { language } = useLanguage();
+  const spread = useLocalizedCanvasTexture(language, makePortfolioSpread);
   const { pos, rotY } = layout.portfolio;
 
   return (

@@ -40,3 +40,7 @@ Reduced-motion mode disables tile transitions and copy animation; the Heartwheel
 ## URL and source of truth
 
 Hash routing is authoritative for Index archive/project routes and Room. The currently focused Heartwheel theme remains local UI state while the route is plain `#index`; choosing “View all” writes a theme route. This is a deliberate distinction in current code, not a second project-detail route source. Project identity comes from the slug in the hash and the single `library` data set.
+
+## Language selection
+
+The EN / 中文 toggle is available in both the Index identity bar and Room HUD. `LanguageProvider` owns the current language across route changes and persists it in local storage. It updates document language, visible interface copy, project metadata, theme labels, Room object descriptions and generated laptop / phone / portfolio screen textures. Native names, product brands and text fetched live from third-party APIs remain in their source form.
