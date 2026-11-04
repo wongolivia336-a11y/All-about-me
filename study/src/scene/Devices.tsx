@@ -5,8 +5,12 @@ import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeom
 import { phoneApps } from "../data/links";
 import { Hotspot } from "../interaction/Hotspot";
 import { requestArchive, useFocusedRoom } from "../interaction/studyStore";
+import { useLanguage, type Language } from "../i18n";
 import { DESK_TOP_Y, layout } from "./layout";
 import { makeAppScreen, makeSiteScreen, palette } from "./theme";
+import { useLocalizedCanvasTexture } from "./useLocalizedCanvasTexture";
+
+const makePhoneScreen = (language: Language) => makeAppScreen(phoneApps, language);
 
 /**
  * The two screens. These are the objects that will eventually host real DOM
@@ -23,7 +27,8 @@ export function Devices() {
 }
 
 function Laptop() {
-  const screen = useMemo(makeSiteScreen, []);
+  const { language } = useLanguage();
+  const screen = useLocalizedCanvasTexture(language, makeSiteScreen);
 
   const baseH = 0.011;
   const baseY = DESK_TOP_Y + baseH / 2;
@@ -173,7 +178,8 @@ function Keyboard({ y }: { y: number }) {
 }
 
 function Phone() {
-  const screen = useMemo(() => makeAppScreen(phoneApps), []);
+  const { language } = useLanguage();
+  const screen = useLocalizedCanvasTexture(language, makePhoneScreen);
   const { focused } = useFocusedRoom();
   const lit = focused === "phone";
 

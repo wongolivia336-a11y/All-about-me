@@ -1,4 +1,5 @@
 import { forwardRef } from "react";
+import { useLanguage } from "../i18n";
 
 interface RoomExitButtonProps {
   onClick: () => void;
@@ -9,6 +10,7 @@ export const RoomExitButton = forwardRef<HTMLButtonElement, RoomExitButtonProps>
   { onClick, disabled = false },
   ref,
 ) {
+  const { copy } = useLanguage();
   return (
     <button
       ref={ref}
@@ -16,8 +18,8 @@ export const RoomExitButton = forwardRef<HTMLButtonElement, RoomExitButtonProps>
       type="button"
       onClick={onClick}
       disabled={disabled}
-      aria-label="Return to Index"
-      title="Return to Index"
+      aria-label={copy.returnToIndex}
+      title={copy.returnToIndex}
     >
       <span aria-hidden="true" />
     </button>

@@ -27,6 +27,8 @@ export interface ArchiveEntry {
   summary: string;
   links: readonly ArchiveLink[];
   cover?: string;
+  detailCover?: string;
+  coverKind?: "conceptual" | "documentary";
   tags: readonly string[];
   featured?: boolean;
   featuredOrder?: number;
@@ -54,7 +56,9 @@ export const library: readonly ArchiveEntry[] = [
     status: "published",
     year: 2026,
     summary: "将 DMPK 报价和肿瘤报告整理为可审阅的 Agent workflow 原型。",
-    cover: "/portfolio/thumb-03.webp",
+    cover: "/portfolio/mono/01_bioaz-research_wide.png",
+    detailCover: "/portfolio/mono/01_bioaz-research.png",
+    coverKind: "conceptual",
     tags: ["AI products", "Agent workflow", "Prototype"],
     featured: true,
     featuredOrder: 1,
@@ -76,7 +80,9 @@ export const library: readonly ArchiveEntry[] = [
     status: "published",
     year: 2026,
     summary: "本地优先的长期健康管理工具：提醒、记录、报告整理与可信科普。",
-    cover: "/portfolio/thumb-04.webp",
+    cover: "/portfolio/mono/07_healther-daily_wide.png",
+    detailCover: "/portfolio/mono/07_healther-daily.png",
+    coverKind: "conceptual",
     tags: ["Health", "Local-first", "Product system"],
     links: [{ label: "GitHub", url: "https://github.com/wongolivia336-a11y/healther" }],
   },
@@ -90,7 +96,9 @@ export const library: readonly ArchiveEntry[] = [
     status: "published",
     year: 2026,
     summary: "把真实猫叫做成可被忽略、也值得停一下的休息仪式。",
-    cover: "/portfolio/thumb-07.webp",
+    cover: "/portfolio/mono/04_meow-gallery-cat_wide.png",
+    detailCover: "/portfolio/mono/04_meow-gallery-cat.png",
+    coverKind: "conceptual",
     tags: ["Creative technology", "Sound", "Personal experiment"],
     links: [
       { label: "打开作品", url: "https://domi-meow-gallery.vercel.app" },
@@ -110,7 +118,9 @@ export const library: readonly ArchiveEntry[] = [
     status: "published",
     year: 2026,
     summary: "一个通过光、声音和等待建立关系的陪伴机器人交互原型。",
-    cover: "/portfolio/thumb-08.webp",
+    cover: "/portfolio/mono/02_knock-knock-presence_wide.png",
+    detailCover: "/portfolio/mono/02_knock-knock-presence.png",
+    coverKind: "conceptual",
     tags: ["Interaction", "Light", "Companion robot"],
     featured: true,
     featuredOrder: 2,
@@ -129,7 +139,9 @@ export const library: readonly ArchiveEntry[] = [
     status: "published",
     year: 2026,
     summary: "古典意象如何进入现代经验的多维文本可视化研究。",
-    cover: "/portfolio/thumb-09.webp",
+    cover: "/portfolio/mono/06_mirror-two-sides_wide.png",
+    detailCover: "/portfolio/mono/06_mirror-two-sides.png",
+    coverKind: "conceptual",
     tags: ["Research", "Text visualization", "Culture"],
     links: [{ label: "打开研究", url: "https://zhangzao.vercel.app" }],
   },
@@ -143,7 +155,9 @@ export const library: readonly ArchiveEntry[] = [
     status: "published",
     year: 2026,
     summary: "从海外寄批地到潮汕村庄的侨批数据叙事。",
-    cover: "/portfolio/thumb-10.webp",
+    cover: "/portfolio/mono/03_qiaopi-letter_wide.png",
+    detailCover: "/portfolio/mono/03_qiaopi-letter.png",
+    coverKind: "conceptual",
     tags: ["Data story", "Archive", "Geography"],
     featured: true,
     featuredOrder: 3,
@@ -162,6 +176,9 @@ export const library: readonly ArchiveEntry[] = [
     status: "prototype",
     year: 2026,
     summary: "A small shelf for returning to Lynch, Yang Dechang and Hou Hsiao-hsien.",
+    cover: "/portfolio/mono/05_film-shelf_wide.png",
+    detailCover: "/portfolio/mono/05_film-shelf.png",
+    coverKind: "conceptual",
     tags: ["Cinema", "Film notes", "Room object"],
     links: [],
   },

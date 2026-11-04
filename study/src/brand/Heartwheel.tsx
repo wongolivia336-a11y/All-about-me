@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import type { ThemeId } from "../data/library";
 import { themeConfig, themeOrder } from "../data/themeConfig";
+import { themeText, useLanguage } from "../i18n";
 import { HEART_PATH, HeartTextTexture } from "./HeartTextTexture";
 import "./Heartwheel.css";
 
@@ -49,6 +50,7 @@ const themeForRotation = (rotation: number) => {
 };
 
 export function Heartwheel({ activeTheme, focused = true, onThemeChange }: HeartwheelProps) {
+  const { language, copy } = useLanguage();
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [dragging, setDragging] = useState(false);
   const [hoveredTheme, setHoveredTheme] = useState<ThemeId | null>(null);
@@ -160,7 +162,20 @@ export function Heartwheel({ activeTheme, focused = true, onThemeChange }: Heart
     }
   };
 
+  const cancelGesture = (pointerId: number) => {
+    const active = gesture.current;
+    if (!active || active.pointerId !== pointerId) return;
+    gesture.current = null;
+    setDragging(false);
+    suppressClick.current = true;
+    window.setTimeout(() => {
+      suppressClick.current = false;
+    }, 0);
+    if (active.dragging) animateToRotation(targetRotation.current);
+  };
+
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!event.isPrimary || event.button !== 0) return;
     if ((event.target as HTMLElement).closest("button")) return;
     if (gesture.current) return;
     cancelSettle();
@@ -206,7 +221,7 @@ export function Heartwheel({ activeTheme, focused = true, onThemeChange }: Heart
     } catch {
       // Capture may already have been released by the browser.
     }
-    finishGesture(event.pointerId);
+    cancelGesture(event.pointerId);
   };
 
   const wheelStyle = {
@@ -224,7 +239,7 @@ export function Heartwheel({ activeTheme, focused = true, onThemeChange }: Heart
   useEffect(() => () => cancelSettle(), []);
 
   return (
-    <div className="heartwheel" aria-label="Four Hearts 主题导航">
+    <div className="heartwheel" role="group" aria-label={copy.themeNavigation}>
       <div
         className={["heartwheel__stage", dragging && "heartwheel__stage--dragging"].filter(Boolean).join(" ")}
         ref={stageRef}
@@ -234,7 +249,7 @@ export function Heartwheel({ activeTheme, focused = true, onThemeChange }: Heart
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
         onLostPointerCapture={() => {
-          if (gesture.current) finishGesture(gesture.current.pointerId);
+          if (gesture.current) cancelGesture(gesture.current.pointerId);
         }}
       >
         <div className="heartwheel__orbit">
@@ -258,7 +273,6 @@ export function Heartwheel({ activeTheme, focused = true, onThemeChange }: Heart
                 >
                   <g className="heartwheel__leaf-visual">
                     <path className="heartwheel__leaf-fill" d={HEART_PATH} />
-                    <path className="heartwheel__leaf-outline" d={HEART_PATH} />
                     <HeartTextTexture theme={theme} clipId={`heart-clip-${theme}`} />
                   </g>
                   <path
@@ -273,7 +287,7 @@ export function Heartwheel({ activeTheme, focused = true, onThemeChange }: Heart
                       event.stopPropagation();
                       handleLeafClick(theme);
                     }}
-                    aria-label={`选择 ${themeConfig[theme].label}`}
+                    aria-label={copy.selectTheme + themeText(theme, language).label}
                   />
                 </g>
               );
@@ -281,7 +295,7 @@ export function Heartwheel({ activeTheme, focused = true, onThemeChange }: Heart
             <circle className="heartwheel__hub" cx="0" cy="0" r="6" />
           </svg>
 
-          <div className="heartwheel__labels" role="group" aria-label="Four Hearts 主题">
+          <div className="heartwheel__labels" role="group" aria-label={copy.themeGroup}>
             {themeOrder.map((theme, index) => {
               const selected = focused && activeTheme === theme;
               const labelStyle = {
@@ -295,6 +309,7 @@ export function Heartwheel({ activeTheme, focused = true, onThemeChange }: Heart
                   style={labelStyle}
                   type="button"
                   aria-pressed={selected}
+                  aria-label={copy.selectTheme + themeText(theme, language).label}
                   onMouseEnter={() => setHoveredTheme(theme)}
                   onMouseLeave={() => setHoveredTheme(null)}
                   onFocus={() => setHoveredTheme(theme)}
@@ -312,17 +327,16 @@ export function Heartwheel({ activeTheme, focused = true, onThemeChange }: Heart
                   }}
                   data-heart-theme={theme}
                 >
-                  <span>{themeConfig[theme].label}</span>
-                  <small>{themeConfig[theme].descriptor}</small>
+                  <span>{themeText(theme, language).label}</span>
+                  <small>{themeText(theme, language).descriptor}</small>
                 </button>
               );
             })}
           </div>
         </div>
       </div>
-      <p className="heartwheel__hint">drag to turn · select a leaf</p>
       <p className="sr-only" aria-live="polite">
-        当前主题：{themeConfig[activeTheme].label}，{themeConfig[activeTheme].shortLabel}
+        {copy.currentTheme}{themeText(activeTheme, language).label}, {themeText(activeTheme, language).shortLabel}
       </p>
     </div>
   );

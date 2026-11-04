@@ -1,0 +1,119 @@
+{
+  "url": "http://127.0.0.1:5174/",
+  "browser": "Edge DevTools",
+  "desktopViewport": [
+    1440,
+    900
+  ],
+  "mobileViewport": [
+    390,
+    844
+  ],
+  "checks": [
+    {
+      "name": "Index switches to Chinese and persists selection",
+      "passed": true,
+      "observed": {
+        "title": "记录我构建、追问、试验与珍藏的事物。",
+        "leaf": "构建",
+        "selected": "true",
+        "persistent": "zh",
+        "hash": "#index",
+        "archive": true,
+        "wheel": true,
+        "body": "Room\nFOUR HEARTS / 01\n王心蕊\nOlivia Wong\nEN\n中文\n联系\n\n设计工程 / AI 产品 / 创意技术\n\n记录我构建、追问、试验与珍藏的事物。\n\n我为仍在成形中的想法，设计以人为本的工具与交互系统。\n\n查看精选作品 ↓\n开始交流 ↗\n概览 · 4 个主题\n系统 · 关照 · 迭代\n交付 · 迭代 · 界面\n关照 · 界面 · "
+      }
+    },
+    {
+      "name": "Theme selection keeps copy synchronized without permanent leaf strokes",
+      "passed": true,
+      "observed": {
+        "mode": "focused",
+        "title": "镜子的两面",
+        "leaf": "追问",
+        "outlineCount": 0,
+        "idleButtonBorder": "0px"
+      }
+    },
+    {
+      "name": "Project detail is readable in Chinese",
+      "passed": true,
+      "observed": {
+        "hash": "#index/question/zhang-zao",
+        "title": "镜子的两面",
+        "summary": "古典意象如何进入现代经验的多维文本可视化研究。",
+        "htmlLang": "zh-CN",
+        "headingVisible": true
+      }
+    },
+    {
+      "name": "Language toggle returns the whole Index to English",
+      "passed": true,
+      "observed": {
+        "title": "A living archive of things I build, question, play with, and keep.",
+        "leaf": "BUILD"
+      }
+    },
+    {
+      "name": "Room transition has one reveal surface and no stacked fold preview",
+      "passed": true,
+      "observed": {
+        "hash": "#room",
+        "corner": false,
+        "preview": false,
+        "progress": 0.127,
+        "phase": "false"
+      }
+    },
+    {
+      "name": "Room copy and exit control follow the language setting",
+      "passed": true,
+      "observed": {
+        "title": "书单与笔记",
+        "language": "zh-CN",
+        "exitLabel": "返回主题索引",
+        "titleColor": "rgb(255, 253, 248)",
+        "panelColor": "rgb(255, 253, 248)",
+        "evening": true
+      }
+    },
+    {
+      "name": "Room panel text follows the active light or evening palette",
+      "passed": true,
+      "observed": {
+        "title": "书单与笔记",
+        "language": "zh-CN",
+        "exitLabel": "返回主题索引",
+        "titleColor": "rgb(255, 253, 248)",
+        "panelColor": "rgb(255, 253, 248)",
+        "evening": true
+      }
+    },
+    {
+      "name": "Mobile Index fits, keeps the fold clear, and preserves touch target size",
+      "passed": true,
+      "observed": {
+        "viewport": 390,
+        "pageWidth": 390,
+        "switchHeight": 44,
+        "switchColor": "rgb(92, 98, 93)",
+        "switchCornerOverlap": false,
+        "title": "记录我构建、追问、试验与珍藏的事物。"
+      }
+    },
+    {
+      "name": "Reduced-motion preference removes switch animation",
+      "passed": true,
+      "observed": {
+        "active": true,
+        "switchTransition": "1e-05s"
+      }
+    },
+    {
+      "name": "No uncaught browser exceptions",
+      "passed": true,
+      "observed": []
+    }
+  ],
+  "exceptions": []
+}

@@ -1,0 +1,155 @@
+{
+  "url": "http://127.0.0.1:5174/",
+  "browser": "Edge DevTools",
+  "viewport": [
+    1280,
+    800
+  ],
+  "checks": [
+    {
+      "name": "Index exposes the Room entry",
+      "passed": true,
+      "observed": {
+        "hash": "#index",
+        "archive": true,
+        "enterRoom": true
+      }
+    },
+    {
+      "name": "Room loads and becomes interactive",
+      "passed": true,
+      "observed": {
+        "hash": "#room",
+        "hud": true,
+        "canvasCount": 1,
+        "revealInteractive": "true",
+        "exit": true
+      }
+    },
+    {
+      "name": "Room entry moves focus to its exit control",
+      "passed": true,
+      "observed": {
+        "active": true,
+        "focusCall": {
+          "requested": "Return to Index",
+          "active": true
+        }
+      }
+    },
+    {
+      "name": "Room object laptop opens its content surface",
+      "passed": true,
+      "observed": "Code and the web"
+    },
+    {
+      "name": "Room object phone opens its content surface",
+      "passed": true,
+      "observed": "Things I write"
+    },
+    {
+      "name": "Room object portfolio opens its content surface",
+      "passed": true,
+      "observed": "Portfolio · 2022—2026"
+    },
+    {
+      "name": "Room object shelf opens its content surface",
+      "passed": true,
+      "observed": "Books and notes"
+    },
+    {
+      "name": "Room object camera opens its content surface",
+      "passed": true,
+      "observed": "Photography"
+    },
+    {
+      "name": "Room object board opens its content surface",
+      "passed": true,
+      "observed": "About"
+    },
+    {
+      "name": "Room object marshall opens its content surface",
+      "passed": true,
+      "observed": "Now playing"
+    },
+    {
+      "name": "Room object posters opens its content surface",
+      "passed": true,
+      "observed": "Film shelf"
+    },
+    {
+      "name": "Room object domi opens its content surface",
+      "passed": true,
+      "observed": "Domi"
+    },
+    {
+      "name": "Room object sketchbook opens its content surface",
+      "passed": true,
+      "observed": "Sketchbook"
+    },
+    {
+      "name": "Room object materials opens its content surface",
+      "passed": true,
+      "observed": "Material samples"
+    },
+    {
+      "name": "Room object whiteboard opens its content surface",
+      "passed": true,
+      "observed": "What is still unresolved"
+    },
+    {
+      "name": "Escape closes the focused object panel",
+      "passed": true,
+      "observed": {
+        "panel": false,
+        "hash": "#room"
+      }
+    },
+    {
+      "name": "Room exit returns to Index and restores the trigger focus",
+      "passed": true,
+      "observed": {
+        "hash": "#index",
+        "archive": true,
+        "roomMounted": false,
+        "focusRestored": true,
+        "focusTrace": [
+          {
+            "requested": "Return to Index",
+            "active": true
+          },
+          {
+            "requested": "Return to Index",
+            "active": true
+          },
+          {
+            "requested": "Enter Room",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "Browser Back restores Room",
+      "passed": true,
+      "observed": {
+        "hash": "#room",
+        "hud": true
+      }
+    },
+    {
+      "name": "Browser Forward restores Index",
+      "passed": true,
+      "observed": {
+        "hash": "#index",
+        "archive": true
+      }
+    },
+    {
+      "name": "No uncaught browser exceptions",
+      "passed": true,
+      "observed": []
+    }
+  ],
+  "errors": []
+}

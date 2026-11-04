@@ -6,7 +6,6 @@ interface RoomRevealSurfaceProps {
   progress: number;
   interactive: boolean;
 }
-
 const viewportSize = () => ({ width: window.innerWidth, height: window.innerHeight });
 
 export function RoomRevealSurface({ children, progress, interactive }: RoomRevealSurfaceProps) {
@@ -35,18 +34,6 @@ export function RoomRevealSurface({ children, progress, interactive }: RoomRevea
       }}
     >
       {children}
-    </div>
-  );
-}
-
-export function RoomPeek({ visible }: { visible: boolean }) {
-  return (
-    <div className="room-peek" data-visible={visible ? "true" : "false"} aria-hidden="true">
-      <span className="room-peek__grid" />
-      <span className="room-peek__copy">
-        <strong>Room</strong>
-        <small>the study</small>
-      </span>
     </div>
   );
 }

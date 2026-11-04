@@ -1,0 +1,198 @@
+{
+  "date": "2026-11-04T13:23:16.186Z",
+  "browser": "Microsoft Edge via DevTools Protocol",
+  "url": "http://127.0.0.1:5174/",
+  "viewport": [
+    1440,
+    900
+  ],
+  "baselineReproduction": {
+    "status": "confirmed-before-fix",
+    "steps": "Focus QUESTION, open BUILD / BioAZ from Selected Works, then use project Back.",
+    "observed": {
+      "sourceTheme": "question",
+      "projectTheme": "build",
+      "returnedTheme": "build"
+    },
+    "expectedReturnTheme": "question"
+  },
+  "matchedThemeFrames": {
+    "beforeScrollTop": 328,
+    "afterScrollTop": 328
+  },
+  "checks": [
+    {
+      "name": "Header contact and Room entry have independent hit areas",
+      "passed": true,
+      "observed": {
+        "contact": {
+          "left": 1156.015625,
+          "right": 1303,
+          "top": 28,
+          "bottom": 57
+        },
+        "room": {
+          "left": 1356,
+          "right": 1428,
+          "top": 12,
+          "bottom": 84
+        },
+        "overlapX": -53,
+        "overlapY": 29
+      }
+    },
+    {
+      "name": "Rapid selections settle on matching leaf and artwork",
+      "passed": true,
+      "observed": {
+        "hash": "#index",
+        "selected": [
+          "question"
+        ],
+        "activeTile": "question",
+        "mode": "focused",
+        "rotation": -90.01296473936158,
+        "rotationError": 0.01296473936156417,
+        "rapidSequence": [
+          "question",
+          "play",
+          "keep",
+          "build",
+          "question",
+          "keep",
+          "play",
+          "question"
+        ]
+      }
+    },
+    {
+      "name": "Second intentional selection of the active theme returns to overview",
+      "passed": true,
+      "observed": {
+        "hash": "#index",
+        "selected": [],
+        "activeTile": null,
+        "mode": "overview",
+        "rotation": -90
+      }
+    },
+    {
+      "name": "Arrow navigation changes theme and keeps focus on its control",
+      "passed": true,
+      "observed": {
+        "hash": "#index",
+        "selected": [
+          "play"
+        ],
+        "activeTile": "play",
+        "mode": "focused",
+        "rotation": -179.96381035528364,
+        "focusedTheme": "play"
+      }
+    },
+    {
+      "name": "Project detail is reachable from the selected works list",
+      "passed": true,
+      "observed": {
+        "hash": "#index/build/bioaz-agent-workbench",
+        "title": "BioAZ Agent Workbench"
+      }
+    },
+    {
+      "name": "Project return restores the theme the visitor was exploring",
+      "passed": true,
+      "observed": {
+        "hash": "#index",
+        "selected": [
+          "question"
+        ],
+        "activeTile": "question",
+        "mode": "focused",
+        "rotation": -82.05270859812477,
+        "projectRoute": {
+          "hash": "#index/build/bioaz-agent-workbench",
+          "title": "BioAZ Agent Workbench"
+        }
+      }
+    },
+    {
+      "name": "Browser Back and Forward preserve the source theme context",
+      "passed": true,
+      "observed": {
+        "hash": "#index",
+        "selected": [
+          "question"
+        ],
+        "activeTile": "question",
+        "mode": "focused",
+        "rotation": -90
+      }
+    },
+    {
+      "name": "Focused theme survives a refresh on its current history entry",
+      "passed": true,
+      "observed": {
+        "hash": "#index",
+        "selected": [
+          "question"
+        ],
+        "activeTile": "question",
+        "mode": "focused",
+        "rotation": -90
+      }
+    },
+    {
+      "name": "Exposed leaf surface receives pointer input outside its label",
+      "passed": true,
+      "observed": {
+        "x": 343.7768859863281,
+        "y": 635.0689697265625,
+        "target": "heartwheel__leaf-hit",
+        "stage": {
+          "x": 148.828125,
+          "y": 497.421875,
+          "width": 390,
+          "height": 390,
+          "top": 497.421875,
+          "right": 538.828125,
+          "bottom": 887.421875,
+          "left": 148.828125
+        }
+      }
+    },
+    {
+      "name": "Dragging the SVG leaf rotates and commits a neighboring theme without a ghost click",
+      "passed": true,
+      "observed": {
+        "hash": "#index",
+        "selected": [
+          "keep"
+        ],
+        "activeTile": "keep",
+        "mode": "focused",
+        "rotation": 89.99451567621445,
+        "start": {
+          "x": 343.7768859863281,
+          "y": 635.0689697265625,
+          "target": "heartwheel__leaf-hit",
+          "stage": {
+            "x": 148.828125,
+            "y": 497.421875,
+            "width": 390,
+            "height": 390,
+            "top": 497.421875,
+            "right": 538.828125,
+            "bottom": 887.421875,
+            "left": 148.828125
+          }
+        }
+      }
+    },
+    {
+      "name": "No uncaught browser exceptions during the stress rehearsal",
+      "passed": true,
+      "observed": []
+    }
+  ],
+  "exceptions": []
+}

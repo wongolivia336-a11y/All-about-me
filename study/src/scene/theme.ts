@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { entriesFor } from "../data/library";
+import { collectionText, phoneAppText, projectText, type Language } from "../i18n";
 
 /**
  * Palette for the study. Kept deliberately narrow: warm neutrals for the room,
@@ -59,7 +60,7 @@ function roundRect(
 }
 
 /** A compact, literal preview of the public Work entries on the laptop. */
-export const makeSiteScreen = () =>
+export const makeSiteScreen = (language: Language) =>
   makeTexture(1024, 640, (ctx, w, h) => {
     const work = entriesFor("work").slice(0, 2);
     ctx.fillStyle = "#f5f2ed";
@@ -77,14 +78,14 @@ export const makeSiteScreen = () =>
     roundRect(ctx, 116, 9, w - 194, 25, 7);
 
     ctx.fillStyle = "#817b72";
-    ctx.font = "500 16px Segoe UI, sans-serif";
-    ctx.fillText("OLIVIA WONG  /  WORK", 52, 91);
+    ctx.font = "500 16px Segoe UI, PingFang SC, Microsoft YaHei, sans-serif";
+    ctx.fillText(language === "zh" ? "王心蕊  /  作品" : "OLIVIA WONG  /  WORK", 52, 91);
     ctx.fillStyle = "#222321";
     ctx.font = "500 48px Segoe UI, sans-serif";
-    ctx.fillText("Selected work", 52, 154);
+    ctx.fillText(language === "zh" ? "精选作品" : "Selected work", 52, 154);
     ctx.fillStyle = "#77746f";
     ctx.font = "400 22px Segoe UI, sans-serif";
-    ctx.fillText("Interfaces, systems and tools for real use", 52, 190);
+    ctx.fillText(language === "zh" ? "让界面、系统与工具真正可用" : "Interfaces, systems and tools for real use", 52, 190);
 
     const cardW = (w - 104 - 22) / 2;
     work.forEach((entry, i) => {
@@ -96,17 +97,17 @@ export const makeSiteScreen = () =>
       ctx.fillStyle = i === 0 ? "#dbe7e2" : "#eee5cd";
       roundRect(ctx, x + 45, 271, cardW - 90, 111, 3);
       ctx.fillStyle = "#252a28";
-      ctx.font = "500 27px Segoe UI, sans-serif";
-      ctx.fillText(entry.title, x + 22, 455, cardW - 44);
+      ctx.font = "500 27px Segoe UI, PingFang SC, Microsoft YaHei, sans-serif";
+      ctx.fillText(projectText(entry, language).title, x + 22, 455, cardW - 44);
       ctx.fillStyle = "#5d6460";
       ctx.font = "400 17px Segoe UI, sans-serif";
-      ctx.fillText(`${entry.collection}  ·  ${entry.year}`, x + 22, 484);
+      ctx.fillText(`${collectionText(entry.collection, language)}  ·  ${entry.year}`, x + 22, 484);
     });
     ctx.fillStyle = "#bcb8b0";
     ctx.fillRect(52, 547, w - 104, 1);
     ctx.fillStyle = "#5f5c56";
     ctx.font = "400 17px Segoe UI, sans-serif";
-    ctx.fillText("Work  /  Research  /  Make  /  Journal", 52, 585);
+    ctx.fillText(language === "zh" ? "作品 / 研究 / 创作 / 手记" : "Work  /  Research  /  Make  /  Journal", 52, 585);
   });
 
 /**
@@ -115,7 +116,8 @@ export const makeSiteScreen = () =>
  * panel behind it never disagree about what is on the phone.
  */
 export const makeAppScreen = (
-  apps: { mark: string; label: string; tone: string }[],
+  apps: { id: string; mark: string; label: string; tone: string }[],
+  language: Language,
 ) =>
   makeTexture(512, 1040, (ctx, w, h) => {
     const g = ctx.createLinearGradient(0, 0, w, h);
@@ -139,7 +141,7 @@ export const makeAppScreen = (
     ctx.fillText("9:41", 40, 220);
     ctx.font = "400 26px -apple-system, Segoe UI, sans-serif";
     ctx.fillStyle = "rgba(255,255,255,0.6)";
-    ctx.fillText("周一  8月17日", 44, 262);
+    ctx.fillText(language === "zh" ? "周一  8月17日" : "Monday · Aug 17", 44, 262);
 
     // icon grid
     const cols = 3;
@@ -161,7 +163,7 @@ export const makeAppScreen = (
 
       ctx.fillStyle = "rgba(255,255,255,0.82)";
       ctx.font = "400 20px -apple-system, PingFang SC, Segoe UI, sans-serif";
-      ctx.fillText(app.label, x + icon / 2, y + icon + 30);
+      ctx.fillText(phoneAppText(app.id, app.label, language), x + icon / 2, y + icon + 30);
       ctx.textAlign = "left";
     });
 
@@ -199,7 +201,7 @@ export const makeGrilleTexture = () =>
 // longer belongs in the shared texture grab-bag.
 
 /** Warm paper-ish texture for the open portfolio spread. */
-export const makeSpreadTexture = () =>
+export const makeSpreadTexture = (language: Language) =>
   makeTexture(1024, 724, (ctx, w, h) => {
     ctx.fillStyle = "#faf7f0";
     ctx.fillRect(0, 0, w, h);
@@ -214,7 +216,7 @@ export const makeSpreadTexture = () =>
 
     ctx.fillStyle = "#1c1c1e";
     ctx.font = "600 40px Georgia, serif";
-    ctx.fillText("Portfolio", 70, 110);
+    ctx.fillText(language === "zh" ? "作品集" : "Portfolio", 70, 110);
     ctx.fillStyle = "#9a948a";
     ctx.font = "400 20px Georgia, serif";
     ctx.fillText("2021 — 2026", 70, 146);

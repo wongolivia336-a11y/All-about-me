@@ -4,6 +4,7 @@ import { Html, useCursor } from "@react-three/drei";
 import type { HotspotId } from "../data/hotspots";
 import { hotspotById } from "../data/hotspots";
 import { useFocusedRoom } from "./studyStore";
+import { hotspotText, useLanguage } from "../i18n";
 
 interface Props {
   id: HotspotId;
@@ -37,10 +38,12 @@ export function Hotspot({
   onActivate,
 }: Props) {
   const [hovered, setHovered] = useState(false);
+  const { language } = useLanguage();
   const { focused, focus } = useFocusedRoom();
   useCursor(hovered);
 
   const spot = hotspotById(id);
+  const localizedSpot = hotspotText(id, language, spot);
   const isFocused = focused === id;
   const showLabel = hovered && focused === null;
 
@@ -66,8 +69,8 @@ export function Hotspot({
       {showLabel && (
         <Html position={labelAt} center distanceFactor={2.2} zIndexRange={[20, 0]}>
           <div className="hotspot-label">
-            <span className="hotspot-label__title">{spot.label}</span>
-            <span className="hotspot-label__blurb">{spot.blurb}</span>
+            <span className="hotspot-label__title">{localizedSpot.label}</span>
+            <span className="hotspot-label__blurb">{localizedSpot.blurb}</span>
           </div>
         </Html>
       )}

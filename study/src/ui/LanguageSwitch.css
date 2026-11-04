@@ -1,0 +1,59 @@
+.language-switch {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-muted, #64645d);
+  font: 11px/1 var(--font-mono, ui-monospace, monospace);
+}
+
+.language-switch button {
+  min-height: 30px;
+  padding: 0 1px;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+
+.language-switch button[aria-pressed="true"] {
+  border-bottom-color: currentColor;
+  color: var(--color-ink, #282923);
+  font-weight: 600;
+}
+
+.language-switch button:hover {
+  color: var(--color-ink, #282923);
+}
+
+.language-switch button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+.app--evening .hud .language-switch {
+  color: rgba(247, 247, 245, 0.72);
+}
+
+.app--evening .hud .language-switch button[aria-pressed="true"] {
+  color: #f7f7f5;
+}
+
+@media (max-width: 620px) {
+  .language-switch {
+    gap: 9px;
+  }
+
+  .language-switch button {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .language-switch button {
+    transition-duration: 0.01ms;
+  }
+}

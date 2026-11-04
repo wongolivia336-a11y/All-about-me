@@ -53,14 +53,6 @@
   transition: fill 180ms ease, opacity 180ms ease, transform 180ms ease;
 }
 
-.heartwheel__leaf-outline {
-  fill: none;
-  stroke: color-mix(in srgb, var(--leaf-ink) 42%, var(--color-line, var(--archive-line)));
-  stroke-width: 1.05;
-  vector-effect: non-scaling-stroke;
-  transition: stroke 180ms ease, stroke-width 180ms ease;
-}
-
 .heartwheel__leaf-hit {
   cursor: pointer;
 }
@@ -73,11 +65,6 @@
 .heartwheel__leaf--active .heartwheel__leaf-fill {
   fill: color-mix(in srgb, var(--leaf-accent) 58%, var(--color-paper, var(--archive-paper)));
   opacity: 0.9;
-}
-
-.heartwheel__leaf--active .heartwheel__leaf-outline {
-  stroke: var(--leaf-ink);
-  stroke-width: 1.2;
 }
 
 .heartwheel__leaf--active .heartwheel__leaf-visual {
@@ -111,7 +98,7 @@
   place-content: center;
   gap: 5px;
   padding: 8px 5px;
-  border: 1px solid transparent;
+  border: 0;
   border-radius: 2px;
   background: transparent;
   color: var(--label-ink);
@@ -121,7 +108,22 @@
   transform-origin: center;
   pointer-events: auto;
   cursor: pointer;
-  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+.heartwheel__label::after {
+  position: absolute;
+  right: 50%;
+  bottom: 4px;
+  width: 12px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--label-ink);
+  content: "";
+  opacity: 0;
+  transform: translateX(50%) scaleX(0.65);
+  transform-origin: center;
+  transition: width 150ms ease, opacity 150ms ease, transform 150ms ease;
 }
 
 .heartwheel__label:nth-child(2) {
@@ -155,22 +157,18 @@
 }
 
 .heartwheel__label:hover,
-.heartwheel__label:focus-visible,
 .heartwheel__label--selected {
-  border-color: color-mix(in srgb, var(--label-ink) 42%, transparent);
   background: color-mix(in srgb, var(--label-accent) 24%, transparent);
 }
 
 .heartwheel__label:focus-visible {
-  outline: 2px solid var(--label-ink);
-  outline-offset: 4px;
+  outline: none;
 }
 
-.heartwheel__hint {
-  margin: -4px 0 0;
-  color: var(--archive-muted);
-  font: 11px/1.2 var(--font-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
-  letter-spacing: 0.04em;
+.heartwheel__label:focus-visible::after {
+  width: 24px;
+  opacity: 1;
+  transform: translateX(50%) scaleX(1);
 }
 
 @media (max-width: 620px) {
@@ -183,6 +181,10 @@
     min-height: 48px;
   }
 
+  .heartwheel__label::after {
+    bottom: 3px;
+  }
+
   .heartwheel__label small {
     display: none;
   }
@@ -191,11 +193,8 @@
 @media (prefers-reduced-motion: reduce) {
   .heartwheel__orbit,
   .heartwheel__label,
+  .heartwheel__label::after,
   .heartwheel__leaf-fill,
-  .heartwheel__leaf-outline {
-    transition-duration: 0.01ms;
-  }
-
   .heartwheel__leaf-visual {
     transition-duration: 0.01ms;
   }
