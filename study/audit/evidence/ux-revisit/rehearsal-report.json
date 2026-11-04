@@ -17,7 +17,11 @@
         "title": "记录我构建、追问、试验与珍藏的事物。",
         "leaf": "构建",
         "selected": "true",
-        "persistent": "zh"
+        "persistent": "zh",
+        "hash": "#index",
+        "archive": true,
+        "wheel": true,
+        "body": "Room\nFOUR HEARTS / 01\n王心蕊\nOlivia Wong\nEN\n中文\n联系\n\n设计工程 / AI 产品 / 创意技术\n\n记录我构建、追问、试验与珍藏的事物。\n\n我为仍在成形中的想法，设计以人为本的工具与交互系统。\n\n查看精选作品 ↓\n开始交流 ↗\n概览 · 4 个主题\n系统 · 关照 · 迭代\n交付 · 迭代 · 界面\n关照 · 界面 · "
       }
     },
     {
@@ -57,7 +61,7 @@
         "hash": "#room",
         "corner": false,
         "preview": false,
-        "progress": 0.118,
+        "progress": 0.127,
         "phase": "false"
       }
     },

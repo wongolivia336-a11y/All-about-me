@@ -5,11 +5,11 @@
 | State | Entry | URL | Visible surface | Exit / history |
 |---|---|---|---|---|
 | Overview | Load `#index` | `#index` | Intro、四叶草、四主题图像矩阵 | Select a leaf / tile |
-| Focused theme | Select a Heartwheel label or image tile | Usually `#index`; in-memory theme state | One expanded image、主题摘要、Explore / View all | Overview button or second deliberate leaf selection |
+| Focused theme | Select a Heartwheel label or image tile | `#index`; theme and focused mode are stored on its matching history entry | One expanded image、主题摘要、Explore / View all | Overview button or second deliberate leaf selection; refresh restores the current entry |
 | Theme archive | View all | `#index/{theme}` | Theme project list | Back to Living Index |
 | Project detail | Open a selected-work card or theme tile | `#index/{theme}/{projectId}` | Back button、真实摘要与链接、概念图标注 | Back button uses browser history when opened in-app; direct route replaces with archive route |
 
-Project detail keeps the archive mounted. On open it records the source card, nested scroll position and card viewport top. Detail receives focus and is scrolled into view. On return, the source route and visual position are restored before focus returns to the source card. `document.title` follows the project and returns to the site title on exit.
+Project detail keeps the archive mounted. On open it records the source route in the new history entry, plus the source card, nested scroll position and card viewport top. Detail receives focus and is scrolled into view. On return, the source theme/view, scroll position and source card focus are restored. Back and Forward read their matching history entries; direct project URLs still fall back to their theme archive. `document.title` follows the project and returns to the site title on exit.
 
 ## Room
 
@@ -39,7 +39,7 @@ Reduced-motion mode disables tile transitions and copy animation; the Heartwheel
 
 ## URL and source of truth
 
-Hash routing is authoritative for Index archive/project routes and Room. The currently focused Heartwheel theme remains local UI state while the route is plain `#index`; choosing “View all” writes a theme route. This is a deliberate distinction in current code, not a second project-detail route source. Project identity comes from the slug in the hash and the single `library` data set.
+The hash remains the shareable route for Index archive/project routes and Room. A focused Heartwheel selection keeps the compact `#index` hash, while its theme and focused/overview mode are stored in that matching browser history entry so Back, Forward and refresh preserve context. Project identity comes from the slug in the hash and the single `library` data set; each in-app project history entry also stores its source route.
 
 ## Language selection
 

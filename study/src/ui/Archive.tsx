@@ -12,10 +12,11 @@ import { LanguageSwitch } from "./LanguageSwitch";
 interface ArchiveProps {
   active: boolean;
   initialTheme: ThemeId;
+  initialFocused: boolean;
   showThemeArchive: boolean;
   projectId?: string;
   onClose: () => void;
-  onThemeChange: (theme: ThemeId, showAll?: boolean) => void;
+  onThemeChange: (theme: ThemeId, showAll?: boolean, focused?: boolean) => void;
   onProjectOpen: (entry: ArchiveEntry) => void;
   onProjectClose: (theme: ThemeId) => void;
 }
@@ -161,6 +162,7 @@ function ProjectDetail({
 export function Archive({
   active,
   initialTheme,
+  initialFocused,
   showThemeArchive,
   projectId,
   onClose,
@@ -170,7 +172,7 @@ export function Archive({
 }: ArchiveProps) {
   const { language, copy } = useLanguage();
   const [activeTheme, setActiveTheme] = useState<ThemeId>(initialTheme);
-  const [viewMode, setViewMode] = useState<"overview" | "focused">("overview");
+  const [viewMode, setViewMode] = useState<"overview" | "focused">(initialFocused ? "focused" : "overview");
   const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(projectId);
   const archiveRef = useRef<HTMLElement | null>(null);
   const detailRef = useRef<HTMLElement | null>(null);
@@ -180,7 +182,10 @@ export function Archive({
   const projectReturnFocusTop = useRef<number | null>(null);
   const previousProjectId = useRef(selectedProjectId);
 
-  useEffect(() => setActiveTheme(initialTheme), [initialTheme]);
+  useEffect(() => {
+    setActiveTheme(initialTheme);
+    setViewMode(initialFocused ? "focused" : "overview");
+  }, [initialFocused, initialTheme]);
   useEffect(() => setSelectedProjectId(projectId), [projectId]);
 
   const currentDefinition = themeText(activeTheme, language);
@@ -252,7 +257,7 @@ export function Archive({
     setActiveTheme(theme);
     setViewMode(zoomOut ? "overview" : "focused");
     setSelectedProjectId(undefined);
-    onThemeChange(theme, false);
+    onThemeChange(theme, false, !zoomOut);
   };
 
   const openProject = (entry: ArchiveEntry) => {
@@ -326,7 +331,7 @@ export function Archive({
                     <p className="archive__eyebrow">{copy.fourThemeIndex} / {currentDefinition.label}</p>
                     <h2 id="theme-title">{currentDefinition.shortLabel}</h2>
                   </div>
-                  <button className="leaf-canvas__archive-back" type="button" onClick={() => onThemeChange(activeTheme, false)}>
+                  <button className="leaf-canvas__archive-back" type="button" onClick={() => onThemeChange(activeTheme, false, viewMode === "focused")}>
                     {copy.backToIndex}
                   </button>
                 </div>
@@ -349,7 +354,7 @@ export function Archive({
                 onViewAll={(theme) => {
                   setActiveTheme(theme);
                   setViewMode("focused");
-                  onThemeChange(theme, true);
+                  onThemeChange(theme, true, true);
                 }}
               />
             )}

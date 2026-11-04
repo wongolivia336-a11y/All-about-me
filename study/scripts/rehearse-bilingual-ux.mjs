@@ -104,7 +104,10 @@ try {
   const chineseIndex = await evaluate(`({title:document.querySelector('#archive-title')?.textContent,
     leaf:document.querySelector('[data-heart-theme="build"] span')?.textContent,
     selected:document.querySelector('.language-switch button[lang="zh-CN"]')?.getAttribute('aria-pressed'),
-    persistent:localStorage.getItem('four-hearts-language')})`);
+    persistent:localStorage.getItem('four-hearts-language'),hash:location.hash,
+    archive:Boolean(document.querySelector('.archive')),wheel:Boolean(document.querySelector('.heartwheel__stage')),
+    detail:document.querySelector('.archive__project-detail h2')?.textContent,
+    body:document.body.innerText.slice(0,180)})`);
   await capture("index-zh-1440x900");
   check("Index switches to Chinese and persists selection", chineseIndex.title?.includes("记录我构建") &&
     chineseIndex.leaf === "构建" && chineseIndex.selected === "true" && chineseIndex.persistent === "zh", chineseIndex);

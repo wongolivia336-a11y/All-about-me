@@ -118,3 +118,16 @@
 - **Correction:** Defer pending transition focus to an effect that runs after the settled destination render.
 - **Acceptance:** Room entry focuses Room exit; exit focuses the Room entry; browser Back / Forward remains usable.
 - **Status:** **Fixed and verified.**
+
+## FH-13 — Project return forgets the focused source theme
+
+- **Priority:** P1 · **Evidence:** Confirmed in Edge by reproducing before and after the correction
+- **Location:** `src/App.tsx`, `src/ui/Archive.tsx`
+- **Reproduction:** On `#index`, focus QUESTION; scroll to Selected Works; open the BUILD project BioAZ; use the detail Back control or browser Back.
+- **Observed:** Before correction, the project route showed BioAZ and the URL was valid, but return reconstructed plain `#index` as BUILD. The reader lost the theme and expanded content they came from.
+- **Root cause:** Focused theme and focus mode existed only in the Archive component state; `routeFromHash("#index")` defaults to BUILD. The previous browser entry did not carry that state.
+- **Correction:** Store a hash-matched route snapshot on each history entry, persist the project source route on its detail entry and hydrate Archive's focused theme/view mode from that route.
+- **Files:** `src/App.tsx`, `src/ui/Archive.tsx`, `scripts/rehearse-design-stress.mjs`
+- **Acceptance:** Project return, Back, Forward and refresh all restore QUESTION and its focused artwork; direct project routes remain valid.
+- **Regression risk:** History state must stay paired with its hash across Index ↔ Room and project navigation; covered by Edge/CDP project, Room and stress rehearsals.
+- **Status:** **Fixed and verified: 11/11 stress checks, 18 project checks and 20 Room checks passed.**

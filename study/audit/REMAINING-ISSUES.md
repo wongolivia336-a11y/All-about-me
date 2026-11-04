@@ -28,3 +28,7 @@
 - Concept art is semantically relevant but remains illustrative. It does not substitute for real project UI, research charts or process evidence.
 - The new detail layout presents existing facts and one visual; richer case-study structure awaits materials rather than empty sections.
 - Live-before evidence for the off-screen project route was recorded as DOM metrics, not as a retained live screenshot. The committed before screenshot is the local 1440×900 Index captured before this implementation.
+
+## Current preview access
+
+- The supplied Vercel preview redirected the live-browser session to Vercel SSO on 2026-11-04. Current deployed behavior could not be directly compared in this pass; local Edge/CDP testing covered the checked source. Revisit the preview once its access gate permits the browser session.

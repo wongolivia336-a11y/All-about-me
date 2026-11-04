@@ -28,6 +28,14 @@ This frame shows the detail in the viewport, correct image proportion, visible p
 
 Settled screenshots and browser interaction reports are retained. The pointer-cancel test records start/end rotation in `navigation-report.json`; there is no recorded video or full frame-by-frame series.
 
+## Project return preserves reading context — 1440×900, Edge
+
+| Before opening BioAZ | After project Back |
+|---|---|
+| ![QUESTION source state before opening BioAZ](evidence/design-stress/source-theme-before-project-1440x900.png) | ![QUESTION source state after returning from BioAZ](evidence/design-stress/source-theme-after-project-return-1440x900.png) |
+
+The matched frames show the same QUESTION artwork and expanded theme before opening a BUILD project and after returning. Before the fix, the Edge report reproduced a reset to BUILD; [the stress report](evidence/design-stress/design-stress-report.json) verifies the corrected return. The selected theme and focused mode now live in the matching history entry, while the project's history entry keeps its source route.
+
 ## UX revisit — same local build and browser conditions
 
 | State | Evidence |

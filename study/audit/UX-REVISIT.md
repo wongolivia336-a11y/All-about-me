@@ -31,6 +31,14 @@ The night state changed `--ink` on `.app--evening`, but `.app` inherited the roo
 
 The old callback requested focus in the same animation frame that changed transition state. On return, the Index entry button was not always mounted when the callback ran. A pending-focus effect now waits for the destination route to settle and its button to exist before moving focus. Edge confirmed focus to Room exit on entry and back to Room entry on exit.
 
+### Confirmed — project return lost the visitor's theme
+
+Reproduction: focus QUESTION, scroll to Selected Works, open the BUILD project BioAZ, then use the project return control or browser Back. Before the correction, the project URL correctly represented BioAZ, but its previous `#index` entry did not encode the in-memory QUESTION focus. Route parsing therefore reconstructed the default BUILD state. The visible project content and its return destination had different themes.
+
+The route now records the focused theme and view mode in the matching browser history entry while keeping the authored hash readable. Project history entries carry their source route. `Archive` restores the selected theme and focus mode from that route; Back, Forward and refresh therefore resolve to the same source context. This keeps the existing `#index` share URL and avoids adding one Back step for every leaf selection.
+
+Evidence: `evidence/design-stress/design-stress-report.json` verifies the corrected return; matched settled frames are in [before](evidence/design-stress/source-theme-before-project-1440x900.png) and [after](evidence/design-stress/source-theme-after-project-return-1440x900.png).
+
 ## Choreography and interaction review
 
 | Phase | Observed / intended relationship |
@@ -53,9 +61,10 @@ The four-leaf control now communicates selection through the existing filled sha
 - Edge/CDP bilingual rehearsal — 10/10 checks passed, including language persistence, Chinese theme/project/Room copy, no overlay during the reveal, zero uncaught exceptions, night text contrast, reduced motion, mobile overflow and control sizing.
 - Edge/CDP Index/project regression — 18/18 checks passed, including all four themes, selected-work detail, direct route, Back/Forward, touch cancellation, reduced motion and 390×844 overflow.
 - Edge/CDP Room regression — 20/20 checks passed, including all 12 non-lamp content surfaces, entry and exit focus, Escape, Back/Forward and zero uncaught exceptions.
+- Edge/CDP design stress rehearsal — 11/11 checks passed: rapid theme changes, same-theme overview toggle, ArrowRight focus, project source-theme return, Back/Forward, refresh, real mouse drag and no ghost click.
 
 Screenshots and JSON reports are in [`evidence/ux-revisit/`](evidence/ux-revisit/), [`evidence/after-final-bilingual/`](evidence/after-final-bilingual/) and [`evidence/after-final/`](evidence/after-final/).
 
 ## Unverified
 
-Physical phone and Safari behavior, other mobile/tablet sizes, full screen-reader review, physical 3D hotspot hit targets, frame-by-frame camera motion, FPS / Web Vitals / GPU cost, and project-specific author role/process/outcomes remain unverified. See [REMAINING-ISSUES.md](REMAINING-ISSUES.md).
+The supplied Vercel preview URL redirected the live browser to Vercel SSO during this pass, so current deployed behavior could not be compared directly. The checked source was rehearsed locally in Edge at the recorded viewports. Physical phone and Safari behavior, other mobile/tablet sizes, full screen-reader review, physical 3D hotspot hit targets, frame-by-frame camera motion, FPS / Web Vitals / GPU cost, and project-specific author role/process/outcomes remain unverified. See [REMAINING-ISSUES.md](REMAINING-ISSUES.md).

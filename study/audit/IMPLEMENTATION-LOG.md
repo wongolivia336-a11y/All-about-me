@@ -38,5 +38,9 @@ Browser conditions: local Vite app, Edge DevTools Protocol, DPR 1; Index at 1440
    - Bound app text to the active palette and moved Room entry/exit focus handoff to the settled destination render.
 10. **Rehearsal evidence** — `audit/evidence/ux-revisit/`, updated browser verification scripts
    - 10 bilingual checks, 18 Index / project checks and 20 Room checks passed in Edge/CDP.
+11. **History-backed reading context** — `src/App.tsx`, `src/ui/Archive.tsx`, `scripts/rehearse-design-stress.mjs`
+   - Reproduced a source-theme loss: QUESTION → open BUILD/BioAZ → Back returned to BUILD because plain `#index` parsed as the default theme.
+   - Store theme and focused/overview mode with the matching history entry; store the source route with each in-app project detail entry. Back, Forward and refresh restore the same theme and expanded artwork.
+   - Edge/CDP stress rehearsal: 11/11 passed, including rapid switches, real drag, project return, browser history and refresh.
 
-Final verification after the latest source changes: `npm run lint`, `npm run build`, `npm run test:heartwheel`, `npm run test:room-reveal` and `git diff --check` passed. Vite still reports the lazy RoomScene chunk above its 500 KB advisory threshold; see [REMAINING-ISSUES.md](REMAINING-ISSUES.md).
+Final verification after the latest source changes: `npm run lint`, `npm run build`, `npm run test:heartwheel`, `npm run test:room-reveal`, 11 design-stress checks, 18 project checks, 20 Room checks and 10 bilingual checks passed in Edge/CDP. Vite still reports the lazy RoomScene chunk above its 500 KB advisory threshold; see [REMAINING-ISSUES.md](REMAINING-ISSUES.md).

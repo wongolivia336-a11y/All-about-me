@@ -39,3 +39,9 @@ The screenshots capture settled states, not a frame-by-frame video or performanc
 | Language switch | Interface copy and Canvas textures had no shared language state. | Persistent EN / 中文 state now updates Index, project detail, Room panels, accessibility labels and generated screen textures. 390×844 shows no overflow or fold overlap; each switch control is 44px tall. |
 
 Edge/CDP evidence: [10 bilingual UX checks](evidence/ux-revisit/rehearsal-report.json), [18 Index / project checks](evidence/after-final-bilingual/navigation-report.json), and [20 Room checks](evidence/after-final/room-navigation-report.json). See the image set in [UX-REVISIT.md](UX-REVISIT.md).
+
+## Fresh interaction rehearsal — 2026-11-04
+
+The most consequential issue was a continuity break rather than a spacing or animation defect: a reader could focus QUESTION, open a BUILD project, then return to BUILD because `#index` did not carry the in-memory theme. The detail itself changed correctly, but its exit had lost the place the visitor was reading from. History entries now retain the theme and focused/overview state, and project entries retain their source route. This closes the narrative loop without changing the visible hash or adding decorative motion.
+
+Real-pointer Edge/CDP rehearsal also rapidly switched eight themes, tested the second click on the current leaf, used ArrowRight with real focus transfer, dragged a leaf, and checked that the resulting synthetic click did not reselect the origin. All selected leaf, image and settled rotation states agreed. Contact and the Room fold had disjoint hit rectangles at 1440×900.

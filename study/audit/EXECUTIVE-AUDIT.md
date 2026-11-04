@@ -19,6 +19,7 @@ Four Hearts 已有清晰的作者身份：四叶草主题导航、作品画布�
 - 更正七个作品的视觉关联：BioAZ、Knock Knock、侨批、meow gallery、Film shelf、镜子的两面、Healther。
 - 修正 Project Detail 图片高度比例，避免 1600×1000 图片被显示成 474×1000。
 - 修复项目打开、标题同步、详情焦点、返回滚动/焦点恢复和浏览器历史。
+- 修复一个更深的项目返回问题：原先 `#index` 不记录聚焦主题，从 QUESTION 打开 BUILD 项目后会返回 BUILD；现在每个 history entry 保存主题焦点与项目来源路由。
 - 修复 Heartwheel 的 pointer-cancel 路径：取消手势回到原旋转，不提交新主题。
 - 移除首页重复的专业方向短语；移动端缩短首屏占用。
 - 新增真实 Edge/CDP 回归脚本与截图、报告。
@@ -30,6 +31,7 @@ Four Hearts 已有清晰的作者身份：四叶草主题导航、作品画布�
 - `npm run test:room-reveal`：通过。
 - `npm run build`：通过；RoomScene 仍有 1,384 KB minified chunk 的 Vite 警告，见 [REMAINING-ISSUES.md](REMAINING-ISSUES.md)。
 - Edge/CDP：18 项 Index/作品路径检查、20 项 Room 路径检查通过；390×844 无水平溢出。
+- Edge/CDP 压力走查：11 项通过，涵盖快速切主题、键盘、真实拖拽、项目返回、Back/Forward 和刷新。
 - 图片资源：14 个引用均以 `image/png`、HTTP 200 加载。
 
 ## 尚需作者材料
@@ -44,6 +46,7 @@ Four Hearts 已有清晰的作者身份：四叶草主题导航、作品画布�
 - [直达项目 URL 刷新](evidence/after-final/direct-project-route-1440x900.png)
 - [Room（1280×800，日间状态）](evidence/after-final/room-overview-1280x800.png)
 - [Mobile（390×844）](evidence/after-final/index-mobile-390x844.png)
+- [主题返回前后画面](evidence/design-stress/source-theme-before-project-1440x900.png) · [主题返回后](evidence/design-stress/source-theme-after-project-return-1440x900.png) · [11 项压力报告](evidence/design-stress/design-stress-report.json)
 - [Index / project 浏览器报告](evidence/after-final/navigation-report.json)
 - [Room 浏览器报告](evidence/after-final/room-navigation-report.json)
 

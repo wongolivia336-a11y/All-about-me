@@ -26,9 +26,16 @@ interface IndexRoute {
   theme: ThemeId;
   archive?: boolean;
   projectId?: string;
+  focused?: boolean;
 }
 
 type Route = IndexRoute | { view: "room" };
+interface AppHistoryState {
+  fourHeartsHash?: string;
+  fourHeartsRoute?: Route;
+  fourHeartsProjectOrigin?: IndexRoute;
+  [key: string]: unknown;
+}
 
 const isTheme = (value: string | undefined): value is ThemeId =>
   Boolean(value && themes.includes(value as ThemeId));
@@ -55,6 +62,23 @@ const routeFromHash = (): Route => {
 const hashForIndex = ({ theme, archive, projectId }: IndexRoute) =>
   archive || projectId ? `#index/${theme}${projectId ? `/${projectId}` : ""}` : "#index";
 
+const isIndexRoute = (value: unknown): value is IndexRoute => {
+  if (!value || typeof value !== "object") return false;
+  const route = value as Partial<IndexRoute>;
+  return route.view === "index" && isTheme(route.theme);
+};
+
+const isRoute = (value: unknown): value is Route =>
+  isIndexRoute(value) || Boolean(value && typeof value === "object" && (value as { view?: unknown }).view === "room");
+
+const routeFromCurrentEntry = (): Route => {
+  const state = window.history.state as AppHistoryState | null;
+  if (state?.fourHeartsHash === window.location.hash && isRoute(state.fourHeartsRoute)) {
+    return state.fourHeartsRoute;
+  }
+  return routeFromHash();
+};
+
 const isNightNow = () => {
   const hour = new Date().getHours();
   return hour < 7 || hour >= 18;
@@ -80,7 +104,7 @@ export default function App() {
     musicPlaying,
     volume,
   } = useStudy();
-  const initialRoute = routeFromHash();
+  const initialRoute = routeFromCurrentEntry();
   const [route, setRoute] = useState<Route>(initialRoute);
   const [indexRoute, setIndexRoute] = useState<IndexRoute>(
     initialRoute.view === "index" ? initialRoute : { view: "index", theme: "build" },
@@ -183,7 +207,16 @@ export default function App() {
       if (viewRef.current === "room" && currentPhase !== "closing") return;
       viewRef.current = "room";
       setRoute({ view: "room" });
-      if (pushHistory && window.location.hash !== "#room") window.history.pushState(null, "", "#room");
+      if (pushHistory && window.location.hash !== "#room") {
+        const previousState = window.history.state && typeof window.history.state === "object"
+          ? window.history.state as AppHistoryState
+          : {};
+        window.history.pushState({
+          ...previousState,
+          fourHeartsHash: "#room",
+          fourHeartsRoute: { view: "room" },
+        }, "", "#room");
+      }
       if (!roomMounted) setRoomMounted(true);
       if (roomReadyRef.current) settleRoomLoading();
       else beginRoomLoading(false);
@@ -210,30 +243,60 @@ export default function App() {
     viewRef.current = "index";
     setRoute(indexRouteRef.current);
     const indexHash = hashForIndex(indexRouteRef.current);
-    if (pushHistory && window.location.hash !== indexHash) window.history.pushState(null, "", indexHash);
+    if (pushHistory && window.location.hash !== indexHash) {
+      const previousState = window.history.state && typeof window.history.state === "object"
+        ? window.history.state as AppHistoryState
+        : {};
+      window.history.pushState({ ...previousState, fourHeartsHash: indexHash, fourHeartsRoute: indexRouteRef.current }, "", indexHash);
+    }
     setTransitionPhase("closing");
     animateReveal(0, { onComplete: finishClosing });
   }, [animateReveal, beginRoomLoading, finishClosing, finishOpening, roomMounted, setTransitionPhase, settleRoomLoading]);
 
-  const applyIndexRoute = useCallback((next: IndexRoute, push = true) => {
+  const applyIndexRoute = useCallback((next: IndexRoute, push = true, projectOrigin?: IndexRoute) => {
     indexRouteRef.current = next;
     setIndexRoute(next);
     if (viewRef.current === "index") setRoute(next);
     const hash = hashForIndex(next);
+    const previousState = window.history.state && typeof window.history.state === "object"
+      ? window.history.state as AppHistoryState
+      : {};
+    const state: AppHistoryState = {
+      ...previousState,
+      fourHeartsHash: hash,
+      fourHeartsRoute: next,
+    };
+    delete state.fourHeartsProjectOrigin;
+    if (projectOrigin) state.fourHeartsProjectOrigin = projectOrigin;
     if (window.location.hash !== hash) {
-      if (push) window.history.pushState(null, "", hash);
-      else window.history.replaceState(null, "", hash);
-    }
+      if (push) window.history.pushState(state, "", hash);
+      else window.history.replaceState(state, "", hash);
+    } else window.history.replaceState(state, "", hash);
   }, []);
 
   useEffect(() => {
     if (!window.location.hash) {
       const next = indexRouteRef.current;
-      window.history.replaceState(null, "", hashForIndex(next));
+      const hash = hashForIndex(next);
+      window.history.replaceState({ fourHeartsHash: hash, fourHeartsRoute: next }, "", hash);
+    } else {
+      const state = window.history.state as AppHistoryState | null;
+      if (state?.fourHeartsHash !== window.location.hash || !isRoute(state.fourHeartsRoute)) {
+        const route = routeFromHash();
+        window.history.replaceState({ fourHeartsHash: window.location.hash, fourHeartsRoute: route }, "", window.location.hash);
+      }
     }
 
     const syncRoute = () => {
-      const next = routeFromHash();
+      let next = routeFromCurrentEntry();
+      if (next.view === "index" && next.projectId) {
+        const storedOrigin = (window.history.state as AppHistoryState | null)?.fourHeartsProjectOrigin;
+        if (isIndexRoute(storedOrigin)) projectOriginRoute.current = storedOrigin;
+      } else if (indexRouteRef.current.projectId && projectOriginRoute.current) {
+        // `#index` does not encode a focused theme. Restore the in-memory source route
+        // when Back leaves a project detail instead of defaulting to BUILD.
+        next = projectOriginRoute.current;
+      }
       if (next.view === "index") {
         indexRouteRef.current = next;
         setIndexRoute(next);
@@ -283,18 +346,22 @@ export default function App() {
 
   useEffect(() => () => settleRoomLoading(), [settleRoomLoading]);
 
-  const handleThemeChange = useCallback((theme: ThemeId, showAll = false) => {
-    applyIndexRoute({ view: "index", theme, archive: showAll });
+  const handleThemeChange = useCallback((theme: ThemeId, showAll = false, focused = false) => {
+    applyIndexRoute({ view: "index", theme, archive: showAll, focused });
   }, [applyIndexRoute]);
 
   const handleProjectOpen = useCallback((entry: { id: string; primaryTheme: ThemeId }) => {
-    projectOriginRoute.current = indexRouteRef.current;
-    applyIndexRoute({ view: "index", theme: entry.primaryTheme, archive: true, projectId: entry.id });
+    const origin = indexRouteRef.current;
+    projectOriginRoute.current = origin;
+    applyIndexRoute(
+      { view: "index", theme: entry.primaryTheme, archive: true, projectId: entry.id },
+      true,
+      origin,
+    );
   }, [applyIndexRoute]);
 
   const handleProjectClose = useCallback((theme: ThemeId) => {
     if (projectOriginRoute.current) {
-      projectOriginRoute.current = null;
       window.history.back();
       return;
     }
@@ -431,6 +498,7 @@ export default function App() {
           <Archive
             active={route.view === "index"}
             initialTheme={indexRoute.theme}
+            initialFocused={Boolean(indexRoute.focused)}
             showThemeArchive={Boolean(indexRoute.archive || indexRoute.projectId)}
             projectId={indexRoute.projectId}
             onClose={enterRoom}

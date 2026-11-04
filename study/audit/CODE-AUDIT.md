@@ -15,11 +15,12 @@
 | `src/i18n.tsx`, `src/ui/LanguageSwitch.tsx`, Room / archive UI | Interface had no persistent bilingual state; labels and generated device-screen copy could diverge. | Added EN / 中文 provider and localized copy/data helpers; both views expose the same persisted toggle. |
 | `src/index.css`, `src/ui/LanguageSwitch.css` | Evening palette changed `--ink`, but `.app` inherited the already-computed root `color`, leaving Room panels dark; the broad night selector also made Index language tabs white on paper. | Bind `.app` color to `var(--ink)` and scope white language-tab styling to `.hud` in the Room. |
 | `src/App.tsx` | Focus was scheduled in the same frame as transition state updates, before the destination control was guaranteed to be mounted. | Track pending destination focus and run it from an effect after the settled destination render. |
+| `src/App.tsx`, `src/ui/Archive.tsx` | Focused theme lived only in `Archive` state while `#index` parsed as BUILD. Back from a project could lose the source theme; project theme and source theme were conflated. | Match route state to each history hash, persist focused theme / view mode in history state, store the project's source route on its history entry and restore it on Back / Forward / refresh. |
 
 ## Architecture reconstructed
 
-- `App.tsx` parses hash routes and owns Index ↔ Room transition state.
-- `Archive.tsx` owns local selected theme, view mode and project detail; `library.ts` is the project data source.
+- `App.tsx` parses hash routes, stores hash-matched view state in browser history entries and owns Index ↔ Room transition state.
+- `Archive.tsx` renders selected theme / view mode from the route and owns project detail plus source scroll / focus restoration; `library.ts` is the project data source.
 - `LeafCanvas.tsx` keeps four images mounted; CSS transforms express overview/focus.
 - `Heartwheel.tsx` rotates SVG leaves from click, drag and an interruptible animation loop.
 - Room object focus is shared through `interaction/studyStore.ts`; hotspot labels and camera poses read `data/hotspots.ts`, which derives object targets from `scene/layout.ts`.
