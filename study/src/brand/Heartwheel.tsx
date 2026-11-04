@@ -160,7 +160,20 @@ export function Heartwheel({ activeTheme, focused = true, onThemeChange }: Heart
     }
   };
 
+  const cancelGesture = (pointerId: number) => {
+    const active = gesture.current;
+    if (!active || active.pointerId !== pointerId) return;
+    gesture.current = null;
+    setDragging(false);
+    suppressClick.current = true;
+    window.setTimeout(() => {
+      suppressClick.current = false;
+    }, 0);
+    if (active.dragging) animateToRotation(targetRotation.current);
+  };
+
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!event.isPrimary || event.button !== 0) return;
     if ((event.target as HTMLElement).closest("button")) return;
     if (gesture.current) return;
     cancelSettle();
@@ -206,7 +219,7 @@ export function Heartwheel({ activeTheme, focused = true, onThemeChange }: Heart
     } catch {
       // Capture may already have been released by the browser.
     }
-    finishGesture(event.pointerId);
+    cancelGesture(event.pointerId);
   };
 
   const wheelStyle = {
@@ -234,7 +247,7 @@ export function Heartwheel({ activeTheme, focused = true, onThemeChange }: Heart
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
         onLostPointerCapture={() => {
-          if (gesture.current) finishGesture(gesture.current.pointerId);
+          if (gesture.current) cancelGesture(gesture.current.pointerId);
         }}
       >
         <div className="heartwheel__orbit">
@@ -320,7 +333,6 @@ export function Heartwheel({ activeTheme, focused = true, onThemeChange }: Heart
           </div>
         </div>
       </div>
-      <p className="heartwheel__hint">drag to turn · select a leaf</p>
       <p className="sr-only" aria-live="polite">
         当前主题：{themeConfig[activeTheme].label}，{themeConfig[activeTheme].shortLabel}
       </p>

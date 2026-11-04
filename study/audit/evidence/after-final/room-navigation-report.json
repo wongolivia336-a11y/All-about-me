@@ -1,0 +1,140 @@
+{
+  "url": "http://127.0.0.1:5173/",
+  "browser": "Edge DevTools",
+  "viewport": [
+    1280,
+    800
+  ],
+  "checks": [
+    {
+      "name": "Index exposes the Room entry",
+      "passed": true,
+      "observed": {
+        "hash": "#index",
+        "archive": true,
+        "enterRoom": true
+      }
+    },
+    {
+      "name": "Room loads and becomes interactive",
+      "passed": true,
+      "observed": {
+        "hash": "#room",
+        "hud": true,
+        "canvasCount": 1,
+        "revealInteractive": "true",
+        "exit": true
+      }
+    },
+    {
+      "name": "Room entry moves focus to its exit control",
+      "passed": true,
+      "observed": true
+    },
+    {
+      "name": "Room object laptop opens its content surface",
+      "passed": true,
+      "observed": "代码与网页"
+    },
+    {
+      "name": "Room object phone opens its content surface",
+      "passed": true,
+      "observed": "我写的东西"
+    },
+    {
+      "name": "Room object portfolio opens its content surface",
+      "passed": true,
+      "observed": "作品集 · 2022—2026"
+    },
+    {
+      "name": "Room object shelf opens its content surface",
+      "passed": true,
+      "observed": "书单与笔记"
+    },
+    {
+      "name": "Room object camera opens its content surface",
+      "passed": true,
+      "observed": "摄影"
+    },
+    {
+      "name": "Room object board opens its content surface",
+      "passed": true,
+      "observed": "关于我"
+    },
+    {
+      "name": "Room object marshall opens its content surface",
+      "passed": true,
+      "observed": "在听什么"
+    },
+    {
+      "name": "Room object posters opens its content surface",
+      "passed": true,
+      "observed": "片单"
+    },
+    {
+      "name": "Room object domi opens its content surface",
+      "passed": true,
+      "observed": "多米"
+    },
+    {
+      "name": "Room object sketchbook opens its content surface",
+      "passed": true,
+      "observed": "手稿"
+    },
+    {
+      "name": "Room object materials opens its content surface",
+      "passed": true,
+      "observed": "材料样本"
+    },
+    {
+      "name": "Room object whiteboard opens its content surface",
+      "passed": true,
+      "observed": "还没想清楚的部分"
+    },
+    {
+      "name": "Escape closes the focused object panel",
+      "passed": true,
+      "observed": {
+        "panel": false,
+        "hash": "#room"
+      }
+    },
+    {
+      "name": "Room exit returns to Index and restores the trigger focus",
+      "passed": true,
+      "observed": {
+        "hash": "#index",
+        "archive": true,
+        "roomMounted": false,
+        "focusRestored": true,
+        "focusTrace": [
+          "Return to Index",
+          "Return to Index",
+          "Enter Room"
+        ]
+      }
+    },
+    {
+      "name": "Browser Back restores Room",
+      "passed": true,
+      "observed": {
+        "hash": "#room",
+        "hud": true
+      }
+    },
+    {
+      "name": "Browser Forward restores Index",
+      "passed": true,
+      "observed": {
+        "hash": "#index",
+        "archive": true
+      }
+    },
+    {
+      "name": "No uncaught browser exceptions",
+      "passed": true,
+      "observed": []
+    }
+  ],
+  "errors": []
+}

@@ -84,6 +84,7 @@ export default function App() {
   );
   const viewRef = useRef<View>(initialRoute.view);
   const indexRouteRef = useRef(indexRoute);
+  const projectOriginRoute = useRef<IndexRoute | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const indexTrigger = useRef<HTMLButtonElement>(null);
   const roomExitRef = useRef<HTMLButtonElement>(null);
@@ -280,7 +281,17 @@ export default function App() {
   }, [applyIndexRoute]);
 
   const handleProjectOpen = useCallback((entry: { id: string; primaryTheme: ThemeId }) => {
+    projectOriginRoute.current = indexRouteRef.current;
     applyIndexRoute({ view: "index", theme: entry.primaryTheme, archive: true, projectId: entry.id });
+  }, [applyIndexRoute]);
+
+  const handleProjectClose = useCallback((theme: ThemeId) => {
+    if (projectOriginRoute.current) {
+      projectOriginRoute.current = null;
+      window.history.back();
+      return;
+    }
+    applyIndexRoute({ view: "index", theme, archive: true }, false);
   }, [applyIndexRoute]);
 
   const brightnessPercent = Math.round(lampBrightness * 100);
@@ -404,6 +415,7 @@ export default function App() {
             onClose={enterRoom}
             onThemeChange={handleThemeChange}
             onProjectOpen={handleProjectOpen}
+            onProjectClose={handleProjectClose}
           />
       </div>
     </div>

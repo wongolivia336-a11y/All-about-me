@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
 import {
   library,
   type ArchiveEntry,
@@ -15,6 +15,7 @@ interface ArchiveProps {
   onClose: () => void;
   onThemeChange: (theme: ThemeId, showAll?: boolean) => void;
   onProjectOpen: (entry: ArchiveEntry) => void;
+  onProjectClose: (theme: ThemeId) => void;
 }
 const visibleEntries = library.filter(
   (entry) => entry.status === "published" || entry.status === "prototype",
@@ -29,11 +30,13 @@ function ProjectCard({
   onOpen,
   compact = false,
   featured = false,
+  context = compact ? "archive" : "selected",
 }: {
   entry: ArchiveEntry;
   onOpen: () => void;
   compact?: boolean;
   featured?: boolean;
+  context?: "archive" | "selected";
 }) {
   const definition = themeConfig[entry.primaryTheme];
   const style = {
@@ -48,10 +51,16 @@ function ProjectCard({
         .join(" ")}
       style={style}
     >
-      <button className="project-card__open" type="button" onClick={onOpen}>
+      <button
+        className="project-card__open"
+        type="button"
+        data-project-entry={entry.id}
+        data-project-context={context}
+        onClick={onOpen}
+      >
         <span className="project-card__visual">
           {entry.cover ? (
-            <img src={entry.cover} alt="" width="3368" height="1190" loading="lazy" decoding="async" />
+            <img src={entry.cover} alt="" width="1800" height="630" loading="lazy" decoding="async" />
           ) : (
             <span className="project-card__fallback" aria-label="暂无公开封面">
               <span>{definition.label}</span>
@@ -76,15 +85,24 @@ function ProjectCard({
     </article>
   );
 }
-function ProjectDetail({ entry, onBack }: { entry: ArchiveEntry; onBack: () => void }) {
+function ProjectDetail({
+  entry,
+  detailRef,
+  onBack,
+}: {
+  entry: ArchiveEntry;
+  detailRef: RefObject<HTMLElement | null>;
+  onBack: () => void;
+}) {
   const definition = themeConfig[entry.primaryTheme];
   return (
     <section
       id="theme-panel"
       className="archive__project-detail"
-      role="tabpanel"
+      role="region"
       tabIndex={-1}
       aria-labelledby="project-detail-title"
+      ref={detailRef}
       style={{ "--detail-accent": definition.accent, "--detail-ink": definition.ink } as CSSProperties}
     >
       <button className="archive__back" type="button" onClick={onBack}>
@@ -100,21 +118,29 @@ function ProjectDetail({ entry, onBack }: { entry: ArchiveEntry; onBack: () => v
             <span>{definition.shortLabel}</span>
             <span>{entry.status}</span>
           </div>
-          <p className="archive__project-note">
-            {entry.links.length > 0
-              ? "This entry only publishes material that is currently verified. Follow the project link for the live work; a fuller case study will appear here when the evidence is ready."
-              : "This is an internal archive entry, not a finished public page. The public catalogue and cover selection will be added when the collection is ready."}
-          </p>
-          <div className="archive__project-links">
-            {entry.links.map((link) => (
-              <a key={link.url} href={link.url} target="_blank" rel="noreferrer">
-                {link.label} <span aria-hidden="true">↗</span>
-              </a>
-            ))}
-          </div>
+          {entry.links.length > 0 && (
+            <div className="archive__project-links">
+              {entry.links.map((link) => (
+                <a key={link.url} href={link.url} target="_blank" rel="noreferrer">
+                  {link.label} <span aria-hidden="true">↗</span>
+                </a>
+              ))}
+            </div>
+          )}
         </div>
         {entry.cover ? (
-          <img className="archive__project-cover" src={entry.cover} alt={`${entry.title} project cover`} width="3368" height="1190" />
+          <figure className="archive__project-art">
+            <img
+              className="archive__project-cover"
+              src={entry.detailCover ?? entry.cover}
+              alt=""
+              width="1600"
+              height="1000"
+            />
+            {entry.coverKind === "conceptual" && (
+              <figcaption>Conceptual artwork · not a project screenshot or result.</figcaption>
+            )}
+          </figure>
         ) : (
           <div className="archive__project-cover archive__project-cover--empty" aria-label="暂无公开封面">
             <span>{definition.label}</span>
@@ -126,11 +152,26 @@ function ProjectDetail({ entry, onBack }: { entry: ArchiveEntry; onBack: () => v
   );
 }
 
-export function Archive({ initialTheme, showThemeArchive, projectId, onClose, onThemeChange, onProjectOpen }: ArchiveProps) {
+export function Archive({
+  initialTheme,
+  showThemeArchive,
+  projectId,
+  onClose,
+  onThemeChange,
+  onProjectOpen,
+  onProjectClose,
+}: ArchiveProps) {
   const [activeTheme, setActiveTheme] = useState<ThemeId>(initialTheme);
   const [viewMode, setViewMode] = useState<"overview" | "focused">("overview");
   const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(projectId);
-  const projectReturnFocus = useRef<HTMLButtonElement | null>(null);
+  const archiveRef = useRef<HTMLElement | null>(null);
+  const detailRef = useRef<HTMLElement | null>(null);
+  const projectReturnFocus = useRef<HTMLElement | null>(null);
+  const projectReturnTarget = useRef<{ entryId: string; context: string } | null>(null);
+  const projectReturnScrollTop = useRef<number | null>(null);
+  const projectReturnFocusTop = useRef<number | null>(null);
+  const previousProjectId = useRef(selectedProjectId);
+  const originalDocumentTitle = useRef(document.title);
 
   useEffect(() => setActiveTheme(initialTheme), [initialTheme]);
   useEffect(() => setSelectedProjectId(projectId), [projectId]);
@@ -144,6 +185,54 @@ export function Archive({ initialTheme, showThemeArchive, projectId, onClose, on
     ? visibleEntries.find((entry) => entry.id === selectedProjectId)
     : undefined;
 
+  useEffect(() => {
+    if (selectedProject) {
+      document.title = `${selectedProject.title} — Olivia Wong / Four Hearts`;
+      const frame = requestAnimationFrame(() => {
+        detailRef.current?.focus({ preventScroll: true });
+        detailRef.current?.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+          block: "start",
+        });
+      });
+      previousProjectId.current = selectedProject.id;
+      return () => cancelAnimationFrame(frame);
+    }
+
+    document.title = originalDocumentTitle.current;
+    if (!previousProjectId.current) return;
+
+    let followupFrame: number | null = null;
+    const restoreProjectContext = () => {
+      if (projectReturnScrollTop.current !== null && archiveRef.current) {
+        archiveRef.current.scrollTop = projectReturnScrollTop.current;
+      }
+      const target = projectReturnFocus.current?.isConnected
+        ? projectReturnFocus.current
+        : projectReturnTarget.current
+          ? archiveRef.current?.querySelector<HTMLElement>(
+              `[data-project-entry="${projectReturnTarget.current.entryId}"][data-project-context="${projectReturnTarget.current.context}"]`,
+            )
+          : null;
+      if (target && archiveRef.current && projectReturnFocusTop.current !== null) {
+        archiveRef.current.scrollTop += target.getBoundingClientRect().top - projectReturnFocusTop.current;
+      }
+      (target ?? archiveRef.current?.querySelector<HTMLElement>("#theme-panel"))?.focus({ preventScroll: true });
+      projectReturnFocus.current = null;
+      projectReturnTarget.current = null;
+      projectReturnScrollTop.current = null;
+      projectReturnFocusTop.current = null;
+    };
+    const frame = requestAnimationFrame(() => {
+      followupFrame = requestAnimationFrame(restoreProjectContext);
+    });
+    previousProjectId.current = selectedProjectId;
+    return () => {
+      cancelAnimationFrame(frame);
+      if (followupFrame !== null) cancelAnimationFrame(followupFrame);
+    };
+  }, [selectedProject, selectedProjectId]);
+
   const selectTheme = (theme: ThemeId, source: ThemeSelectionSource = "select") => {
     // Only a deliberate second click on an active leaf toggles Overview.
     // Drag-and-snap of the same leaf keeps the focus intact.
@@ -155,8 +244,17 @@ export function Archive({ initialTheme, showThemeArchive, projectId, onClose, on
   };
 
   const openProject = (entry: ArchiveEntry) => {
-    projectReturnFocus.current = document.activeElement instanceof HTMLButtonElement
-      ? document.activeElement
+    const activeElement = document.activeElement;
+    projectReturnFocus.current = activeElement instanceof HTMLElement ? activeElement : null;
+    projectReturnTarget.current = activeElement instanceof HTMLElement && activeElement.dataset.projectEntry
+      ? {
+          entryId: activeElement.dataset.projectEntry,
+          context: activeElement.dataset.projectContext ?? "selected",
+        }
+      : null;
+    projectReturnScrollTop.current = archiveRef.current?.scrollTop ?? 0;
+    projectReturnFocusTop.current = activeElement instanceof HTMLElement
+      ? activeElement.getBoundingClientRect().top
       : null;
     setActiveTheme(entry.primaryTheme);
     setSelectedProjectId(entry.id);
@@ -165,12 +263,11 @@ export function Archive({ initialTheme, showThemeArchive, projectId, onClose, on
 
   const closeProject = () => {
     setSelectedProjectId(undefined);
-    onThemeChange(activeTheme, false);
-    requestAnimationFrame(() => projectReturnFocus.current?.focus());
+    onProjectClose(activeTheme);
   };
 
   return (
-    <main className="archive" aria-label="Olivia Wong / Four Hearts personal archive">
+    <main ref={archiveRef} className="archive" aria-label="Olivia Wong / Four Hearts personal archive">
       <div className="archive__shell">
         <header className="archive__bar">
           <div className="archive__identity-lockup">
@@ -196,16 +293,11 @@ export function Archive({ initialTheme, showThemeArchive, projectId, onClose, on
               </button>
               <a href={`mailto:${CONTACT_EMAIL}`}>Start a conversation ↗</a>
             </div>
-            <div className="archive__facts" aria-label="Olivia Wong 专业方向">
-              <span>AI products</span>
-              <span>Interaction design</span>
-              <span>Human-centred systems</span>
-            </div>
           </div>
         </section>
 
         {selectedProject ? (
-          <ProjectDetail entry={selectedProject} onBack={closeProject} />
+          <ProjectDetail entry={selectedProject} detailRef={detailRef} onBack={closeProject} />
         ) : (
           <section
             id="theme-panel"

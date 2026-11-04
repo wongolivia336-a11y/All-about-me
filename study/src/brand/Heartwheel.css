@@ -166,13 +166,6 @@
   outline-offset: 4px;
 }
 
-.heartwheel__hint {
-  margin: -4px 0 0;
-  color: var(--archive-muted);
-  font: 11px/1.2 var(--font-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
-  letter-spacing: 0.04em;
-}
-
 @media (max-width: 620px) {
   .heartwheel__stage {
     width: min(100%, 360px);

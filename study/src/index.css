@@ -2023,7 +2023,6 @@ input:focus-visible {
 
 .archive__monogram,
 .archive__eyebrow,
-.archive__facts,
 .archive__project-meta,
 .archive__footer-note {
   color: var(--color-muted);
@@ -2136,23 +2135,6 @@ input:focus-visible {
 .archive__footer-links button:hover,
 .archive__footer-links button:focus-visible {
   text-decoration: underline;
-}
-
-.archive__facts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 18px;
-  margin-top: 52px;
-}
-
-.archive__facts span::before {
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  margin: 0 8px 1px 0;
-  border-radius: 50%;
-  background: var(--color-build);
-  content: "";
 }
 
 .archive__wheel-wrap {
@@ -2554,14 +2536,6 @@ input:focus-visible {
   margin-top: 26px;
 }
 
-.archive__project-note {
-  max-width: 43ch;
-  margin: 52px 0 0;
-  color: var(--color-muted);
-  font-size: 12px;
-  line-height: 1.55;
-}
-
 .archive__project-links {
   display: flex;
   flex-wrap: wrap;
@@ -2578,9 +2552,26 @@ input:focus-visible {
 .archive__project-cover {
   display: block;
   width: 100%;
+  height: auto;
   aspect-ratio: 1.6;
   object-fit: cover;
   opacity: 0.96;
+}
+
+.archive__project-detail:focus {
+  outline: 1px solid var(--color-line-strong, var(--color-line));
+  outline-offset: 4px;
+}
+
+.archive__project-art {
+  min-width: 0;
+  margin: 0;
+}
+
+.archive__project-art figcaption {
+  margin-top: 10px;
+  color: var(--color-muted);
+  font: 11px/1.45 var(--font-mono);
 }
 
 .archive__project-cover--empty {
@@ -2717,10 +2708,6 @@ input:focus-visible {
 
   .archive__identity h1 {
     font-size: clamp(40px, 12vw, 58px);
-  }
-
-  .archive__facts {
-    margin-top: 42px;
   }
 
   .archive__theme-section,

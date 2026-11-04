@@ -36,7 +36,6 @@ export function LeafCanvas({
     <div className="leaf-canvas" data-mode={focused ? "focused" : "overview"}>
       <div className="leaf-canvas__control">
         <div className="leaf-canvas__heading">
-          <p>FOUR DIRECTIONS <span aria-hidden="true">/</span> 01—04</p>
           <button
             className="leaf-canvas__overview"
             type="button"
@@ -52,7 +51,6 @@ export function LeafCanvas({
           focused={focused}
           onThemeChange={onThemeChange}
         />
-        <p className="leaf-canvas__instruction">Select a leaf, or drag to turn.</p>
       </div>
 
       <div className="leaf-canvas__content">
@@ -78,6 +76,8 @@ export function LeafCanvas({
                 aria-label={expanded
                   ? entry ? `查看项目详情：${entry.title}` : `${def.label} 暂无公开项目封面`
                   : `聚焦 ${def.label}，${entry?.title ?? "暂无公开封面"}`}
+                data-project-entry={entry?.id}
+                data-project-context="theme-tile"
                 onClick={() => {
                   if (expanded) {
                     if (entry) onProjectOpen(entry);
@@ -94,7 +94,7 @@ export function LeafCanvas({
                 } as CSSProperties}
               >
                 {entry?.cover ? (
-                  <img src={entry.cover} alt="" loading="eager" decoding="async" />
+                  <img src={entry.cover} alt="" width="1800" height="630" loading="eager" decoding="async" />
                 ) : (
                   <span className="leaf-canvas__cover-empty" aria-hidden="true">
                     <span>PRIVATE INDEX</span>
@@ -131,7 +131,6 @@ export function LeafCanvas({
                 <h2 id="theme-title">Four hearts. Four ways of seeing.</h2>
                 <p>A selection of real projects, questions, experiments and things worth keeping.</p>
               </div>
-              <span>TOUCH A LEAF TO EXPLORE</span>
             </div>
           )}
         </div>

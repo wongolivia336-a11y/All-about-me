@@ -37,13 +37,6 @@
 .leaf-canvas__overview:disabled { opacity: .47; cursor: default; }
 .leaf-canvas .heartwheel { width: 100%; max-width: 390px; margin: 2px auto 0; }
 .leaf-canvas .heartwheel__stage { width: 100%; }
-.leaf-canvas .heartwheel__hint { display: none; }
-.leaf-canvas__instruction {
-  margin: 4px 0 0;
-  text-align: center;
-  color: var(--color-muted, #71736d);
-  font: 12px/1.5 var(--font-sans, system-ui, sans-serif);
-}
 /* Quiet at rest, never a permanent pastel quartet. */
 .leaf-canvas .heartwheel__leaf-fill {
   fill: color-mix(in srgb, var(--leaf-accent) 5%, var(--color-paper, #f8f8f5));
@@ -203,7 +196,6 @@
 .archive .archive__identity h1 { max-width: 25ch; font-size: clamp(34px,3.55vw,53px); line-height: 1.08; }
 .archive .archive__lede { margin-top: 14px; max-width: 68ch; font-size: 15px; }
 .archive .archive__hero-actions { margin-top: 18px; }
-.archive .archive__facts { margin-top: 18px; }
 .archive .archive__theme-section { padding-top: 12px; }
 @media (max-width: 1060px) {
   .leaf-canvas { grid-template-columns: minmax(245px,.82fr) minmax(0,1.18fr); gap: 26px; }
@@ -222,12 +214,10 @@
 }
 @media (max-width: 480px) {
   .archive .archive__hero { padding: 28px 0 15px; }
-  .archive .archive__identity h1 { font-size: clamp(32px,8vw,39px); }
+  .archive .archive__identity h1 { max-width: 21ch; font-size: clamp(32px,8vw,39px); }
   .archive .archive__lede { font-size: 14px; }
-  .archive .archive__facts { margin-top: 12px; }
   .leaf-canvas__heading { margin-bottom: -12px; }
-  .leaf-canvas .heartwheel { max-width: 245px; }
-  .leaf-canvas__instruction { margin-top: -8px; }
+  .leaf-canvas .heartwheel { max-width: 220px; }
   .leaf-canvas__viewport { height: 275px; }
   .leaf-canvas__tile-marker { left: 11px; bottom: 11px; }
   .leaf-canvas__tile-marker strong { font-size: 14px; }
