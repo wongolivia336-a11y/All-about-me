@@ -22,6 +22,8 @@ export interface Account {
 
 export const GITHUB_USER = "wongolivia336-a11y";
 
+export const CONTACT_EMAIL = "Wongolivia336@gmail.com";
+
 /** Shown on the phone — the platforms you publish to. */
 export const phoneApps: Account[] = [
   {

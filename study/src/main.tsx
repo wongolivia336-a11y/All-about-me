@@ -6,7 +6,9 @@ import { GlobalLoadingProvider } from "./ui/loading/LoadingManager";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <GlobalLoadingProvider>
+    <GlobalLoadingProvider onReturnToIndex={() => {
+      window.location.hash = "#index/build";
+    }}>
       <App />
     </GlobalLoadingProvider>
   </StrictMode>,

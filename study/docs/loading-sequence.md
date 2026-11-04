@@ -1,13 +1,11 @@
-# ASCII interlude and page turn
+# Loading, page turn and Four Hearts
 
 ## Intent
 
-The site remains Olivia Wong's personal space. The transition foreground is
-her name; a short excerpt from the [2005 Stanford address](https://news.stanford.edu/stories/2005/06/youve-got-find-love-jobs-says)
-is source material for the moving field. `SpeechCodeLoader.tsx` converts every
-character in that excerpt, including spaces and punctuation, to a three-digit
-decimal ASCII value. The repeated codes form an `OW` mask. The address is
-credited in a small footer link rather than presented as the site's subject.
+The site has two modes: the fast, structured Index and the slower spatial Room.
+The loading layer is a visual handoff between them, not a simulated progress
+bar. Its typography echoes the Four Hearts mark while keeping the page ready
+as soon as real work is complete.
 
 ## Architecture
 
@@ -16,32 +14,30 @@ GlobalLoadingProvider
   ├─ app-shell and Room resource tasks
   ├─ two-frame Index handoff task
   ├─ Page turn task, begun before either view folds away
-  └─ SpeechCodeLoader overlay and retry affordance
+  └─ SpeechCodeLoader overlay, retry and Return to Index affordances
 
 App
   ├─ Room / Index page sheet + upper-right folded corner
-  ├─ 850 ms sheet turn over the ASCII interlude
+  ├─ page turn over the Four Hearts glyph field
   └─ Room task → RoomScene first committed frame
 ```
 
-Clicking a corner starts the loader behind the current page, then rotates that
-page around its upper-right edge. After the 850 ms turn, the next view mounts
-beneath the loader. The overlay stays visible for at least 2.6 seconds from
-the beginning of the transition, then fades for 520 ms. Direct hash changes
-and browser history use the same fold. Reduced motion skips the rotation and
-uses a static field with a 0.9-second exposure.
+The loader uses the deterministic clover glyph artwork from
+`src/data/clover.ts`. It does not embed the full Steve Jobs speech or invent a
+percentage. The current visual exposure is 1200ms for ordinary motion and
+280ms for reduced motion, followed by a 360ms fade. The page fold remains
+interruptible at the application state level, and browser history uses the
+same hash transition.
 
 ## Field and performance
 
-The numeric grid is sampled into a stable cell array; a small off-screen atlas
-caches each ASCII code at 16 colors. Neighboring cells share two slow wave
-phases. A diagonal band travels through the color ramp during each transition,
-and pointer movement adds bounded velocity and energy to nearby cells. Spring
-restoration returns the digits to their cells. The field paints at most 20 fps
-and caps DPR at 1.5 on desktop and 1.25 on small screens. Reduced motion draws
-once, without a retained animation loop or pointer disturbance.
+`SpeechCodeLoader.tsx` renders a small deterministic glyph set on a 2D canvas.
+It fits once per size change, paints at a bounded cadence, responds to pointer
+proximity, and stops its animation loop when reduced motion is active or the
+document is hidden. The loader is not a WebGL surface and does not increase the
+initial Room cost.
 
-`useLoading().begin(label)` remains available for future real work. A task may
-report measured progress or call `fail(message, retry)`; the UI never invents
-a percentage. The current Room path completes after the first committed Canvas
-frame and reports Drei's resource progress when assets expose it.
+`useLoading().begin(label)` tracks real work. A task may report measured
+progress or call `fail(message, retry)`; the UI does not invent a percentage.
+Room resources are observed through Drei's progress hook, and a failed Room
+load exposes both retry and Return to Index actions.

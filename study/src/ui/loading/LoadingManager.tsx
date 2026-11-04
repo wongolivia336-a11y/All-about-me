@@ -20,7 +20,10 @@ const clamp = (value: number) => Math.min(1, Math.max(0, value));
  * two-frame visual handoff for a local view switch. The ASCII field holds
  * either one for a short minimum exposure and never shows fake progress.
  */
-export function GlobalLoadingProvider({ children }: PropsWithChildren) {
+export function GlobalLoadingProvider({
+  children,
+  onReturnToIndex,
+}: PropsWithChildren<{ onReturnToIndex?: () => void }>) {
   const tasks = useRef(
     new Map<string, LoadingTask>([
       ["app-shell", { id: "app-shell", label: "App shell", blocking: true, progress: null, error: null, retry: null }],
@@ -98,6 +101,7 @@ export function GlobalLoadingProvider({ children }: PropsWithChildren) {
       <SpeechCodeLoader
         active={active}
         error={failed?.error ?? null}
+        onReturnToIndex={onReturnToIndex}
         onRetry={
           failed?.retry
             ? () => {
