@@ -94,7 +94,6 @@ export function LampDimmer() {
     setLampBrightness,
     toggleLampPower,
     setLampInteracting,
-    tactileMuted,
   } = useLampControls();
   const dial = useRef<THREE.Group>(null);
   const topMaterial = useRef<THREE.MeshPhysicalMaterial>(null);
@@ -251,7 +250,7 @@ export function LampDimmer() {
 
     const detent = detentForBrightness(brightness);
     if (detent !== active.lastDetent) {
-      tactileFeedback("tick", tactileMuted);
+      tactileFeedback("tick");
       active.lastDetent = detent;
     }
   };
@@ -265,7 +264,7 @@ export function LampDimmer() {
       active.phase === "press-candidate" &&
       event.timeStamp - active.startedAt <= maxPressDuration
     ) {
-      tactileFeedback("press", tactileMuted);
+      tactileFeedback("press");
       suppressNextPowerAnimation.current = true;
       toggleLampPower();
     }

@@ -131,3 +131,35 @@
 - **Acceptance:** Project return, Back, Forward and refresh all restore QUESTION and its focused artwork; direct project routes remain valid.
 - **Regression risk:** History state must stay paired with its hash across Index ↔ Room and project navigation; covered by Edge/CDP project, Room and stress rehearsals.
 - **Status:** **Fixed and verified: 11/11 stress checks, 18 project checks and 20 Room checks passed.**
+
+## FH-14 — Heartwheel keyboard focus reads as a square button outline
+
+- **Priority:** P2 · **Evidence:** Confirmed in CSS and computed Edge styles; comment marker itself is browser annotation chrome.
+- **Location:** `src/brand/Heartwheel.css`
+- **Observed:** Keyboard focus put a rectangular stroke and block-like highlight around the theme copy.
+- **Correction:** Keep focus discernible with a short, high-contrast underline; remove the focus-only rectangle and fill.
+- **Acceptance:** Focused labels retain a visible indicator without a box. **Fixed and verified** in the comment rehearsal.
+
+## FH-15 — Room fold responds with unrelated rigid translation
+
+- **Priority:** P2 · **Evidence:** Confirmed in CSS and mid-transition Edge capture.
+- **Location:** `src/PageTurn.css`
+- **Observed:** The corner triangle rotated and shifted in-plane while its Room label slid independently.
+- **Correction:** Rotate the flap gently around its diagonal crease; keep the button hit area and caption still; settle to the resting shape under Reduced Motion.
+- **Acceptance:** Rest, mid-hover and settled states are continuous, with no X/Y translation. **Fixed and verified** in the comment rehearsal.
+
+## FH-16 — Default-on tactile preference competes with Room controls
+
+- **Priority:** P2 · **Evidence:** Confirmed in Room HUD, shared state and call sites.
+- **Location:** `src/App.tsx`, `src/interaction/studyStore.ts`, `src/interaction/tactile.ts`, `src/scene/lamp/LampDimmer.tsx`, `src/i18n.tsx`
+- **Observed:** A global button to mute default-on lamp feedback occupied the HUD beside lamp power.
+- **Correction:** Remove the global toggle and unused mute state. Preserve tactile press / detent feedback and the actual lamp controls.
+- **Acceptance:** One icon button powers the lamp; brightness slider remains; no global tactile toggle. **Fixed and verified** in Edge.
+
+## FH-17 — Room return glyph becomes a plus on hover
+
+- **Priority:** P2 · **Evidence:** Confirmed in Edge; hover rotated the two-stroke exit glyph into a plus.
+- **Location:** `src/PageTurn.css`, `.room-exit`
+- **Observed:** “Return to Index” changed to a plus-shaped symbol on hover / keyboard focus, suggesting an add action.
+- **Correction:** Keep the cross fixed and let the control's surface provide the acknowledgment.
+- **Acceptance:** The symbol remains a cross through hover and focus. **Fixed and verified** in the comment rehearsal.

@@ -1,0 +1,102 @@
+{
+  "date": "2026-11-04T14:51:54.855Z",
+  "browser": "Microsoft Edge via DevTools Protocol",
+  "url": "http://127.0.0.1:5175/",
+  "viewport": [
+    1440,
+    900
+  ],
+  "checks": [
+    {
+      "name": "Theme keyboard focus uses an editorial marker instead of a rectangle",
+      "passed": true,
+      "observed": {
+        "focusVisible": true,
+        "outline": "none",
+        "outlineWidth": "3px",
+        "background": "rgba(0, 0, 0, 0)",
+        "markerOpacity": "1",
+        "markerWidth": "24px",
+        "markerColor": "rgb(98, 83, 62)"
+      }
+    },
+    {
+      "name": "Paper fold responds around its diagonal hinge without moving the control or label",
+      "passed": true,
+      "observed": {
+        "before": {
+          "button": {
+            "left": 1356,
+            "top": 12,
+            "width": 72,
+            "height": 72
+          },
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "transformOrigin": "0px 0px",
+          "labelTransform": "none"
+        },
+        "mid": {
+          "transform": "matrix3d(0.984399, 0.0156008, 0.175256, 0, 0.0156008, 0.984399, -0.175256, 0, -0.175256, 0.175256, 0.968798, 0, 0, 0, 1.59448, 1)",
+          "labelTransform": "none"
+        },
+        "hover": {
+          "hovered": true,
+          "button": {
+            "left": 1356,
+            "top": 12,
+            "width": 72,
+            "height": 72
+          },
+          "transform": "matrix3d(0.975528, 0.0244717, 0.218508, 0, 0.0244717, 0.975528, -0.218508, 0, -0.218508, 0.218508, 0.951057, 0, 0, 0, 2, 1)",
+          "hinge": "0px 0px",
+          "translation": {
+            "x": 0,
+            "y": 0
+          },
+          "labelTransform": "none",
+          "shadow": "rgba(39, 31, 22, 0.16) -1px 4px 7px 0px"
+        }
+      }
+    },
+    {
+      "name": "Reduced motion removes the expressive fold transform",
+      "passed": true,
+      "observed": {
+        "matches": true,
+        "leafTransform": "none"
+      }
+    },
+    {
+      "name": "Room return control keeps its close meaning on hover",
+      "passed": true,
+      "observed": {
+        "hovered": true,
+        "ariaLabel": "Return to Index",
+        "symbolTransform": "none",
+        "beforeTransform": "matrix(0.707107, 0.707107, -0.707107, 0.707107, 0, 0)",
+        "afterTransform": "matrix(0.707107, -0.707107, 0.707107, 0.707107, 0, 0)"
+      }
+    },
+    {
+      "name": "Room HUD keeps the lamp power control and brightness slider without a global tactile toggle",
+      "passed": true,
+      "observed": {
+        "iconButtons": [
+          "Turn desk lamp on"
+        ],
+        "tactileLabels": [],
+        "slider": true,
+        "hud": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 86,
+          "top": 0,
+          "right": 1440,
+          "bottom": 86,
+          "left": 0
+        }
+      }
+    }
+  ]
+}

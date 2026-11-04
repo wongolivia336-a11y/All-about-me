@@ -31,8 +31,6 @@ interface StudyState {
   lastNonZeroLampBrightness: number;
   /** prevents CameraControls from competing with an active dial gesture */
   lampInteracting: boolean;
-  /** optional, low-volume mechanical feedback; defaults to enabled */
-  tactileMuted: boolean;
   /** the speaker. Browsers block autoplay, so this only ever starts on a click */
   musicPlaying: boolean;
   /** set when playback was refused — usually because no audio file is present */
@@ -50,7 +48,6 @@ let state: StudyState = {
   lampBrightness: DEFAULT_LAMP_BRIGHTNESS,
   lastNonZeroLampBrightness: DEFAULT_LAMP_BRIGHTNESS,
   lampInteracting: false,
-  tactileMuted: false,
   musicPlaying: false,
   musicUnavailable: false,
   volume: 0.6,
@@ -120,8 +117,6 @@ export const setLampInteracting = (lampInteracting: boolean) => {
   if (state.lampInteracting !== lampInteracting) setState({ lampInteracting });
 };
 
-export const setTactileMuted = (tactileMuted: boolean) => setState({ tactileMuted });
-
 export const setMusicPlaying = (playing: boolean) =>
   setState({ musicPlaying: playing, ...(playing ? { musicUnavailable: false } : {}) });
 
@@ -141,12 +136,10 @@ export function useLampControls() {
   const lampPower = useStudyValue(() => state.lampPower);
   const lampPowerRevision = useStudyValue(() => state.lampPowerRevision);
   const lampBrightness = useStudyValue(() => state.lampBrightness);
-  const tactileMuted = useStudyValue(() => state.tactileMuted);
   return {
     lampPower,
     lampPowerRevision,
     lampBrightness,
-    tactileMuted,
     setLampBrightness,
     toggleLampPower,
     setLampInteracting,
@@ -194,7 +187,6 @@ export function useStudy() {
     setLampBrightness,
     toggleLampPower,
     setLampInteracting,
-    setTactileMuted,
     setMusicPlaying,
     setVolume,
     effectiveLampBrightness: effectiveLampBrightness(snapshot.lampPower, snapshot.lampBrightness),

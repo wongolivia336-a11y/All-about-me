@@ -44,3 +44,18 @@ Browser conditions: local Vite app, Edge DevTools Protocol, DPR 1; Index at 1440
    - Edge/CDP stress rehearsal: 11/11 passed, including rapid switches, real drag, project return, browser history and refresh.
 
 Final verification after the latest source changes: `npm run lint`, `npm run build`, `npm run test:heartwheel`, `npm run test:room-reveal`, 11 design-stress checks, 18 project checks, 20 Room checks and 10 bilingual checks passed in Edge/CDP. Vite still reports the lazy RoomScene chunk above its 500 KB advisory threshold; see [REMAINING-ISSUES.md](REMAINING-ISSUES.md).
+
+## Browser annotation follow-up — 2026-11-04
+
+12. **Heartwheel keyboard focus** — `src/brand/Heartwheel.css`
+    - Removed the rectangular focus outline and focus-only block fill. A short dark theme-ink underline now marks the focused label without boxing its copy.
+13. **Paper corner hover** — `src/PageTurn.css`
+    - Changed the flap from a flat rotate-and-translate to a restrained 3D hinge around its diagonal crease. The Room label stays in place; reduced-motion users see the resting fold.
+14. **Room HUD controls** — `src/App.tsx`, `src/interaction/studyStore.ts`, `src/interaction/tactile.ts`, `src/scene/lamp/LampDimmer.tsx`, `src/i18n.tsx`
+    - Removed the default-on tactile mute toggle and dead preference state. Press / detent feedback remains active; lamp power and brightness remain visible.
+15. **Room return glyph** — `src/PageTurn.css`
+    - Removed the hover/focus rotation that turned the “Return to Index” cross into a plus. The exit symbol keeps its meaning while the button surface responds.
+16. **Comment-specific rehearsal** — `scripts/rehearse-comment-fixes.mjs`, `audit/evidence/annotation-follow-up/`
+    - 5/5 Edge/CDP checks passed, including rest / mid-hover / settled captures, focus appearance, reduced motion, stable return glyph and the Room HUD.
+
+See [ANNOTATION-FOLLOW-UP.md](ANNOTATION-FOLLOW-UP.md) for reproduction, decisions and reference-material limits.

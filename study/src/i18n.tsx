@@ -59,8 +59,6 @@ export interface Copy {
   lampBrightness: string;
   turnLampOn: string;
   turnLampOff: string;
-  tactileOn: string;
-  tactileOff: string;
   closePanel: string;
   musicTitle: string;
   musicBody: string;
@@ -154,8 +152,6 @@ const translations: Record<Language, Copy> = {
     lampBrightness: "Desk lamp brightness",
     turnLampOn: "Turn desk lamp on",
     turnLampOff: "Turn desk lamp off",
-    tactileOn: "Enable tactile lamp feedback",
-    tactileOff: "Disable tactile lamp feedback",
     closePanel: "Return to room",
     musicTitle: "Now playing",
     musicBody: "Tap the speaker to play. Add an audio file at public/audio/now-playing.mp3 to use it here.",
@@ -247,8 +243,6 @@ const translations: Record<Language, Copy> = {
     lampBrightness: "台灯亮度",
     turnLampOn: "打开台灯",
     turnLampOff: "关闭台灯",
-    tactileOn: "开启台灯机械反馈",
-    tactileOff: "关闭台灯机械反馈",
     closePanel: "返回房间",
     musicTitle: "正在播放",
     musicBody: "点击音箱开始播放。添加 public/audio/now-playing.mp3 音频文件后即可使用。",

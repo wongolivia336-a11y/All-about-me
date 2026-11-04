@@ -103,9 +103,7 @@ function playMechanicalFeedback(kind: TactileFeedback) {
  * User-gesture-only feedback. Android may expose a real vibration motor;
  * other browsers keep the interaction legible through motion and quiet sound.
  */
-export function tactileFeedback(kind: TactileFeedback, muted: boolean) {
-  if (muted) return;
-
+export function tactileFeedback(kind: TactileFeedback) {
   const now = typeof performance === "undefined" ? Date.now() : performance.now();
   if (kind === "tick") {
     // A rapid sweep can cross several detents in one frame. Merge them instead

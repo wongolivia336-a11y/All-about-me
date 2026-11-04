@@ -48,3 +48,16 @@ The matched frames show the same QUESTION artwork and expanded theme before open
 | Index, mobile 390×844 | ![Mobile Index](evidence/ux-revisit/index-mobile-zh-390x844.png) |
 
 The fold now reveals through one clipped surface; the corner control is absent during the transition. Four leaves have no idle stroke. The bilingual toggle persists between Index and Room. The mobile screenshot shows the language controls clear of the fold, with 44px minimum height. [Rehearsal results](evidence/ux-revisit/rehearsal-report.json) record 10 passing checks.
+
+## Follow-up browser comments — 1440×900, Edge
+
+| State | Evidence |
+|---|---|
+| Heartwheel keyboard focus, no label box | ![Theme focus underline](evidence/annotation-follow-up/theme-focus-detail-1440x900.png) |
+| Paper corner at rest | ![Paper corner at rest](evidence/annotation-follow-up/paper-corner-rest-detail-1440x900.png) |
+| Paper corner mid-hover | ![Paper corner mid-hover](evidence/annotation-follow-up/paper-corner-mid-hover-detail-1440x900.png) |
+| Paper corner settled hover, detail | ![Paper corner hover detail](evidence/annotation-follow-up/paper-corner-hover-detail-1440x900.png) |
+| Paper corner with Reduced Motion | ![Paper corner under reduced motion](evidence/annotation-follow-up/paper-corner-reduced-motion-detail-1440x900.png) |
+| Room HUD after tactile control removal | ![Room HUD](evidence/annotation-follow-up/room-hud-controls-detail-1440x900.png) |
+
+The original blue rectangle in the comment screenshot belongs to the browser annotation layer. The actual keyboard focus outline was also rectangular; it is now a theme-ink underline. The Room HUD keeps lamp power and brightness, while the default-on tactile feedback runs at its existing press / detent interactions. The return cross now stays an × on hover; it no longer turns into a plus. Full computed-state checks are in [comment-fixes-report.json](evidence/annotation-follow-up/comment-fixes-report.json).
