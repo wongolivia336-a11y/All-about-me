@@ -1,5 +1,5 @@
-import { useMemo, useState, type CSSProperties } from "react";
-import { Heartwheel } from "../brand/Heartwheel";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { Heartwheel, type ThemeZoomOrigin } from "../brand/Heartwheel";
 import { library, type ArchiveEntry, type ThemeId } from "../data/library";
 import { themeOrder } from "../data/themeConfig";
 import { projectText, themeText, useLanguage } from "../i18n";
@@ -10,7 +10,7 @@ export type ThemeSelectionSource = "select" | "drag";
 interface LeafWorldProps {
   activeTheme: ThemeId;
   focused: boolean;
-  onThemeChange: (theme: ThemeId, source?: ThemeSelectionSource) => void;
+  onThemeChange: (theme: ThemeId, source?: ThemeSelectionSource, origin?: ThemeZoomOrigin) => void;
   onProjectOpen: (entry: ArchiveEntry) => void;
 }
 
@@ -18,7 +18,7 @@ const visibleEntries = library.filter(
   (entry) => entry.status === "published" || entry.status === "prototype",
 );
 
-function ThemePreview({ theme, entry, onEnter }: { theme: ThemeId; entry?: ArchiveEntry; onEnter: () => void }) {
+function ThemePreview({ theme, entry, onEnter }: { theme: ThemeId; entry?: ArchiveEntry; onEnter: (origin: ThemeZoomOrigin) => void }) {
   const { copy, language } = useLanguage();
   const definition = themeText(theme, language);
   const localized = entry ? projectText(entry, language) : null;
@@ -28,7 +28,14 @@ function ThemePreview({ theme, entry, onEnter }: { theme: ThemeId; entry?: Archi
       data-theme={theme}
       style={{ "--preview-accent": definition.accent, "--preview-ink": definition.ink } as CSSProperties}
     >
-      <button className="leaf-preview__button" type="button" onClick={onEnter}>
+      <button
+        className="leaf-preview__button"
+        type="button"
+        onClick={(event) => {
+          const bounds = event.currentTarget.getBoundingClientRect();
+          onEnter({ x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 });
+        }}
+      >
         <span className="leaf-preview__visual">
           {entry?.cover ? <img src={entry.cover} alt="" width="1800" height="630" /> : <span className="leaf-preview__empty">{copy.noPublicCover}</span>}
           <span className="leaf-preview__stamp">{definition.label} / 01</span>
@@ -70,6 +77,10 @@ function WorldCard({ entry, primary, onOpen }: { entry: ArchiveEntry; primary?: 
 export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }: LeafWorldProps) {
   const { language, copy } = useLanguage();
   const [previewTheme, setPreviewTheme] = useState<ThemeId | null>(null);
+  const [transitionPhase, setTransitionPhase] = useState<"overview" | "entering" | "focused" | "exiting">(focused ? "focused" : "overview");
+  const [zoomOrigin, setZoomOrigin] = useState<ThemeZoomOrigin | null>(null);
+  const previousFocused = useRef(focused);
+  const dockRef = useRef<HTMLDivElement | null>(null);
   const representatives = useMemo(() =>
     Object.fromEntries(themeOrder.map((theme) => [theme,
       visibleEntries.find((entry) => entry.primaryTheme === theme),
@@ -81,10 +92,40 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
   const previewEntry = previewTheme ? representatives[previewTheme] : undefined;
   const activeDefinition = themeText(activeTheme, language);
 
+  useEffect(() => {
+    if (focused === previousFocused.current) return;
+    previousFocused.current = focused;
+    if (focused) {
+      setTransitionPhase("entering");
+      const frame = requestAnimationFrame(() => setTransitionPhase("focused"));
+      return () => cancelAnimationFrame(frame);
+    }
+    setTransitionPhase("exiting");
+    const timer = window.setTimeout(() => setTransitionPhase("overview"), 420);
+    return () => window.clearTimeout(timer);
+  }, [focused]);
+
+  const changeTheme = (theme: ThemeId, source: ThemeSelectionSource = "select", origin?: ThemeZoomOrigin) => {
+    if (origin && dockRef.current) {
+      const bounds = dockRef.current.getBoundingClientRect();
+      setZoomOrigin({ x: origin.x - bounds.left, y: origin.y - bounds.top });
+    } else if (origin) {
+      setZoomOrigin(origin);
+    }
+    onThemeChange(theme, source, origin);
+  };
+
+  const shellStyle = {
+    "--zoom-x": zoomOrigin ? `${zoomOrigin.x}px` : "50%",
+    "--zoom-y": zoomOrigin ? `${zoomOrigin.y}px` : "50%",
+  } as CSSProperties;
+
   return (
     <div
       className="leaf-world-shell"
       data-mode={focused ? "focused" : "overview"}
+      data-transition={transitionPhase}
+      style={shellStyle}
       onMouseLeave={() => setPreviewTheme(null)}
     >
       <div className="leaf-world-shell__control">
@@ -92,7 +133,7 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
           <button
             className="leaf-world-shell__overview"
             type="button"
-            onClick={() => focused && onThemeChange(activeTheme, "select")}
+            onClick={() => focused && changeTheme(activeTheme, "select")}
             disabled={!focused}
             aria-label={copy.overviewAria}
           >
@@ -104,9 +145,9 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
           activeTheme={activeTheme}
           focused={focused}
           previewTheme={previewTheme}
-          onThemeChange={(theme, source) => {
+          onThemeChange={(theme, source, origin) => {
             setPreviewTheme(null);
-            onThemeChange(theme, source);
+            changeTheme(theme, source, origin);
           }}
           onThemeHover={(theme) => {
             if (!focused) setPreviewTheme(theme);
@@ -117,12 +158,12 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
         </p>
       </div>
 
-      <div className="leaf-world-shell__dock" aria-live="polite">
+      <div ref={dockRef} className="leaf-world-shell__dock" aria-live="polite">
         {!focused && previewTheme ? (
           <ThemePreview
             theme={previewTheme}
             entry={previewEntry}
-            onEnter={() => onThemeChange(previewTheme, "select")}
+            onEnter={(origin) => changeTheme(previewTheme, "select", origin)}
           />
         ) : focused ? (
           <section className="leaf-world" aria-labelledby="leaf-world-title">
@@ -132,7 +173,7 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
                 <h2 id="leaf-world-title">{activeDefinition.shortLabel}</h2>
                 <p>{activeDefinition.description}</p>
               </div>
-              <button type="button" onClick={() => onThemeChange(activeTheme, "select")}>
+              <button type="button" onClick={() => changeTheme(activeTheme, "select")}>
                 {copy.overview}
               </button>
             </header>
@@ -156,8 +197,8 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
               <p><span>{language === "zh" ? "教育" : "Education"}</span>{copy.educationTitle}</p>
             </div>
             <div className="leaf-world-shell__resting-links">
-              <button type="button" onClick={() => onThemeChange("build", "select")}>{copy.openExperience} ↗</button>
-              <button type="button" onClick={() => onThemeChange("question", "select")}>{copy.openEducation} ↗</button>
+              <button type="button" onClick={() => changeTheme("build", "select")}>{copy.openExperience} ↗</button>
+              <button type="button" onClick={() => changeTheme("question", "select")}>{copy.openEducation} ↗</button>
             </div>
           </section>
         )}

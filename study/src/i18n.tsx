@@ -56,9 +56,17 @@ export interface Copy {
   loadingRoom: string;
   roomLoadError: string;
   retry: string;
+  loaderForming: string;
+  loaderReady: string;
+  loaderTitle: string;
+  loaderSubtitle: string;
+  loaderWorking: string;
+  loaderProgress: string;
   lampBrightness: string;
   turnLampOn: string;
   turnLampOff: string;
+  tactileOn: string;
+  tactileOff: string;
   closePanel: string;
   musicTitle: string;
   musicBody: string;
@@ -159,9 +167,17 @@ const translations: Record<Language, Copy> = {
     loadingRoom: "Loading Room",
     roomLoadError: "Room resources could not load.",
     retry: "Retry",
+    loaderForming: "FORMING",
+    loaderReady: "READY",
+    loaderTitle: "Some things take shape in motion.",
+    loaderSubtitle: "A small world is assembling in the background.",
+    loaderWorking: "WORKING",
+    loaderProgress: "Loading progress",
     lampBrightness: "Desk lamp brightness",
     turnLampOn: "Turn desk lamp on",
     turnLampOff: "Turn desk lamp off",
+    tactileOn: "Enable tactile lamp feedback",
+    tactileOff: "Disable tactile lamp feedback",
     closePanel: "Return to room",
     musicTitle: "Now playing",
     musicBody: "Tap the speaker to play. Add an audio file at public/audio/now-playing.mp3 to use it here.",
@@ -260,9 +276,17 @@ const translations: Record<Language, Copy> = {
     loadingRoom: "正在载入 Room",
     roomLoadError: "Room 场景资源载入失败。",
     retry: "重试",
+    loaderForming: "正在成形",
+    loaderReady: "已就绪",
+    loaderTitle: "有些世界，需要一点时间成形。",
+    loaderSubtitle: "一个小小的世界正在后台聚拢。",
+    loaderWorking: "处理中",
+    loaderProgress: "载入进度",
     lampBrightness: "台灯亮度",
     turnLampOn: "打开台灯",
     turnLampOff: "关闭台灯",
+    tactileOn: "开启台灯机械反馈",
+    tactileOff: "关闭台灯机械反馈",
     closePanel: "返回房间",
     musicTitle: "正在播放",
     musicBody: "点击音箱开始播放。添加 public/audio/now-playing.mp3 音频文件后即可使用。",

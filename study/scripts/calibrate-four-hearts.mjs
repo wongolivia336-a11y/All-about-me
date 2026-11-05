@@ -127,12 +127,24 @@ const world = await evaluate(`({ hash: location.hash, cards: document.querySelec
 await capture("z1-build-1440x900");
 check("Preview click becomes a Z1 world while clover remains available", world.hash === "#index/build" && world.cards >= 1 && world.clover, world);
 
+const enterZoom = await evaluate(`({ phase: document.querySelector('.leaf-world-shell')?.dataset.transition, clip: getComputedStyle(document.querySelector('.leaf-world-shell__dock')).clipPath })`);
+check("Z0 to Z1 uses a source-point clip zoom", enterZoom.phase === "focused" && enterZoom.clip.includes("circle"), enterZoom);
+await click(".leaf-world__header > button");
+await waitFor("location.hash === '#index'");
+await sleep(70);
+const exitZoom = await evaluate(`({ phase: document.querySelector('.leaf-world-shell')?.dataset.transition, clip: getComputedStyle(document.querySelector('.leaf-world-shell__dock')).clipPath })`);
+check("Z1 returns through the same zoom hierarchy", exitZoom.phase === "exiting" && exitZoom.clip.includes("circle"), exitZoom);
+await sleep(460);
+await click('[data-heart-theme="build"]');
+await waitFor("location.hash === '#index/build' && Boolean(document.querySelector('.leaf-world'))");
+await sleep(350);
+
 await click('[data-project-entry="bioaz-agent-workbench"]');
 await waitFor("document.querySelector('.archive__project-detail') && location.hash.includes('/bioaz-agent-workbench')");
 await sleep(300);
-const detail = await evaluate(`({ hash: location.hash, title: document.querySelector('.archive__project-detail h2')?.textContent, image: document.querySelector('.archive__project-cover')?.getAttribute('src') })`);
+const detail = await evaluate(`(() => { const image = document.querySelector('.archive__project-cover'); return { hash: location.hash, title: document.querySelector('.archive__project-detail h2')?.textContent, image: image?.getAttribute('src'), imageLoaded: Boolean(image?.complete && image.naturalWidth > 0) }; })()`);
 await capture("z2-bioaz-1440x900");
-check("World card enters the canonical project detail", detail.hash === "#index/build/bioaz-agent-workbench" && detail.title?.includes("BioAZ"), detail);
+check("World card enters the canonical project detail with a real illustration", detail.hash === "#index/build/bioaz-agent-workbench" && detail.title?.includes("BioAZ") && detail.imageLoaded, detail);
 await click(".archive__back");
 await waitFor("document.querySelector('.leaf-world') && !document.querySelector('.archive__project-detail')");
 check("Back returns to the source world", await evaluate("location.hash === '#index/build' && document.querySelector('.leaf-world')?.dataset"), await evaluate("({ hash: location.hash, world: !!document.querySelector('.leaf-world') })"));
