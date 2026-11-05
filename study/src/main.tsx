@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import "./ui/ArchiveResume.css";
 import { GlobalLoadingProvider } from "./ui/loading/LoadingManager";
 import { LanguageProvider } from "./i18n";
 

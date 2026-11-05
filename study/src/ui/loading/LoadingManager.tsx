@@ -79,11 +79,27 @@ export function GlobalLoadingProvider({
     [complete, refresh],
   );
 
-  // This is a real paint boundary, not simulated resource progress. The loader
-  // itself keeps a short visual handoff so a fast initial render never flashes.
+  // Wait for fonts and two real paint opportunities. This is a readiness
+  // boundary for the static index, not simulated resource progress.
   useEffect(() => {
-    const frame = window.requestAnimationFrame(() => complete("app-shell"));
-    return () => window.cancelAnimationFrame(frame);
+    let cancelled = false;
+    const settle = () => {
+      if (cancelled) return;
+      const frame = window.requestAnimationFrame(() => {
+        if (cancelled) return;
+        complete("app-shell");
+      });
+      return () => window.cancelAnimationFrame(frame);
+    };
+    let cancelFrame: (() => void) | undefined;
+    const fontsReady = "fonts" in document ? document.fonts.ready : Promise.resolve();
+    fontsReady.then(() => {
+      cancelFrame = settle();
+    });
+    return () => {
+      cancelled = true;
+      cancelFrame?.();
+    };
   }, [complete]);
 
   const snapshot = useMemo(() => {
@@ -92,6 +108,10 @@ export function GlobalLoadingProvider({
   }, [revision]);
   const failed = snapshot.find((task) => task.error);
   const active = snapshot.some((task) => task.blocking);
+  const blockingTasks = snapshot.filter((task) => task.blocking);
+  const progress = blockingTasks.length > 0 && blockingTasks.every((task) => task.progress !== null)
+    ? blockingTasks.reduce((total, task) => total + (task.progress ?? 0), 0) / blockingTasks.length
+    : null;
 
   const value = useMemo<LoadingContextValue>(() => ({ active, begin }), [active, begin]);
 
@@ -100,6 +120,7 @@ export function GlobalLoadingProvider({
       {children}
       <SpeechCodeLoader
         active={active}
+        progress={progress}
         error={failed?.error ?? null}
         onReturnToIndex={onReturnToIndex}
         onRetry={
@@ -115,3 +136,4 @@ export function GlobalLoadingProvider({
     </LoadingContext.Provider>
   );
 }
+

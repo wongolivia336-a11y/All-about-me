@@ -11,6 +11,12 @@ export interface Copy {
   language: string;
   switchToEnglish: string;
   switchToChinese: string;
+  navigation: string;
+  openNavigation: string;
+  closeNavigation: string;
+  navWorlds: string;
+  navWork: string;
+  navAbout: string;
   contact: string;
   archiveAria: string;
   heroEyebrow: string;
@@ -19,6 +25,7 @@ export interface Copy {
   seeSelected: string;
   startConversation: string;
   backToArchive: string;
+  backToWorld: string;
   backToIndex: string;
   noPublishedEntries: string;
   practiceEyebrow: string;
@@ -45,6 +52,8 @@ export interface Copy {
   focusTheme: string;
   noThemeCover: string;
   exploreProject: string;
+  enterWorld: string;
+  worldNavigation: string;
   viewAllTheme: string;
   overviewTitle: string;
   overviewDescription: string;
@@ -56,9 +65,17 @@ export interface Copy {
   loadingRoom: string;
   roomLoadError: string;
   retry: string;
+  loaderForming: string;
+  loaderReady: string;
+  loaderTitle: string;
+  loaderSubtitle: string;
+  loaderWorking: string;
+  loaderProgress: string;
   lampBrightness: string;
   turnLampOn: string;
   turnLampOff: string;
+  tactileOn: string;
+  tactileOff: string;
   closePanel: string;
   musicTitle: string;
   musicBody: string;
@@ -82,6 +99,11 @@ export interface Copy {
   phoneKicker: string;
   portfolioKicker: string;
   resumeEyebrow: string;
+  resumeTitle: string;
+  experienceLabel: string;
+  educationLabel: string;
+  selectedWorkLabel: string;
+  backToTop: string;
   experienceTitle: string;
   experienceBody: string;
   educationTitle: string;
@@ -114,14 +136,21 @@ const translations: Record<Language, Copy> = {
     language: "Language",
     switchToEnglish: "Switch language to English",
     switchToChinese: "切换语言为中文",
+    navigation: "Main navigation",
+    openNavigation: "Open navigation",
+    closeNavigation: "Close navigation",
+    navWorlds: "Worlds",
+    navWork: "Work",
+    navAbout: "About",
     contact: "Contact",
     archiveAria: "Olivia Wong / Four Hearts personal archive",
     heroEyebrow: "Design engineer / AI products / creative technology",
-    heroTitle: "A living archive of things I build, question, play with, and keep.",
+    heroTitle: "A living archive of things I build, question, play with, and collect.",
     heroLead: "I make human-centred tools and interactive systems for ideas that are still becoming.",
     seeSelected: "See selected work ↓",
     startConversation: "Start a conversation ↗",
     backToArchive: "← Back to archive",
+    backToWorld: "← Back to world",
     backToIndex: "← Back to Living Index",
     noPublishedEntries: "No published entries for this theme yet.",
     practiceEyebrow: "A cross-section of the practice",
@@ -148,9 +177,11 @@ const translations: Record<Language, Copy> = {
     focusTheme: "Focus ",
     noThemeCover: "no public cover",
     exploreProject: "Explore project ↗",
+    enterWorld: "Enter this world ↗",
+    worldNavigation: "Switch between the four worlds",
     viewAllTheme: "View all ",
     overviewTitle: "Four hearts. Four ways of seeing.",
-    overviewDescription: "A selection of real projects, questions, experiments and things worth keeping.",
+    overviewDescription: "A selection of real projects, questions, experiments and things worth collecting.",
     currentTheme: "Current theme: ",
     focusAnnouncement: " is open. Select the same leaf again to return to the overview.",
     overviewAnnouncement: "Four-theme overview is open.",
@@ -159,9 +190,17 @@ const translations: Record<Language, Copy> = {
     loadingRoom: "Loading Room",
     roomLoadError: "Room resources could not load.",
     retry: "Retry",
+    loaderForming: "FORMING",
+    loaderReady: "READY",
+    loaderTitle: "Some things take shape in motion.",
+    loaderSubtitle: "A small world is assembling in the background.",
+    loaderWorking: "WORKING",
+    loaderProgress: "Loading progress",
     lampBrightness: "Desk lamp brightness",
     turnLampOn: "Turn desk lamp on",
     turnLampOff: "Turn desk lamp off",
+    tactileOn: "Enable tactile lamp feedback",
+    tactileOff: "Disable tactile lamp feedback",
     closePanel: "Return to room",
     musicTitle: "Now playing",
     musicBody: "Tap the speaker to play. Add an audio file at public/audio/now-playing.mp3 to use it here.",
@@ -185,6 +224,11 @@ const translations: Record<Language, Copy> = {
     phoneKicker: "Apps",
     portfolioKicker: "Portfolio",
     resumeEyebrow: "A quick read",
+    resumeTitle: "Design practice, research and making",
+    experienceLabel: "Internship",
+    educationLabel: "Education",
+    selectedWorkLabel: "Selected work",
+    backToTop: "Back to top ↑",
     experienceTitle: "BioAZ / AI product + agent workflows",
     experienceBody: "Internship practice across product UI, agent workflow prototypes and reviewable systems.",
     educationTitle: "Tongji University / Huaqiao University",
@@ -215,6 +259,12 @@ const translations: Record<Language, Copy> = {
     language: "语言",
     switchToEnglish: "Switch language to English",
     switchToChinese: "切换语言为中文",
+    navigation: "主导航",
+    openNavigation: "展开导航",
+    closeNavigation: "收起导航",
+    navWorlds: "四个世界",
+    navWork: "作品",
+    navAbout: "关于",
     contact: "联系",
     archiveAria: "王心蕊 / Four Hearts 个人档案",
     heroEyebrow: "设计工程 / AI 产品 / 创意技术",
@@ -223,6 +273,7 @@ const translations: Record<Language, Copy> = {
     seeSelected: "查看精选作品 ↓",
     startConversation: "开始交流 ↗",
     backToArchive: "← 返回档案",
+    backToWorld: "← 返回所在世界",
     backToIndex: "← 返回主题索引",
     noPublishedEntries: "这个主题暂时没有公开内容。",
     practiceEyebrow: "实践的一组切面",
@@ -249,6 +300,8 @@ const translations: Record<Language, Copy> = {
     focusTheme: "聚焦 ",
     noThemeCover: "暂无公开封面",
     exploreProject: "查看项目 ↗",
+    enterWorld: "进入这个世界 ↗",
+    worldNavigation: "切换四个世界",
     viewAllTheme: "查看全部 ",
     overviewTitle: "四颗心，四种观看方式。",
     overviewDescription: "一些真实项目、问题、实验，以及值得留下的事物。",
@@ -260,9 +313,17 @@ const translations: Record<Language, Copy> = {
     loadingRoom: "正在载入 Room",
     roomLoadError: "Room 场景资源载入失败。",
     retry: "重试",
+    loaderForming: "正在成形",
+    loaderReady: "已就绪",
+    loaderTitle: "有些世界，需要一点时间成形。",
+    loaderSubtitle: "一个小小的世界正在后台聚拢。",
+    loaderWorking: "处理中",
+    loaderProgress: "载入进度",
     lampBrightness: "台灯亮度",
     turnLampOn: "打开台灯",
     turnLampOff: "关闭台灯",
+    tactileOn: "开启台灯机械反馈",
+    tactileOff: "关闭台灯机械反馈",
     closePanel: "返回房间",
     musicTitle: "正在播放",
     musicBody: "点击音箱开始播放。添加 public/audio/now-playing.mp3 音频文件后即可使用。",
@@ -286,6 +347,11 @@ const translations: Record<Language, Copy> = {
     phoneKicker: "应用",
     portfolioKicker: "作品集",
     resumeEyebrow: "快速了解",
+    resumeTitle: "设计实践、研究与制作",
+    experienceLabel: "实习经历",
+    educationLabel: "教育经历",
+    selectedWorkLabel: "精选作品",
+    backToTop: "回到顶部 ↑",
     experienceTitle: "BioAZ / AI 产品与 Agent 工作流",
     experienceBody: "实习实践覆盖产品界面、Agent workflow 原型与可审阅的系统设计。",
     educationTitle: "同济大学 / 华侨大学",
@@ -481,4 +547,3 @@ const englishPhoneApps: Record<string, string> = {
 export function phoneAppText(id: string, fallback: string, language: Language) {
   return language === "en" ? englishPhoneApps[id] ?? fallback : fallback;
 }
-

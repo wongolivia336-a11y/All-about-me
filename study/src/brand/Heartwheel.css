@@ -115,21 +115,6 @@
   transition: background 180ms ease, color 180ms ease;
 }
 
-.heartwheel__label::after {
-  position: absolute;
-  right: 50%;
-  bottom: 4px;
-  width: 12px;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--label-ink);
-  content: "";
-  opacity: 0;
-  transform: translateX(50%) scaleX(0.65);
-  transform-origin: center;
-  transition: width 150ms ease, opacity 150ms ease, transform 150ms ease;
-}
-
 .heartwheel__label:nth-child(2) {
   top: 50%;
   left: 75%;
@@ -161,18 +146,14 @@
 }
 
 .heartwheel__label:hover,
+.heartwheel__label:focus-visible,
 .heartwheel__label--selected {
   background: color-mix(in srgb, var(--label-accent) 24%, transparent);
 }
 
 .heartwheel__label:focus-visible {
-  outline: none;
-}
-
-.heartwheel__label:focus-visible::after {
-  width: 24px;
-  opacity: 1;
-  transform: translateX(50%) scaleX(1);
+  outline: 2px solid var(--label-ink);
+  outline-offset: 4px;
 }
 
 @media (max-width: 620px) {
@@ -185,10 +166,6 @@
     min-height: 48px;
   }
 
-  .heartwheel__label::after {
-    bottom: 3px;
-  }
-
   .heartwheel__label small {
     display: none;
   }
@@ -197,10 +174,8 @@
 @media (prefers-reduced-motion: reduce) {
   .heartwheel__orbit,
   .heartwheel__label,
-  .heartwheel__label::after,
   .heartwheel__leaf-fill,
   .heartwheel__leaf-visual {
     transition-duration: 0.01ms;
   }
 }
-
