@@ -81,6 +81,16 @@ export interface Copy {
   cinemaKicker: string;
   phoneKicker: string;
   portfolioKicker: string;
+  resumeEyebrow: string;
+  experienceTitle: string;
+  experienceBody: string;
+  educationTitle: string;
+  educationBody: string;
+  selectedWorkTitle: string;
+  selectedWorkBody: string;
+  openExperience: string;
+  openEducation: string;
+  browseSelectedWork: string;
   cinemaBody: string;
   cinemaTitle: string;
   posterFallback: string;
@@ -174,6 +184,16 @@ const translations: Record<Language, Copy> = {
     cinemaKicker: "Cinema",
     phoneKicker: "Apps",
     portfolioKicker: "Portfolio",
+    resumeEyebrow: "A quick read",
+    experienceTitle: "BioAZ / AI product + agent workflows",
+    experienceBody: "Internship practice across product UI, agent workflow prototypes and reviewable systems.",
+    educationTitle: "Tongji University / Huaqiao University",
+    educationBody: "AI & Data Design / Industrial Design — a practice grounded in research, making and visual thinking.",
+    selectedWorkTitle: "BioAZ · KNOCK KNOCK · 侨批",
+    selectedWorkBody: "Three representative starting points across product, interaction and research.",
+    openExperience: "Open BUILD",
+    openEducation: "Open QUESTION",
+    browseSelectedWork: "Browse selected work",
     cinemaBody: "Nine films on the wall, by three directors watched most often.",
     cinemaTitle: "Film shelf",
     posterFallback: "Typeset placeholders are shown until the poster assets are added.",
@@ -265,6 +285,16 @@ const translations: Record<Language, Copy> = {
     cinemaKicker: "电影",
     phoneKicker: "应用",
     portfolioKicker: "作品集",
+    resumeEyebrow: "快速了解",
+    experienceTitle: "BioAZ / AI 产品与 Agent 工作流",
+    experienceBody: "实习实践覆盖产品界面、Agent workflow 原型与可审阅的系统设计。",
+    educationTitle: "同济大学 / 华侨大学",
+    educationBody: "AI & Data Design / 工业设计——从研究、制作与视觉思考出发的设计实践。",
+    selectedWorkTitle: "BioAZ · KNOCK KNOCK · 侨批",
+    selectedWorkBody: "从产品、交互与研究开始了解我的三组代表性工作。",
+    openExperience: "打开 BUILD",
+    openEducation: "打开 QUESTION",
+    browseSelectedWork: "查看精选作品",
     cinemaBody: "墙上的九部电影，来自最常观看的三位导演。",
     cinemaTitle: "片单",
     posterFallback: "目前显示的是排版占位图，添加海报素材后会替换。",
@@ -451,3 +481,4 @@ const englishPhoneApps: Record<string, string> = {
 export function phoneAppText(id: string, fallback: string, language: Language) {
   return language === "en" ? englishPhoneApps[id] ?? fallback : fallback;
 }
+

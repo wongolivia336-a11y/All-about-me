@@ -51,16 +51,19 @@ const routeFromHash = (): Route => {
   if (hash === "room") return { view: "room" };
 
   const [, themeCandidate, projectId] = hash.split("/");
+  const hasTheme = isTheme(themeCandidate);
   return {
     view: "index",
-    theme: isTheme(themeCandidate) ? themeCandidate : "build",
-    archive: isTheme(themeCandidate),
-    ...(isTheme(themeCandidate) && projectId ? { projectId } : {}),
+    theme: hasTheme ? themeCandidate : "build",
+    // A themed hash is the shareable Z1 world. `archive` remains accepted in
+    // the in-memory route for backwards compatibility with older links.
+    focused: hasTheme,
+    ...(hasTheme && projectId ? { projectId } : {}),
   };
 };
 
-const hashForIndex = ({ theme, archive, projectId }: IndexRoute) =>
-  archive || projectId ? `#index/${theme}${projectId ? `/${projectId}` : ""}` : "#index";
+const hashForIndex = ({ theme, archive, projectId, focused }: IndexRoute) =>
+  archive || focused || projectId ? `#index/${theme}${projectId ? `/${projectId}` : ""}` : "#index";
 
 const isIndexRoute = (value: unknown): value is IndexRoute => {
   if (!value || typeof value !== "object") return false;
@@ -352,7 +355,7 @@ export default function App() {
     const origin = indexRouteRef.current;
     projectOriginRoute.current = origin;
     applyIndexRoute(
-      { view: "index", theme: entry.primaryTheme, archive: true, projectId: entry.id },
+      { view: "index", theme: entry.primaryTheme, focused: true, projectId: entry.id },
       true,
       origin,
     );
@@ -363,7 +366,7 @@ export default function App() {
       window.history.back();
       return;
     }
-    applyIndexRoute({ view: "index", theme, archive: true }, false);
+    applyIndexRoute({ view: "index", theme, focused: true }, false);
   }, [applyIndexRoute]);
 
   const brightnessPercent = Math.round(lampBrightness * 100);
@@ -498,3 +501,4 @@ export default function App() {
     </div>
   );
 }
+
