@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import {
   library,
   type ArchiveEntry,
@@ -6,8 +6,9 @@ import {
 } from "../data/library";
 import { CONTACT_EMAIL, GITHUB_USER } from "../data/links";
 import { projectText, themeText, useLanguage } from "../i18n";
-import { LeafCanvas, type ThemeSelectionSource } from "./LeafCanvas";
+import { LeafWorld as LeafCanvas, type ThemeSelectionSource } from "./LeafWorld";
 import { LanguageSwitch } from "./LanguageSwitch";
+import "./ArchiveResume.css";
 
 interface ArchiveProps {
   active: boolean;
@@ -188,11 +189,6 @@ export function Archive({
   }, [initialFocused, initialTheme]);
   useEffect(() => setSelectedProjectId(projectId), [projectId]);
 
-  const currentDefinition = themeText(activeTheme, language);
-  const themeEntries = useMemo(
-    () => visibleEntries.filter((entry) => entry.primaryTheme === activeTheme),
-    [activeTheme],
-  );
   const selectedProject = selectedProjectId
     ? visibleEntries.find((entry) => entry.id === selectedProjectId)
     : undefined;
@@ -324,42 +320,41 @@ export function Archive({
             tabIndex={-1}
             aria-labelledby="theme-title"
           >
-            {showThemeArchive ? (
-              <div className="leaf-canvas__archive">
-                <div className="leaf-canvas__archive-bar">
-                  <div>
-                    <p className="archive__eyebrow">{copy.fourThemeIndex} / {currentDefinition.label}</p>
-                    <h2 id="theme-title">{currentDefinition.shortLabel}</h2>
-                  </div>
-                  <button className="leaf-canvas__archive-back" type="button" onClick={() => onThemeChange(activeTheme, false, viewMode === "focused")}>
-                    {copy.backToIndex}
-                  </button>
-                </div>
-                {themeEntries.length > 0 ? (
-                  <div className="leaf-canvas__archive-list">
-                    {themeEntries.map((entry) => (
-                      <ProjectCard key={entry.id} entry={entry} compact onOpen={() => openProject(entry)} />
-                    ))}
-                  </div>
-                ) : (
-                  <p className="archive__empty">{copy.noPublishedEntries}</p>
-                )}
-              </div>
-            ) : (
-              <LeafCanvas
-                activeTheme={activeTheme}
-                focused={viewMode === "focused"}
-                onThemeChange={selectTheme}
-                onProjectOpen={openProject}
-                onViewAll={(theme) => {
-                  setActiveTheme(theme);
-                  setViewMode("focused");
-                  onThemeChange(theme, true, true);
-                }}
-              />
-            )}
+            <LeafCanvas
+              activeTheme={activeTheme}
+              focused={viewMode === "focused" || showThemeArchive}
+              onThemeChange={selectTheme}
+              onProjectOpen={openProject}
+            />
           </section>
         )}
+
+        <section id="resume" className="archive__resume" aria-labelledby="resume-title">
+          <div className="archive__resume-heading">
+            <p className="archive__eyebrow">{copy.resumeEyebrow}</p>
+            <h2 id="resume-title">{language === "zh" ? "先看我是谁，再进入四个世界。" : "Start with the person, then enter the four worlds."}</h2>
+          </div>
+          <div className="archive__resume-grid">
+            <article>
+              <p className="archive__eyebrow">Experience</p>
+              <h3>{copy.experienceTitle}</h3>
+              <p>{copy.experienceBody}</p>
+              <button type="button" onClick={() => selectTheme("build")}>{copy.openExperience} ↗</button>
+            </article>
+            <article>
+              <p className="archive__eyebrow">Education</p>
+              <h3>{copy.educationTitle}</h3>
+              <p>{copy.educationBody}</p>
+              <button type="button" onClick={() => selectTheme("question")}>{copy.openEducation} ↗</button>
+            </article>
+            <article>
+              <p className="archive__eyebrow">Selected work</p>
+              <h3>{copy.selectedWorkTitle}</h3>
+              <p>{copy.selectedWorkBody}</p>
+              <button type="button" onClick={() => document.getElementById("selected-works")?.scrollIntoView({ behavior: "smooth" })}>{copy.browseSelectedWork} ↗</button>
+            </article>
+          </div>
+        </section>
 
         <section id="selected-works" className="archive__selected" aria-labelledby="selected-title">
           <div className="archive__section-heading">
@@ -402,3 +397,4 @@ export function Archive({
   );
 }
 // End of archive view.
+
