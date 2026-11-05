@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import {
   library,
   type ArchiveEntry,
   type ThemeId,
 } from "../data/library";
 import { CONTACT_EMAIL, GITHUB_USER } from "../data/links";
+import type { ThemeZoomOrigin } from "../brand/Heartwheel";
 import { projectText, themeText, useLanguage } from "../i18n";
 import { LeafWorld as LeafCanvas, type ThemeSelectionSource } from "./LeafWorld";
 import { LanguageSwitch } from "./LanguageSwitch";
@@ -18,7 +19,7 @@ interface ArchiveProps {
   projectId?: string;
   onClose: () => void;
   onThemeChange: (theme: ThemeId, showAll?: boolean, focused?: boolean) => void;
-  onProjectOpen: (entry: ArchiveEntry) => void;
+  onProjectOpen: (entry: ArchiveEntry, origin?: ThemeZoomOrigin) => void;
   onProjectClose: (theme: ThemeId) => void;
 }
 const visibleEntries = library.filter(
@@ -37,7 +38,7 @@ function ProjectCard({
   context = compact ? "archive" : "selected",
 }: {
   entry: ArchiveEntry;
-  onOpen: () => void;
+  onOpen: (origin: ThemeZoomOrigin) => void;
   compact?: boolean;
   featured?: boolean;
   context?: "archive" | "selected";
@@ -62,7 +63,10 @@ function ProjectCard({
         type="button"
         data-project-entry={entry.id}
         data-project-context={context}
-        onClick={onOpen}
+        onClick={(event) => {
+          const bounds = event.currentTarget.getBoundingClientRect();
+          onOpen({ x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 });
+        }}
       >
         <span className="project-card__visual">
           {entry.cover ? (
@@ -95,10 +99,14 @@ function ProjectDetail({
   entry,
   detailRef,
   onBack,
+  transition,
+  origin,
 }: {
   entry: ArchiveEntry;
   detailRef: RefObject<HTMLElement | null>;
   onBack: () => void;
+  transition: "entering" | "entered" | "exiting";
+  origin: { x: number; y: number };
 }) {
   const { language, copy } = useLanguage();
   const definition = themeText(entry.primaryTheme, language);
@@ -107,11 +115,17 @@ function ProjectDetail({
     <section
       id="theme-panel"
       className="archive__project-detail"
+      data-transition={transition}
       role="region"
       tabIndex={-1}
       aria-labelledby="project-detail-title"
       ref={detailRef}
-      style={{ "--detail-accent": definition.accent, "--detail-ink": definition.ink } as CSSProperties}
+      style={{
+        "--detail-accent": definition.accent,
+        "--detail-ink": definition.ink,
+        "--detail-x": `${origin.x}px`,
+        "--detail-y": `${origin.y}px`,
+      } as CSSProperties}
     >
       <button className="archive__back" type="button" onClick={onBack}>
         {copy.backToArchive}
@@ -175,6 +189,9 @@ export function Archive({
   const [activeTheme, setActiveTheme] = useState<ThemeId>(initialTheme);
   const [viewMode, setViewMode] = useState<"overview" | "focused">(initialFocused ? "focused" : "overview");
   const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(projectId);
+  const [projectTransition, setProjectTransition] = useState<"entering" | "entered" | "exiting">("entered");
+  const [projectSourceOrigin, setProjectSourceOrigin] = useState<ThemeZoomOrigin | null>(null);
+  const [projectOrigin, setProjectOrigin] = useState({ x: 50, y: 50 });
   const archiveRef = useRef<HTMLElement | null>(null);
   const detailRef = useRef<HTMLElement | null>(null);
   const projectReturnFocus = useRef<HTMLElement | null>(null);
@@ -187,11 +204,29 @@ export function Archive({
     setActiveTheme(initialTheme);
     setViewMode(initialFocused ? "focused" : "overview");
   }, [initialFocused, initialTheme]);
-  useEffect(() => setSelectedProjectId(projectId), [projectId]);
+  useEffect(() => {
+    setSelectedProjectId(projectId);
+    if (projectId) setProjectTransition("entering");
+  }, [projectId]);
 
   const selectedProject = selectedProjectId
     ? visibleEntries.find((entry) => entry.id === selectedProjectId)
     : undefined;
+
+  useLayoutEffect(() => {
+    if (!selectedProject || !projectSourceOrigin || !detailRef.current) return;
+    const bounds = detailRef.current.getBoundingClientRect();
+    setProjectOrigin({
+      x: projectSourceOrigin.x - bounds.left,
+      y: projectSourceOrigin.y - bounds.top,
+    });
+  }, [projectSourceOrigin, selectedProject]);
+
+  useEffect(() => {
+    if (!selectedProject) return;
+    const frame = requestAnimationFrame(() => setProjectTransition("entered"));
+    return () => cancelAnimationFrame(frame);
+  }, [selectedProject]);
 
   useEffect(() => {
     if (selectedProject) {
@@ -256,7 +291,7 @@ export function Archive({
     onThemeChange(theme, false, !zoomOut);
   };
 
-  const openProject = (entry: ArchiveEntry) => {
+  const openProject = (entry: ArchiveEntry, origin?: ThemeZoomOrigin) => {
     const activeElement = document.activeElement;
     projectReturnFocus.current = activeElement instanceof HTMLElement ? activeElement : null;
     projectReturnTarget.current = activeElement instanceof HTMLElement && activeElement.dataset.projectEntry
@@ -270,13 +305,19 @@ export function Archive({
       ? activeElement.getBoundingClientRect().top
       : null;
     setActiveTheme(entry.primaryTheme);
+    setProjectSourceOrigin(origin ?? null);
+    setProjectOrigin(origin ?? { x: 50, y: 50 });
+    setProjectTransition("entering");
     setSelectedProjectId(entry.id);
-    onProjectOpen(entry);
+    onProjectOpen(entry, origin);
   };
 
   const closeProject = () => {
-    setSelectedProjectId(undefined);
-    onProjectClose(activeTheme);
+    setProjectTransition("exiting");
+    window.setTimeout(() => {
+      setSelectedProjectId(undefined);
+      onProjectClose(activeTheme);
+    }, 420);
   };
 
   return (
@@ -311,7 +352,13 @@ export function Archive({
         </section>
 
         {selectedProject ? (
-          <ProjectDetail entry={selectedProject} detailRef={detailRef} onBack={closeProject} />
+          <ProjectDetail
+            entry={selectedProject}
+            detailRef={detailRef}
+            onBack={closeProject}
+            transition={projectTransition}
+            origin={projectOrigin}
+          />
         ) : (
           <section
             id="theme-panel"

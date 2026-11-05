@@ -141,11 +141,17 @@ await sleep(350);
 
 await click('[data-project-entry="bioaz-agent-workbench"]');
 await waitFor("document.querySelector('.archive__project-detail') && location.hash.includes('/bioaz-agent-workbench')");
+await sleep(70);
+const projectEnterZoom = await evaluate(`({ phase: document.querySelector('.archive__project-detail')?.dataset.transition, clip: getComputedStyle(document.querySelector('.archive__project-detail')).clipPath })`);
+check("Z1 to Z2 uses the clicked card as its zoom source", ["entering", "entered"].includes(projectEnterZoom.phase) && projectEnterZoom.clip.includes("circle"), projectEnterZoom);
 await sleep(300);
 const detail = await evaluate(`(() => { const image = document.querySelector('.archive__project-cover'); return { hash: location.hash, title: document.querySelector('.archive__project-detail h2')?.textContent, image: image?.getAttribute('src'), imageLoaded: Boolean(image?.complete && image.naturalWidth > 0) }; })()`);
 await capture("z2-bioaz-1440x900");
 check("World card enters the canonical project detail with a real illustration", detail.hash === "#index/build/bioaz-agent-workbench" && detail.title?.includes("BioAZ") && detail.imageLoaded, detail);
 await click(".archive__back");
+await sleep(70);
+const projectExitZoom = await evaluate(`({ phase: document.querySelector('.archive__project-detail')?.dataset.transition, clip: getComputedStyle(document.querySelector('.archive__project-detail')).clipPath })`);
+check("Z2 returns through the same source hierarchy", projectExitZoom.phase === "exiting" && projectExitZoom.clip.includes("circle"), projectExitZoom);
 await waitFor("document.querySelector('.leaf-world') && !document.querySelector('.archive__project-detail')");
 check("Back returns to the source world", await evaluate("location.hash === '#index/build' && document.querySelector('.leaf-world')?.dataset"), await evaluate("({ hash: location.hash, world: !!document.querySelector('.leaf-world') })"));
 

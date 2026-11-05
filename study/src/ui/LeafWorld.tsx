@@ -11,7 +11,7 @@ interface LeafWorldProps {
   activeTheme: ThemeId;
   focused: boolean;
   onThemeChange: (theme: ThemeId, source?: ThemeSelectionSource, origin?: ThemeZoomOrigin) => void;
-  onProjectOpen: (entry: ArchiveEntry) => void;
+  onProjectOpen: (entry: ArchiveEntry, origin?: ThemeZoomOrigin) => void;
 }
 
 const visibleEntries = library.filter(
@@ -51,7 +51,7 @@ function ThemePreview({ theme, entry, onEnter }: { theme: ThemeId; entry?: Archi
   );
 }
 
-function WorldCard({ entry, primary, onOpen }: { entry: ArchiveEntry; primary?: boolean; onOpen: () => void }) {
+function WorldCard({ entry, primary, onOpen }: { entry: ArchiveEntry; primary?: boolean; onOpen: (origin: ThemeZoomOrigin) => void }) {
   const { language, copy } = useLanguage();
   const definition = themeText(entry.primaryTheme, language);
   const localized = projectText(entry, language);
@@ -60,7 +60,15 @@ function WorldCard({ entry, primary, onOpen }: { entry: ArchiveEntry; primary?: 
       className={["leaf-world__card", primary && "leaf-world__card--primary"].filter(Boolean).join(" ")}
       style={{ "--card-accent": definition.accent, "--card-ink": definition.ink } as CSSProperties}
     >
-      <button type="button" data-project-entry={entry.id} data-project-context="theme-world" onClick={onOpen}>
+      <button
+        type="button"
+        data-project-entry={entry.id}
+        data-project-context="theme-world"
+        onClick={(event) => {
+          const bounds = event.currentTarget.getBoundingClientRect();
+          onOpen({ x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 });
+        }}
+      >
         <span className="leaf-world__card-visual">
           {entry.cover ? <img src={entry.cover} alt="" width="1800" height="630" /> : <span>{copy.noPublicCover}</span>}
         </span>
@@ -180,7 +188,7 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
             {themeEntries.length > 0 ? (
               <div className="leaf-world__cards">
                 {themeEntries.map((entry, index) => (
-                  <WorldCard key={entry.id} entry={entry} primary={index === 0} onOpen={() => onProjectOpen(entry)} />
+                  <WorldCard key={entry.id} entry={entry} primary={index === 0} onOpen={(origin) => onProjectOpen(entry, origin)} />
                 ))}
               </div>
             ) : (

@@ -2500,6 +2500,20 @@ input:focus-visible {
 
 .archive__project-detail {
   padding: 42px 0 20px;
+  clip-path: circle(155vmax at var(--detail-x, 50%) var(--detail-y, 50%));
+  opacity: 1;
+  transition: clip-path 520ms var(--motion-standard), opacity 240ms ease;
+  will-change: clip-path, opacity;
+}
+
+.archive__project-detail[data-transition="entering"] {
+  clip-path: circle(0 at var(--detail-x, 50%) var(--detail-y, 50%));
+  opacity: .35;
+}
+
+.archive__project-detail[data-transition="exiting"] {
+  clip-path: circle(0 at var(--detail-x, 50%) var(--detail-y, 50%));
+  opacity: .2;
 }
 
 .archive__back {
@@ -2816,7 +2830,12 @@ input:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .archive__hero-actions button,
   .project-card,
-  .project-card__visual img {
+  .project-card__visual img,
+  .archive__project-detail {
     transition-duration: 0.01ms;
   }
+
+  .archive__project-detail[data-transition="entering"],
+  .archive__project-detail[data-transition="exiting"] { clip-path: none; opacity: 1; }
 }
+
