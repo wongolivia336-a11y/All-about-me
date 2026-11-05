@@ -11,6 +11,12 @@ export interface Copy {
   language: string;
   switchToEnglish: string;
   switchToChinese: string;
+  navigation: string;
+  openNavigation: string;
+  closeNavigation: string;
+  navWorlds: string;
+  navWork: string;
+  navAbout: string;
   contact: string;
   archiveAria: string;
   heroEyebrow: string;
@@ -19,6 +25,7 @@ export interface Copy {
   seeSelected: string;
   startConversation: string;
   backToArchive: string;
+  backToWorld: string;
   backToIndex: string;
   noPublishedEntries: string;
   practiceEyebrow: string;
@@ -45,6 +52,8 @@ export interface Copy {
   focusTheme: string;
   noThemeCover: string;
   exploreProject: string;
+  enterWorld: string;
+  worldNavigation: string;
   viewAllTheme: string;
   overviewTitle: string;
   overviewDescription: string;
@@ -90,6 +99,11 @@ export interface Copy {
   phoneKicker: string;
   portfolioKicker: string;
   resumeEyebrow: string;
+  resumeTitle: string;
+  experienceLabel: string;
+  educationLabel: string;
+  selectedWorkLabel: string;
+  backToTop: string;
   experienceTitle: string;
   experienceBody: string;
   educationTitle: string;
@@ -122,6 +136,12 @@ const translations: Record<Language, Copy> = {
     language: "Language",
     switchToEnglish: "Switch language to English",
     switchToChinese: "切换语言为中文",
+    navigation: "Main navigation",
+    openNavigation: "Open navigation",
+    closeNavigation: "Close navigation",
+    navWorlds: "Worlds",
+    navWork: "Work",
+    navAbout: "About",
     contact: "Contact",
     archiveAria: "Olivia Wong / Four Hearts personal archive",
     heroEyebrow: "Design engineer / AI products / creative technology",
@@ -130,6 +150,7 @@ const translations: Record<Language, Copy> = {
     seeSelected: "See selected work ↓",
     startConversation: "Start a conversation ↗",
     backToArchive: "← Back to archive",
+    backToWorld: "← Back to world",
     backToIndex: "← Back to Living Index",
     noPublishedEntries: "No published entries for this theme yet.",
     practiceEyebrow: "A cross-section of the practice",
@@ -156,6 +177,8 @@ const translations: Record<Language, Copy> = {
     focusTheme: "Focus ",
     noThemeCover: "no public cover",
     exploreProject: "Explore project ↗",
+    enterWorld: "Enter this world ↗",
+    worldNavigation: "Switch between the four worlds",
     viewAllTheme: "View all ",
     overviewTitle: "Four hearts. Four ways of seeing.",
     overviewDescription: "A selection of real projects, questions, experiments and things worth collecting.",
@@ -201,6 +224,11 @@ const translations: Record<Language, Copy> = {
     phoneKicker: "Apps",
     portfolioKicker: "Portfolio",
     resumeEyebrow: "A quick read",
+    resumeTitle: "Design practice, research and making",
+    experienceLabel: "Internship",
+    educationLabel: "Education",
+    selectedWorkLabel: "Selected work",
+    backToTop: "Back to top ↑",
     experienceTitle: "BioAZ / AI product + agent workflows",
     experienceBody: "Internship practice across product UI, agent workflow prototypes and reviewable systems.",
     educationTitle: "Tongji University / Huaqiao University",
@@ -231,6 +259,12 @@ const translations: Record<Language, Copy> = {
     language: "语言",
     switchToEnglish: "Switch language to English",
     switchToChinese: "切换语言为中文",
+    navigation: "主导航",
+    openNavigation: "展开导航",
+    closeNavigation: "收起导航",
+    navWorlds: "四个世界",
+    navWork: "作品",
+    navAbout: "关于",
     contact: "联系",
     archiveAria: "王心蕊 / Four Hearts 个人档案",
     heroEyebrow: "设计工程 / AI 产品 / 创意技术",
@@ -239,6 +273,7 @@ const translations: Record<Language, Copy> = {
     seeSelected: "查看精选作品 ↓",
     startConversation: "开始交流 ↗",
     backToArchive: "← 返回档案",
+    backToWorld: "← 返回所在世界",
     backToIndex: "← 返回主题索引",
     noPublishedEntries: "这个主题暂时没有公开内容。",
     practiceEyebrow: "实践的一组切面",
@@ -265,6 +300,8 @@ const translations: Record<Language, Copy> = {
     focusTheme: "聚焦 ",
     noThemeCover: "暂无公开封面",
     exploreProject: "查看项目 ↗",
+    enterWorld: "进入这个世界 ↗",
+    worldNavigation: "切换四个世界",
     viewAllTheme: "查看全部 ",
     overviewTitle: "四颗心，四种观看方式。",
     overviewDescription: "一些真实项目、问题、实验，以及值得留下的事物。",
@@ -310,6 +347,11 @@ const translations: Record<Language, Copy> = {
     phoneKicker: "应用",
     portfolioKicker: "作品集",
     resumeEyebrow: "快速了解",
+    resumeTitle: "设计实践、研究与制作",
+    experienceLabel: "实习经历",
+    educationLabel: "教育经历",
+    selectedWorkLabel: "精选作品",
+    backToTop: "回到顶部 ↑",
     experienceTitle: "BioAZ / AI 产品与 Agent 工作流",
     experienceBody: "实习实践覆盖产品界面、Agent workflow 原型与可审阅的系统设计。",
     educationTitle: "同济大学 / 华侨大学",
@@ -505,4 +547,3 @@ const englishPhoneApps: Record<string, string> = {
 export function phoneAppText(id: string, fallback: string, language: Language) {
   return language === "en" ? englishPhoneApps[id] ?? fallback : fallback;
 }
-

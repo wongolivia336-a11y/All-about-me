@@ -2838,4 +2838,3 @@ input:focus-visible {
   .archive__project-detail[data-transition="entering"],
   .archive__project-detail[data-transition="exiting"] { clip-path: none; opacity: 1; }
 }
-

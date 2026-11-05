@@ -71,4 +71,3 @@ export const themeConfig: Record<ThemeId, ThemeDefinition> = {
     texture: ["READ", "WATCH", "HEAR", "COLLECT", "REMEMBER"],
   },
 };
-

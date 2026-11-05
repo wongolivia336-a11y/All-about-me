@@ -71,6 +71,7 @@ export function Heartwheel({
   const gesture = useRef<Gesture | null>(null);
   const suppressClick = useRef(false);
   const targetRotation = useRef(0);
+  const hoverLock = useRef<{ theme: ThemeId; x: number; y: number } | null>(null);
   const animationFrame = useRef<number | null>(null);
   const animationRef = useRef<SettleAnimation | null>(null);
   const lastFrameAt = useRef<number | null>(null);
@@ -200,12 +201,21 @@ export function Heartwheel({
     if (active.dragging) animateToRotation(targetRotation.current);
   };
 
+  const applyPointerHover = (theme: ThemeId, x: number, y: number) => {
+    const locked = hoverLock.current;
+    if (locked && locked.theme !== theme && Math.hypot(locked.x - x, locked.y - y) < 2) return;
+    hoverLock.current = { theme, x, y };
+    setHoveredTheme(theme);
+    onThemeHover?.(theme);
+  };
+
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!event.isPrimary || event.button !== 0) return;
     if ((event.target as HTMLElement).closest("button")) return;
     if (gesture.current) return;
     cancelSettle();
     targetRotation.current = rotationRef.current;
+    hoverLock.current = null;
     setHoveredTheme(null);
     onThemeHover?.(null);
     const target = event.currentTarget;
@@ -232,21 +242,11 @@ export function Heartwheel({
       return;
     }
 
-    if (dragging || !onThemeHover) return;
-    const stage = event.currentTarget.getBoundingClientRect();
-    const x = ((event.clientX - stage.left) / stage.width) * 340 - 170;
-    const y = ((event.clientY - stage.top) / stage.height) * 340 - 170;
-    const angle = Math.atan2(y, x) * (180 / Math.PI);
-    const radius = Math.hypot(x, y);
-    if (radius < 22 || radius > 155) return;
-    const rotatedAngle = angle - rotationRef.current;
-    const theme = themeOrder.reduce((best, candidate) => {
-      const candidateDistance = angularDistance(rotatedAngle, themeConfig[candidate].leafAngle);
-      const bestDistance = angularDistance(rotatedAngle, themeConfig[best].leafAngle);
-      return candidateDistance < bestDistance ? candidate : best;
-    }, themeOrder[0]);
-    setHoveredTheme(theme);
-    onThemeHover(theme);
+    if (dragging) return;
+    const hitLeaf = (event.target as Element).closest<SVGGElement>("[data-heart-leaf]");
+    const theme = hitLeaf?.dataset.heartLeaf as ThemeId | undefined;
+    if (!theme) return;
+    applyPointerHover(theme, event.clientX, event.clientY);
   };
 
   const handlePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -314,6 +314,7 @@ export function Heartwheel({
                 <g
                   key={theme}
                   className={["heartwheel__leaf", active && "heartwheel__leaf--active", hovered && "heartwheel__leaf--hovered"].filter(Boolean).join(" ")}
+                  data-heart-leaf={theme}
                   style={{ "--leaf-accent": themeConfig[theme].accent, "--leaf-ink": themeConfig[theme].ink } as CSSProperties}
                   transform={`rotate(${themeConfig[theme].leafAngle} 0 0)`}
                 >
@@ -327,6 +328,10 @@ export function Heartwheel({
                     fill="#ffffff"
                     fillOpacity="0"
                     pointerEvents="all"
+                    onPointerEnter={(event) => {
+                      if (focused) return;
+                      applyPointerHover(theme, event.clientX, event.clientY);
+                    }}
                     onClick={(event) => {
                       event.stopPropagation();
                       handleLeafClick(theme, originFromElement(event.currentTarget));
@@ -355,11 +360,11 @@ export function Heartwheel({
                   type="button"
                   aria-pressed={selected}
                   aria-label={copy.selectTheme + themeText(theme, language).label}
-                  onMouseEnter={() => {
-                    setHoveredTheme(theme);
-                    onThemeHover?.(theme);
+                  onMouseEnter={(event) => {
+                    applyPointerHover(theme, event.clientX, event.clientY);
                   }}
                   onFocus={() => {
+                    hoverLock.current = null;
                     setHoveredTheme(theme);
                     onThemeHover?.(theme);
                   }}
@@ -393,4 +398,3 @@ export function Heartwheel({
     </div>
   );
 }
-

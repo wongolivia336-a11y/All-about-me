@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import {
   library,
   type ArchiveEntry,
@@ -9,7 +9,6 @@ import type { ThemeZoomOrigin } from "../brand/Heartwheel";
 import { projectText, themeText, useLanguage } from "../i18n";
 import { LeafWorld as LeafCanvas, type ThemeSelectionSource } from "./LeafWorld";
 import { LanguageSwitch } from "./LanguageSwitch";
-import "./ArchiveResume.css";
 
 interface ArchiveProps {
   active: boolean;
@@ -116,10 +115,34 @@ function ProjectDetail({
       id="theme-panel"
       className="archive__project-detail"
       data-transition={transition}
-      role="region"
+      role="dialog"
+      aria-modal="true"
       tabIndex={-1}
       aria-labelledby="project-detail-title"
       ref={detailRef}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          event.stopPropagation();
+          onBack();
+          return;
+        }
+        if (event.key !== "Tab") return;
+        const root = event.currentTarget;
+        const controls = Array.from(root.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        )).filter((element) => element.offsetParent !== null);
+        if (controls.length === 0) return;
+        const first = controls[0];
+        const last = controls[controls.length - 1];
+        if (event.shiftKey && (document.activeElement === first || document.activeElement === root)) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === root)) {
+          event.preventDefault();
+          first.focus();
+        }
+      }}
       style={{
         "--detail-accent": definition.accent,
         "--detail-ink": definition.ink,
@@ -127,9 +150,12 @@ function ProjectDetail({
         "--detail-y": `${origin.y}px`,
       } as CSSProperties}
     >
-      <button className="archive__back" type="button" onClick={onBack}>
-        {copy.backToArchive}
-      </button>
+      <div className="archive__project-toolbar">
+        <LanguageSwitch className="archive__language" />
+        <button className="archive__back" type="button" onClick={onBack}>
+          {copy.backToWorld}
+        </button>
+      </div>
       <div className="archive__project-grid">
         <div>
           <p className="archive__eyebrow">{definition.label} / {localized.type}</p>
@@ -192,8 +218,11 @@ export function Archive({
   const [projectTransition, setProjectTransition] = useState<"entering" | "entered" | "exiting">("entered");
   const [projectSourceOrigin, setProjectSourceOrigin] = useState<ThemeZoomOrigin | null>(null);
   const [projectOrigin, setProjectOrigin] = useState({ x: 50, y: 50 });
+  const [menuOpen, setMenuOpen] = useState(false);
   const archiveRef = useRef<HTMLElement | null>(null);
   const detailRef = useRef<HTMLElement | null>(null);
+  const closeProjectTimer = useRef<number | null>(null);
+  const previousRouteProjectId = useRef(projectId);
   const projectReturnFocus = useRef<HTMLElement | null>(null);
   const projectReturnTarget = useRef<{ entryId: string; context: string } | null>(null);
   const projectReturnScrollTop = useRef<number | null>(null);
@@ -204,9 +233,35 @@ export function Archive({
     setActiveTheme(initialTheme);
     setViewMode(initialFocused ? "focused" : "overview");
   }, [initialFocused, initialTheme]);
+  const scrollToSection = useCallback((id: string) => {
+    setMenuOpen(false);
+    const target = archiveRef.current?.querySelector<HTMLElement>(`#${id}`);
+    target?.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      block: id === "top" ? "start" : "start",
+    });
+  }, []);
+
+  useEffect(() => () => {
+    if (closeProjectTimer.current !== null) window.clearTimeout(closeProjectTimer.current);
+  }, []);
+
   useEffect(() => {
-    setSelectedProjectId(projectId);
-    if (projectId) setProjectTransition("entering");
+    if (projectId) {
+      previousRouteProjectId.current = projectId;
+      if (closeProjectTimer.current !== null) window.clearTimeout(closeProjectTimer.current);
+      setSelectedProjectId(projectId);
+      setProjectTransition("entering");
+      return;
+    }
+    if (!previousRouteProjectId.current) return;
+    previousRouteProjectId.current = undefined;
+    setProjectTransition("exiting");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    closeProjectTimer.current = window.setTimeout(() => {
+      setSelectedProjectId(undefined);
+      closeProjectTimer.current = null;
+    }, reducedMotion ? 0 : 420);
   }, [projectId]);
 
   const selectedProject = selectedProjectId
@@ -232,10 +287,6 @@ export function Archive({
     if (selectedProject) {
       const frame = requestAnimationFrame(() => {
         detailRef.current?.focus({ preventScroll: true });
-        detailRef.current?.scrollIntoView({
-          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
-          block: "start",
-        });
       });
       previousProjectId.current = selectedProject.id;
       return () => cancelAnimationFrame(frame);
@@ -258,7 +309,7 @@ export function Archive({
       if (target && archiveRef.current && projectReturnFocusTop.current !== null) {
         archiveRef.current.scrollTop += target.getBoundingClientRect().top - projectReturnFocusTop.current;
       }
-      (target ?? archiveRef.current?.querySelector<HTMLElement>("#theme-panel"))?.focus({ preventScroll: true });
+      (target ?? archiveRef.current?.querySelector<HTMLElement>("#worlds"))?.focus({ preventScroll: true });
       projectReturnFocus.current = null;
       projectReturnTarget.current = null;
       projectReturnScrollTop.current = null;
@@ -292,6 +343,8 @@ export function Archive({
   };
 
   const openProject = (entry: ArchiveEntry, origin?: ThemeZoomOrigin) => {
+    if (closeProjectTimer.current !== null) window.clearTimeout(closeProjectTimer.current);
+    previousRouteProjectId.current = projectId;
     const activeElement = document.activeElement;
     projectReturnFocus.current = activeElement instanceof HTMLElement ? activeElement : null;
     projectReturnTarget.current = activeElement instanceof HTMLElement && activeElement.dataset.projectEntry
@@ -313,135 +366,195 @@ export function Archive({
   };
 
   const closeProject = () => {
+    if (projectTransition === "exiting") return;
     setProjectTransition("exiting");
-    window.setTimeout(() => {
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    closeProjectTimer.current = window.setTimeout(() => {
+      previousRouteProjectId.current = undefined;
       setSelectedProjectId(undefined);
       onProjectClose(activeTheme);
-    }, 420);
+      closeProjectTimer.current = null;
+    }, reducedMotion ? 0 : 420);
   };
 
+  const worldFocused = viewMode === "focused" || showThemeArchive;
+
   return (
-    <main ref={archiveRef} className="archive" aria-label={copy.archiveAria}>
-      <div className="archive__shell">
-        <header className="archive__bar">
-          <div className="archive__identity-lockup">
-            <span className="archive__monogram">FOUR HEARTS / 01</span>
-            <span className="archive__name">王心蕊</span>
-            <span className="archive__name-en">Olivia Wong</span>
-            <LanguageSwitch className="archive__language" />
-          </div>
-          <div className="archive__bar-links">
-            <a href={`mailto:${CONTACT_EMAIL}`}>{copy.contact}</a>
-          </div>
-        </header>
+    <>
+      <main
+        ref={archiveRef}
+        className="archive"
+        data-zoom={selectedProject ? "project" : worldFocused ? "world" : "index"}
+        aria-label={copy.archiveAria}
+        aria-hidden={Boolean(selectedProject)}
+        inert={Boolean(selectedProject)}
+      >
+        <div className="archive__shell">
+          <header className="archive__bar" id="top" aria-hidden={worldFocused} inert={worldFocused}>
+            <a
+              className="archive__identity-lockup"
+              href="#index"
+              onClick={(event) => {
+                event.preventDefault();
+                setMenuOpen(false);
+                onThemeChange(activeTheme, false, false);
+                scrollToSection("top");
+              }}
+            >
+              <span className="archive__mark" aria-hidden="true"><i /><i /><i /><i /><b /></span>
+              <span className="archive__brand-stack">
+                <span className="archive__wordmark">FOUR HEARTS</span>
+                <span className="archive__byline">OLIVIA WONG · 王心蕊</span>
+              </span>
+            </a>
 
-        <section className="archive__hero" aria-labelledby="archive-title">
-          <div className="archive__identity">
-            <p className="archive__eyebrow">{copy.heroEyebrow}</p>
-            <h1 id="archive-title">{copy.heroTitle}</h1>
-            <p className="archive__lede">
-              {copy.heroLead}
-            </p>
-            <div className="archive__hero-actions">
-              <button type="button" onClick={() => document.getElementById("selected-works")?.scrollIntoView({ behavior: "smooth" })}>
-                {copy.seeSelected}
-              </button>
-              <a href={`mailto:${CONTACT_EMAIL}`}>{copy.startConversation}</a>
+            <button
+              className="archive__menu-toggle"
+              type="button"
+              aria-expanded={menuOpen}
+              aria-controls="primary-navigation"
+              aria-label={menuOpen ? copy.closeNavigation : copy.openNavigation}
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              <span aria-hidden="true" />
+              <span aria-hidden="true" />
+            </button>
+
+            <nav
+              className="archive__nav"
+              id="primary-navigation"
+              aria-label={copy.navigation}
+              data-open={menuOpen ? "true" : "false"}
+            >
+              <button type="button" onClick={() => scrollToSection("worlds")}>{copy.navWorlds}</button>
+              <button type="button" onClick={() => scrollToSection("selected-works")}>{copy.navWork}</button>
+              <button type="button" onClick={() => scrollToSection("about")}>{copy.navAbout}</button>
+            </nav>
+
+            <div className="archive__bar-actions">
+              <LanguageSwitch className="archive__language" />
+              <a className="archive__contact-link" href={`mailto:${CONTACT_EMAIL}`}>{copy.contact}<span aria-hidden="true"> ↗</span></a>
             </div>
-          </div>
-        </section>
+          </header>
 
-        {selectedProject ? (
-          <ProjectDetail
-            entry={selectedProject}
-            detailRef={detailRef}
-            onBack={closeProject}
-            transition={projectTransition}
-            origin={projectOrigin}
-          />
-        ) : (
-          <section
-            id="theme-panel"
-            className="archive__theme-section"
-            role="region"
-            tabIndex={-1}
-            aria-labelledby="theme-title"
-          >
-            <LeafCanvas
-              activeTheme={activeTheme}
-              focused={viewMode === "focused" || showThemeArchive}
-              onThemeChange={selectTheme}
-              onProjectOpen={openProject}
-            />
+          <div className="archive__stage">
+            <section className="archive__hero" aria-labelledby="archive-title" aria-hidden={worldFocused} inert={worldFocused}>
+              <div className="archive__identity">
+                <p className="archive__eyebrow"><span className="archive__status-dot" aria-hidden="true" />{copy.heroEyebrow}</p>
+                <h1 id="archive-title">{copy.heroTitle}</h1>
+                <p className="archive__lede">{copy.heroLead}</p>
+                <div className="archive__hero-actions">
+                  <button type="button" onClick={() => scrollToSection("selected-works")}>
+                    {copy.seeSelected}
+                  </button>
+                  <a href={`mailto:${CONTACT_EMAIL}`}>{copy.startConversation}</a>
+                </div>
+                <p className="archive__hero-note">
+                  <span>2026</span><span aria-hidden="true">/</span><span>FOUR HEARTS</span>
+                  <span className="archive__hero-note-copy">{copy.portfolioMapAria}</span>
+                </p>
+              </div>
+            </section>
+
+            <section
+              id="worlds"
+              className="archive__theme-section"
+              role="region"
+              tabIndex={-1}
+              aria-label={copy.overviewTitle}
+            >
+              <LeafCanvas
+                activeTheme={activeTheme}
+                focused={worldFocused}
+                onThemeChange={selectTheme}
+                onProjectOpen={openProject}
+              />
+            </section>
+          </div>
+
+          <section id="resume" className="archive__resume" aria-labelledby="resume-title" aria-hidden={worldFocused} inert={worldFocused}>
+            <div className="archive__resume-heading">
+              <p className="archive__eyebrow">{copy.resumeEyebrow}</p>
+              <h2 id="resume-title">{copy.resumeTitle}</h2>
+            </div>
+            <div className="archive__resume-grid">
+              <article>
+                <p className="archive__eyebrow">{copy.experienceLabel}</p>
+                <h3>{copy.experienceTitle}</h3>
+                <p>{copy.experienceBody}</p>
+                <button type="button" onClick={() => selectTheme("build")}>{copy.openExperience} <span aria-hidden="true">↗</span></button>
+              </article>
+              <article>
+                <p className="archive__eyebrow">{copy.educationLabel}</p>
+                <h3>{copy.educationTitle}</h3>
+                <p>{copy.educationBody}</p>
+                <button type="button" onClick={() => selectTheme("question")}>{copy.openEducation} <span aria-hidden="true">↗</span></button>
+              </article>
+              <article>
+                <p className="archive__eyebrow">{copy.selectedWorkLabel}</p>
+                <h3>{copy.selectedWorkTitle}</h3>
+                <p>{copy.selectedWorkBody}</p>
+                <button type="button" onClick={() => scrollToSection("selected-works")}>
+                  {copy.browseSelectedWork} <span aria-hidden="true">↗</span>
+                </button>
+              </article>
+            </div>
           </section>
-        )}
 
-        <section id="resume" className="archive__resume" aria-labelledby="resume-title">
-          <div className="archive__resume-heading">
-            <p className="archive__eyebrow">{copy.resumeEyebrow}</p>
-            <h2 id="resume-title">{language === "zh" ? "先看我是谁，再进入四个世界。" : "Start with the person, then enter the four worlds."}</h2>
-          </div>
-          <div className="archive__resume-grid">
-            <article>
-              <p className="archive__eyebrow">Experience</p>
-              <h3>{copy.experienceTitle}</h3>
-              <p>{copy.experienceBody}</p>
-              <button type="button" onClick={() => selectTheme("build")}>{copy.openExperience} ↗</button>
-            </article>
-            <article>
-              <p className="archive__eyebrow">Education</p>
-              <h3>{copy.educationTitle}</h3>
-              <p>{copy.educationBody}</p>
-              <button type="button" onClick={() => selectTheme("question")}>{copy.openEducation} ↗</button>
-            </article>
-            <article>
-              <p className="archive__eyebrow">Selected work</p>
-              <h3>{copy.selectedWorkTitle}</h3>
-              <p>{copy.selectedWorkBody}</p>
-              <button type="button" onClick={() => document.getElementById("selected-works")?.scrollIntoView({ behavior: "smooth" })}>{copy.browseSelectedWork} ↗</button>
-            </article>
-          </div>
-        </section>
-
-        <section id="selected-works" className="archive__selected" aria-labelledby="selected-title">
-          <div className="archive__section-heading">
-            <div>
-              <p className="archive__eyebrow">{copy.practiceEyebrow}</p>
-              <h2 id="selected-title">{copy.selectedWorks}</h2>
+          <section id="selected-works" className="archive__selected" aria-labelledby="selected-title" aria-hidden={worldFocused} inert={worldFocused}>
+            <div className="archive__section-heading">
+              <div>
+                <p className="archive__eyebrow">{copy.practiceEyebrow}</p>
+                <h2 id="selected-title">{copy.selectedWorks}</h2>
+              </div>
+              <p>{copy.selectedWorksDescription}</p>
             </div>
-            <p>{copy.selectedWorksDescription}</p>
-          </div>
-          <div className="selected-grid">
-            {featuredEntries.map((entry) => (
-              <ProjectCard key={entry.id} entry={entry} onOpen={() => openProject(entry)} />
-            ))}
-          </div>
-        </section>
+            <div className="selected-grid">
+              {featuredEntries.map((entry) => (
+                <ProjectCard key={entry.id} entry={entry} onOpen={(origin) => openProject(entry, origin)} />
+              ))}
+            </div>
+          </section>
 
-        <section className="archive__about" aria-labelledby="about-title">
-          <div>
-            <p className="archive__eyebrow">{copy.aboutEyebrow}</p>
-            <h2 id="about-title">{copy.aboutTitle}</h2>
-          </div>
-          <p>
-            {copy.aboutBody}
-          </p>
-        </section>
+          <section id="about" className="archive__about" aria-labelledby="about-title" aria-hidden={worldFocused} inert={worldFocused}>
+            <div>
+              <p className="archive__eyebrow">{copy.aboutEyebrow}</p>
+              <h2 id="about-title">{copy.aboutTitle}</h2>
+            </div>
+            <p>{copy.aboutBody}</p>
+          </section>
 
-        <footer className="archive__footer">
-          <div>
-            <span className="archive__eyebrow">{copy.openLine}</span>
-            <a className="archive__contact" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
-          </div>
-          <div className="archive__footer-links">
-            <a href={`https://github.com/${GITHUB_USER}`} target="_blank" rel="noreferrer">GitHub ↗</a>
-            <button type="button" onClick={onClose}>{copy.exploreRoom}</button>
-          </div>
-          <span className="archive__footer-note">王心蕊 / Olivia Wong · Four Hearts</span>
-        </footer>
-      </div>
-    </main>
+          <section id="contact" className="archive__contact-section" aria-labelledby="contact-title" aria-hidden={worldFocused} inert={worldFocused}>
+            <div>
+              <p className="archive__eyebrow">{copy.openLine}</p>
+              <h2 id="contact-title">{copy.contact}</h2>
+            </div>
+            <a className="archive__contact-email" href={`mailto:${CONTACT_EMAIL}`}>
+              {CONTACT_EMAIL}<span aria-hidden="true">↗</span>
+            </a>
+            <a className="archive__contact-cta" href={`mailto:${CONTACT_EMAIL}`}>{copy.startConversation}</a>
+          </section>
+
+          <footer className="archive__footer" aria-hidden={worldFocused} inert={worldFocused}>
+            <span className="archive__footer-note">王心蕊 / Olivia Wong · Four Hearts</span>
+            <div className="archive__footer-links">
+              <a href={`https://github.com/${GITHUB_USER}`} target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+              <button type="button" onClick={onClose}>{copy.exploreRoom}</button>
+              <button type="button" onClick={() => scrollToSection("top")}>{copy.backToTop}</button>
+            </div>
+          </footer>
+        </div>
+      </main>
+      {selectedProject && (
+        <ProjectDetail
+          entry={selectedProject}
+          detailRef={detailRef}
+          onBack={closeProject}
+          transition={projectTransition}
+          origin={projectOrigin}
+        />
+      )}
+    </>
   );
 }
 // End of archive view.
-

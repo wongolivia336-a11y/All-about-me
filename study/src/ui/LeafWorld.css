@@ -276,4 +276,3 @@
   .leaf-world-shell[data-transition="exiting"] .leaf-world-shell__dock,
   .leaf-world-shell[data-transition="focused"] .leaf-world-shell__dock { clip-path: none; opacity: 1; }
 }
-
