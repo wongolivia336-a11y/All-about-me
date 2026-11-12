@@ -1,22 +1,22 @@
 import { phoneApps } from "../data/links";
 import { focus } from "../interaction/studyStore";
+import { phoneAppText, useLanguage } from "../i18n";
 
 /**
  * The phone's apps. None of these platforms expose a public API, so every one
  * of them is an honest outbound link rather than embedded content.
  */
 export function PhonePanel() {
+  const { language, copy } = useLanguage();
   return (
     <aside className="panel">
-      <button className="panel__close" onClick={() => focus(null)} aria-label="返回房间">
+      <button className="panel__close" onClick={() => focus(null)} aria-label={copy.closePanel}>
         ✕
       </button>
 
-      <p className="panel__kicker">App</p>
-      <h2 className="panel__title">我写的东西</h2>
-      <p className="panel__body">
-        发布在哪儿，就从哪个图标进。这几个平台都不开放 API，所以是跳转，不是嵌入。
-      </p>
+      <p className="panel__kicker">{copy.phoneKicker}</p>
+      <h2 className="panel__title">{copy.phoneTitle}</h2>
+      <p className="panel__body">{copy.phoneBody}</p>
 
       <div className="apps">
         {phoneApps.map((app) => {
@@ -26,9 +26,9 @@ export function PhonePanel() {
                 {app.mark}
               </span>
               <span className="apps__text">
-                <span className="apps__label">{app.label}</span>
+                <span className="apps__label">{phoneAppText(app.id, app.label, language)}</span>
                 <span className="apps__handle">
-                  {app.href ? app.handle : "链接待补"}
+                  {app.href ? app.handle : copy.phoneLinksMissing}
                 </span>
               </span>
             </>
@@ -47,7 +47,7 @@ export function PhonePanel() {
       </div>
 
       <p className="panel__note">
-        把链接填进 <code>src/data/links.ts</code> 就会自动生效。
+        {copy.phoneSources}
       </p>
     </aside>
   );

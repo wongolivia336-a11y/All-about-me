@@ -23,6 +23,7 @@
   transform: rotate(var(--heartwheel-rotation));
   transition: none;
   will-change: transform;
+  isolation: isolate;
 }
 
 .heartwheel__stage--dragging .heartwheel__orbit {
@@ -30,10 +31,34 @@
 }
 
 .heartwheel__svg {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
   overflow: visible;
+}
+
+.heartwheel__scene {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+}
+
+.heartwheel__scene > div,
+.heartwheel__scene canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+}
+
+.heartwheel__scene-fallback {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .heartwheel__leaf {
@@ -48,17 +73,7 @@
 }
 
 .heartwheel__leaf-fill {
-  fill: color-mix(in srgb, var(--leaf-accent) 6%, var(--color-paper, var(--archive-paper)));
-  opacity: 0.72;
-  transition: fill 180ms ease, opacity 180ms ease, transform 180ms ease;
-}
-
-.heartwheel__leaf-outline {
-  fill: none;
-  stroke: color-mix(in srgb, var(--leaf-ink) 42%, var(--color-line, var(--archive-line)));
-  stroke-width: 1.05;
-  vector-effect: non-scaling-stroke;
-  transition: stroke 180ms ease, stroke-width 180ms ease;
+  fill: transparent;
 }
 
 .heartwheel__leaf-hit {
@@ -66,18 +81,15 @@
 }
 
 .heartwheel__leaf--hovered .heartwheel__leaf-fill {
-  fill: color-mix(in srgb, var(--leaf-accent) 24%, var(--color-paper, var(--archive-paper)));
-  opacity: 0.82;
+  fill: transparent;
+}
+
+.heartwheel__leaf--hovered .heartwheel__leaf-visual {
+  transform: scale(1.075);
 }
 
 .heartwheel__leaf--active .heartwheel__leaf-fill {
-  fill: color-mix(in srgb, var(--leaf-accent) 58%, var(--color-paper, var(--archive-paper)));
-  opacity: 0.9;
-}
-
-.heartwheel__leaf--active .heartwheel__leaf-outline {
-  stroke: var(--leaf-ink);
-  stroke-width: 1.2;
+  fill: transparent;
 }
 
 .heartwheel__leaf--active .heartwheel__leaf-visual {
@@ -87,7 +99,7 @@
 .heartwheel__texture {
   font: 500 3.3px/1 var(--font-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
   letter-spacing: 0.1px;
-  opacity: 0.24;
+  opacity: 0.12;
 }
 
 .heartwheel__hub {
@@ -99,6 +111,8 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
+  transform: rotate(var(--heartwheel-rotation));
+  transform-origin: center;
 }
 
 .heartwheel__label {
@@ -111,7 +125,7 @@
   place-content: center;
   gap: 5px;
   padding: 8px 5px;
-  border: 1px solid transparent;
+  border: 0;
   border-radius: 2px;
   background: transparent;
   color: var(--label-ink);
@@ -121,7 +135,7 @@
   transform-origin: center;
   pointer-events: auto;
   cursor: pointer;
-  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+  transition: background 180ms ease, color 180ms ease;
 }
 
 .heartwheel__label:nth-child(2) {
@@ -157,20 +171,12 @@
 .heartwheel__label:hover,
 .heartwheel__label:focus-visible,
 .heartwheel__label--selected {
-  border-color: color-mix(in srgb, var(--label-ink) 42%, transparent);
   background: color-mix(in srgb, var(--label-accent) 24%, transparent);
 }
 
 .heartwheel__label:focus-visible {
   outline: 2px solid var(--label-ink);
   outline-offset: 4px;
-}
-
-.heartwheel__hint {
-  margin: -4px 0 0;
-  color: var(--archive-muted);
-  font: 11px/1.2 var(--font-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
-  letter-spacing: 0.04em;
 }
 
 @media (max-width: 620px) {
@@ -192,10 +198,6 @@
   .heartwheel__orbit,
   .heartwheel__label,
   .heartwheel__leaf-fill,
-  .heartwheel__leaf-outline {
-    transition-duration: 0.01ms;
-  }
-
   .heartwheel__leaf-visual {
     transition-duration: 0.01ms;
   }

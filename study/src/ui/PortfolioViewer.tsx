@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { focus } from "../interaction/studyStore";
+import { useLanguage } from "../i18n";
 
 interface Page {
   index: number;
@@ -19,6 +20,7 @@ interface Page {
  * spreads to WebP and rebuilds a light PDF for download.
  */
 export function PortfolioViewer() {
+  const { copy } = useLanguage();
   const [pages, setPages] = useState<Page[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [current, setCurrent] = useState(0);
@@ -69,22 +71,22 @@ export function PortfolioViewer() {
     <div className="viewer">
       <header className="viewer__bar">
         <div>
-          <p className="viewer__kicker">Portfolio</p>
-          <h2 className="viewer__title">作品集 · 2022—2026</h2>
+          <p className="viewer__kicker">{copy.portfolioKicker}</p>
+          <h2 className="viewer__title">{copy.portfolioTitle}</h2>
         </div>
         <div className="viewer__tools">
           <a className="viewer__download" href="/portfolio/portfolio.pdf" download>
             下载 PDF
           </a>
-          <button className="viewer__close" onClick={() => focus(null)}>
+          <button className="viewer__close" onClick={() => focus(null)} aria-label={copy.closePanel} title={copy.closePanel}>
             返回房间
           </button>
         </div>
       </header>
 
       <div className="viewer__stage">
-        {error && <p className="viewer__msg">作品集加载失败：{error}</p>}
-        {!pages && !error && <p className="viewer__msg">正在载入…</p>}
+        {error && <p className="viewer__msg">{copy.portfolioLoadError} {error}</p>}
+        {!pages && !error && <p className="viewer__msg">{copy.portfolioLoading}</p>}
 
         {page && (
           <>
@@ -92,7 +94,7 @@ export function PortfolioViewer() {
               className="viewer__nav viewer__nav--prev"
               onClick={() => go(-1)}
               disabled={current === 0}
-              aria-label="上一页"
+              aria-label={copy.previousPage}
             >
               ‹
             </button>
@@ -111,7 +113,7 @@ export function PortfolioViewer() {
               className="viewer__nav viewer__nav--next"
               onClick={() => go(1)}
               disabled={current >= total - 1}
-              aria-label="下一页"
+              aria-label={copy.nextPage}
             >
               ›
             </button>
@@ -137,7 +139,7 @@ export function PortfolioViewer() {
                 key={p.index}
                 data-active={i === current}
                 onClick={() => setCurrent(i)}
-                aria-label={`跳到第 ${p.index} 页`}
+                aria-label={`${copy.jumpToPage}${p.index}${copy.jumpPageSuffix}`}
               >
                 <img src={p.thumb} alt="" loading="lazy" decoding="async" />
               </button>

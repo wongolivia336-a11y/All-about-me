@@ -20,7 +20,8 @@ export const themeConfig: Record<ThemeId, ThemeDefinition> = {
   build: {
     id: "build",
     leafAngle: 0,
-    focusRotation: 0,
+    // The committed leaf faces the right-hand content dock.
+    focusRotation: 90,
     label: "BUILD",
     descriptor: "AI products",
     shortLabel: "Things I build",
@@ -33,7 +34,7 @@ export const themeConfig: Record<ThemeId, ThemeDefinition> = {
   question: {
     id: "question",
     leafAngle: 90,
-    focusRotation: -90,
+    focusRotation: 0,
     label: "QUESTION",
     descriptor: "Research / HCI",
     shortLabel: "Things I question",
@@ -46,7 +47,7 @@ export const themeConfig: Record<ThemeId, ThemeDefinition> = {
   play: {
     id: "play",
     leafAngle: 180,
-    focusRotation: -180,
+    focusRotation: -90,
     label: "PLAY",
     descriptor: "Creative code",
     shortLabel: "Things I play with",
@@ -59,10 +60,10 @@ export const themeConfig: Record<ThemeId, ThemeDefinition> = {
   keep: {
     id: "keep",
     leafAngle: 270,
-    focusRotation: -270,
-    label: "KEEP",
+    focusRotation: -180,
+    label: "COLLECT",
     descriptor: "Cinema / objects",
-    shortLabel: "Things I keep",
+    shortLabel: "Things I collect",
     description: "A quiet shelf for references, objects and memories worth returning to.",
     verb: "keep what matters",
     accent: "#DCD0BE",

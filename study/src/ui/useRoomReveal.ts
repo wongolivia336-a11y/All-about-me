@@ -6,6 +6,7 @@ interface AnimateOptions {
 }
 
 const easeOut = (value: number) => 1 - Math.pow(1 - value, 3);
+export const ARCHIVE_ROOM_REVEAL_DURATION = 2400;
 
 /** A single, interruptible progress driver shared by the reveal layers. */
 export function useRoomReveal(initialProgress: number) {

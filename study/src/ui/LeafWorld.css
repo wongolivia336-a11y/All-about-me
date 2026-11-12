@@ -1,0 +1,278 @@
+.leaf-world-shell {
+  display: grid;
+  grid-template-columns: minmax(280px, .42fr) minmax(0, .58fr);
+  align-items: start;
+  gap: clamp(32px, 5vw, 78px);
+  width: 100%;
+  color: var(--color-ink, #202320);
+}
+
+.leaf-world-shell__control {
+  position: sticky;
+  top: 24px;
+  min-width: 0;
+}
+
+.leaf-world-shell__heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  min-height: 26px;
+  color: var(--color-muted, #5c625d);
+  font: 11px/1.4 var(--font-mono, ui-monospace, monospace);
+  letter-spacing: .045em;
+}
+
+.leaf-world-shell__overview,
+.leaf-world-shell__heading > span {
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  white-space: nowrap;
+}
+
+.leaf-world-shell__overview:not(:disabled):hover,
+.leaf-world-shell__overview:not(:disabled):focus-visible {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.leaf-world-shell__overview:disabled { cursor: default; opacity: .75; }
+
+.leaf-world-shell .heartwheel {
+  width: 100%;
+  max-width: 430px;
+  margin: 2px auto 0;
+}
+
+.leaf-world-shell .heartwheel__stage { width: 100%; }
+
+.leaf-world-shell__selected-label {
+  margin: 12px 0 0;
+  color: var(--color-muted);
+  font: 11px/1.4 var(--font-mono);
+  letter-spacing: .05em;
+}
+
+.leaf-world-shell__dock {
+  position: relative;
+  min-width: 0;
+  min-height: 405px;
+  padding-left: clamp(18px, 2.4vw, 36px);
+  clip-path: none;
+  will-change: clip-path, opacity;
+  transition: clip-path 540ms var(--motion-standard), opacity 260ms ease;
+}
+
+.leaf-world-shell[data-transition="entering"] .leaf-world-shell__dock {
+  opacity: .42;
+  clip-path: circle(0 at var(--zoom-x) var(--zoom-y));
+}
+
+.leaf-world-shell[data-transition="focused"] .leaf-world-shell__dock {
+  clip-path: circle(155vmax at var(--zoom-x) var(--zoom-y));
+}
+
+.leaf-world-shell[data-transition="exiting"] .leaf-world-shell__dock {
+  opacity: .2;
+  clip-path: circle(0 at var(--zoom-x) var(--zoom-y));
+}
+
+.leaf-world-shell__dock::before {
+  position: absolute;
+  top: 38%;
+  left: -2px;
+  width: clamp(20px, 3vw, 52px);
+  height: 1px;
+  background: var(--color-line-strong, #858c85);
+  content: "";
+  opacity: .7;
+}
+
+.leaf-world-shell__resting,
+.leaf-preview,
+.leaf-world {
+  position: relative;
+  min-height: 405px;
+  border-top: 1px solid var(--color-line, #d7d9d4);
+  border-bottom: 1px solid var(--color-line, #d7d9d4);
+}
+
+.leaf-world-shell__resting {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(25px, 5vw, 62px);
+  background: color-mix(in srgb, var(--color-paper) 86%, white);
+}
+
+.leaf-world-shell__eyebrow,
+.leaf-world__eyebrow,
+.leaf-preview__eyebrow {
+  margin: 0 0 12px;
+  color: var(--color-muted);
+  font: 11px/1.4 var(--font-mono);
+  letter-spacing: .055em;
+}
+
+.leaf-world-shell__resting h2 {
+  max-width: 13ch;
+  margin: 0;
+  font-size: clamp(32px, 4vw, 58px);
+  font-weight: 400;
+  letter-spacing: -.055em;
+  line-height: .98;
+}
+
+.leaf-world-shell__resting > p:not(.leaf-world-shell__eyebrow) {
+  max-width: 34ch;
+  margin: 18px 0 0;
+  color: var(--color-muted);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.leaf-world-shell__facts {
+  display: grid;
+  gap: 9px;
+  margin-top: 24px;
+  padding-top: 15px;
+  border-top: 1px solid var(--color-line);
+}
+
+.leaf-world-shell__facts p {
+  display: grid;
+  grid-template-columns: 82px 1fr;
+  gap: 12px;
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.leaf-world-shell__facts span {
+  color: var(--color-muted);
+  font: 10px/1.3 var(--font-mono);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.leaf-world-shell__resting-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 24px;
+  margin-top: 35px;
+}
+
+.leaf-world-shell__resting-links button,
+.leaf-world__header > button,
+.leaf-world__card button,
+.leaf-preview__button {
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.leaf-world-shell__resting-links button,
+.leaf-world__header > button {
+  padding: 0 0 4px;
+  border-bottom: 1px solid currentColor;
+  font: 12px/1.3 var(--font-mono);
+}
+
+.leaf-world-shell__resting-links button:hover,
+.leaf-world-shell__resting-links button:focus-visible,
+.leaf-world__header > button:hover,
+.leaf-world__header > button:focus-visible {
+  color: var(--color-muted);
+}
+
+.leaf-preview {
+  overflow: hidden;
+  background: var(--color-surface, #fff);
+  box-shadow: 0 20px 46px -38px var(--preview-ink);
+  animation: leaf-preview-in 360ms var(--motion-standard) both;
+}
+
+.leaf-preview::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: var(--preview-accent);
+  content: "";
+}
+
+.leaf-preview__button { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(190px, .92fr); width: 100%; min-height: 405px; padding: 0; }
+.leaf-preview__visual { position: relative; min-height: 405px; overflow: hidden; background: color-mix(in srgb, var(--preview-accent) 25%, var(--color-paper)); }
+.leaf-preview__visual img { display: block; width: 100%; height: 100%; object-fit: cover; filter: saturate(.82) contrast(.98); transition: transform 450ms var(--motion-standard), filter 300ms ease; }
+.leaf-preview__button:hover .leaf-preview__visual img,
+.leaf-preview__button:focus-visible .leaf-preview__visual img { transform: scale(1.035); filter: saturate(1) contrast(1); }
+.leaf-preview__stamp { position: absolute; top: 16px; left: 18px; color: var(--preview-ink); font: 11px/1 var(--font-mono); letter-spacing: .07em; }
+.leaf-preview__empty { display: grid; height: 100%; place-items: center; color: var(--preview-ink); font: 12px/1.2 var(--font-mono); }
+.leaf-preview__body { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; min-width: 0; padding: clamp(22px, 3vw, 46px); }
+.leaf-preview__body strong { max-width: 10ch; color: var(--color-ink); font-size: clamp(28px, 3.6vw, 52px); font-weight: 400; letter-spacing: -.055em; line-height: .98; }
+.leaf-preview__body > span:not(.leaf-preview__eyebrow):not(.leaf-preview__cta) { max-width: 29ch; margin-top: 17px; color: var(--color-muted); font-size: 14px; line-height: 1.52; }
+.leaf-preview__cta { margin-top: 30px; padding-bottom: 4px; border-bottom: 1px solid currentColor; color: var(--preview-ink); font: 12px/1.3 var(--font-mono); }
+
+.leaf-world { padding: clamp(22px, 3vw, 40px); background: var(--color-surface, #fff); animation: leaf-world-in 420ms var(--motion-standard) both; }
+.leaf-world__header { display: flex; justify-content: space-between; align-items: end; gap: 20px; padding-bottom: 25px; border-bottom: 1px solid var(--color-line); }
+.leaf-world__header h2 { max-width: 12ch; margin: 0; font-size: clamp(32px, 4vw, 58px); font-weight: 400; letter-spacing: -.055em; line-height: .98; }
+.leaf-world__header p:not(.leaf-world__eyebrow) { max-width: 38ch; margin: 14px 0 0; color: var(--color-muted); font-size: 14px; line-height: 1.5; }
+.leaf-world__cards { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(140px, .65fr); gap: 14px; padding-top: 18px; }
+.leaf-world__card { min-width: 0; border: 1px solid var(--color-line); background: var(--color-paper); transition: transform 180ms var(--motion-standard), border-color 180ms ease; }
+.leaf-world__card:hover, .leaf-world__card:focus-within { border-color: var(--card-ink); transform: translateY(-2px); }
+.leaf-world__card--primary { grid-row: span 2; }
+.leaf-world__card button { display: block; width: 100%; padding: 0; }
+.leaf-world__card-visual { display: block; aspect-ratio: 1.55; overflow: hidden; background: color-mix(in srgb, var(--card-accent) 20%, var(--color-paper)); }
+.leaf-world__card--primary .leaf-world__card-visual { aspect-ratio: 1.12; }
+.leaf-world__card-visual img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 360ms var(--motion-standard); }
+.leaf-world__card:hover img, .leaf-world__card:focus-within img { transform: scale(1.03); }
+.leaf-world__card-copy { display: flex; flex-direction: column; align-items: flex-start; min-height: 146px; padding: 14px; }
+.leaf-world__card-meta { color: var(--color-muted); font: 10px/1.2 var(--font-mono); letter-spacing: .05em; }
+.leaf-world__card-copy strong { margin-top: 18px; color: var(--color-ink); font-size: clamp(18px, 2.2vw, 28px); font-weight: 400; letter-spacing: -.04em; line-height: 1.05; }
+.leaf-world__card-copy > span:last-child { margin-top: 10px; color: var(--color-muted); font-size: 12px; line-height: 1.45; }
+.leaf-world__empty { color: var(--color-muted); }
+
+@keyframes leaf-preview-in { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes leaf-world-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 900px) {
+  .leaf-world-shell { grid-template-columns: minmax(220px, .4fr) minmax(0, .6fr); gap: 26px; }
+  .leaf-world-shell__dock { padding-left: 16px; }
+  .leaf-preview__button { grid-template-columns: 1fr; }
+  .leaf-preview__visual { min-height: 220px; }
+  .leaf-preview { min-height: 0; }
+  .leaf-preview__body { min-height: 260px; }
+  .leaf-world__cards { grid-template-columns: 1fr; }
+  .leaf-world__card--primary { grid-row: auto; }
+}
+
+@media (max-width: 680px) {
+  .leaf-world-shell { grid-template-columns: 1fr; gap: 14px; }
+  .leaf-world-shell__control { position: relative; top: auto; }
+  .leaf-world-shell .heartwheel { max-width: 280px; }
+  .leaf-world-shell__selected-label { text-align: center; }
+  .leaf-world-shell__dock { padding-left: 0; min-height: 0; }
+  .leaf-world-shell__dock::before { display: none; }
+  .leaf-world-shell__resting,
+  .leaf-preview,
+  .leaf-world { min-height: 0; }
+  .leaf-world-shell__resting { padding: 26px 20px; }
+  .leaf-preview__button { min-height: 0; }
+  .leaf-preview__body { min-height: 235px; padding: 24px 20px 28px; }
+  .leaf-world { padding: 20px; }
+  .leaf-world__header { align-items: start; flex-direction: column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leaf-preview, .leaf-world, .leaf-preview__visual img, .leaf-world__card, .leaf-world__card-visual img, .leaf-world-shell__dock { animation: none; transition-duration: .01ms; }
+  .leaf-world-shell[data-transition="entering"] .leaf-world-shell__dock,
+  .leaf-world-shell[data-transition="exiting"] .leaf-world-shell__dock,
+  .leaf-world-shell[data-transition="focused"] .leaf-world-shell__dock { clip-path: none; opacity: 1; }
+}

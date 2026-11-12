@@ -8,13 +8,15 @@ import {
 } from "./interaction/studyStore";
 import { tactileFeedback } from "./interaction/tactile";
 import { Archive } from "./ui/Archive";
+import { LanguageSwitch } from "./ui/LanguageSwitch";
 import { PaperCorner } from "./ui/PaperCorner";
 import { RoomExitButton } from "./ui/RoomExitButton";
-import { RoomPeek, RoomRevealSurface } from "./ui/RoomRevealTransition";
+import { RoomRevealSurface } from "./ui/RoomRevealTransition";
 import { Surface } from "./ui/Surface";
 import { useLoading, type LoadingTaskController } from "./ui/loading/LoadingContext";
-import { useRoomReveal } from "./ui/useRoomReveal";
+import { ARCHIVE_ROOM_REVEAL_DURATION, useRoomReveal } from "./ui/useRoomReveal";
 import type { RoomAssetProgress } from "./scene/RoomScene";
+import { useLanguage } from "./i18n";
 import "./PageTurn.css";
 
 type View = "index" | "room";
@@ -24,6 +26,7 @@ interface IndexRoute {
   theme: ThemeId;
   archive?: boolean;
   projectId?: string;
+  focused?: boolean;
 }
 
 type Route = IndexRoute | { view: "room" };
@@ -42,16 +45,17 @@ const routeFromHash = (): Route => {
   if (hash === "room") return { view: "room" };
 
   const [, themeCandidate, projectId] = hash.split("/");
+  const hasTheme = isTheme(themeCandidate);
   return {
     view: "index",
-    theme: isTheme(themeCandidate) ? themeCandidate : "build",
-    archive: isTheme(themeCandidate),
-    ...(isTheme(themeCandidate) && projectId ? { projectId } : {}),
+    theme: hasTheme ? themeCandidate : "build",
+    focused: hasTheme,
+    ...(hasTheme && projectId ? { projectId } : {}),
   };
 };
 
-const hashForIndex = ({ theme, archive, projectId }: IndexRoute) =>
-  archive || projectId ? `#index/${theme}${projectId ? `/${projectId}` : ""}` : "#index";
+const hashForIndex = ({ theme, archive, projectId, focused }: IndexRoute) =>
+  archive || focused || projectId ? `#index/${theme}${projectId ? `/${projectId}` : ""}` : "#index";
 
 const isNightNow = () => {
   const hour = new Date().getHours();
@@ -62,6 +66,7 @@ const RoomScene = lazy(() => import("./scene/RoomScene"));
 
 export default function App() {
   const { begin } = useLoading();
+  const { language, copy } = useLanguage();
   const {
     archiveRequest,
     clearArchiveRequest,
@@ -84,9 +89,11 @@ export default function App() {
   );
   const viewRef = useRef<View>(initialRoute.view);
   const indexRouteRef = useRef(indexRoute);
+  const projectOriginRoute = useRef<IndexRoute | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const indexTrigger = useRef<HTMLButtonElement>(null);
   const roomExitRef = useRef<HTMLButtonElement>(null);
+  const pendingTransitionFocus = useRef<View | null>(null);
   const roomTask = useRef<LoadingTaskController | null>(null);
   const roomFailed = useRef(false);
   const [roomError, setRoomError] = useState<string | null>(null);
@@ -94,10 +101,15 @@ export default function App() {
   const roomReadyRef = useRef(false);
   const [viewTransition, setViewTransition] = useState<"idle" | "preparing" | "opening" | "closing">("idle");
   const [roomMounted, setRoomMounted] = useState(initialRoute.view === "room");
-  const [cornerPeeking, setCornerPeeking] = useState(false);
   const { progress: revealProgress, animateTo: animateReveal, cancel: cancelReveal } = useRoomReveal(
     initialRoute.view === "room" ? 1 : 0,
   );
+
+  useEffect(() => {
+    if (route.view === "room") {
+      document.title = language === "zh" ? "王心蕊 — Room" : "Olivia Wong — Room";
+    }
+  }, [language, route.view]);
 
   const beginRoomLoading = useCallback((blocking = true) => {
     if (roomTask.current) return;
@@ -120,11 +132,11 @@ export default function App() {
       }
       if (errors > 0 && !roomFailed.current) {
         roomFailed.current = true;
-        setRoomError("Room resources could not load.");
-        roomTask.current?.fail("Room resources could not load.", () => window.location.reload());
+        setRoomError(copy.roomLoadError);
+        roomTask.current?.fail(copy.roomLoadError, () => window.location.reload());
       }
     },
-    [beginRoomLoading],
+    [beginRoomLoading, copy.roomLoadError],
   );
 
   useEffect(() => {
@@ -155,16 +167,16 @@ export default function App() {
   }, []);
 
   const finishOpening = useCallback(() => {
+    pendingTransitionFocus.current = "room";
     setTransitionPhase("idle");
-    window.requestAnimationFrame(() => roomExitRef.current?.focus());
   }, [setTransitionPhase]);
 
   const finishClosing = useCallback(() => {
+    pendingTransitionFocus.current = "index";
     setRoomMounted(false);
     roomReadyRef.current = false;
     setTransitionPhase("idle");
     settleRoomLoading();
-    window.requestAnimationFrame(() => indexTrigger.current?.focus());
   }, [setTransitionPhase, settleRoomLoading]);
 
   const turnPage = useCallback((view: View, pushHistory = true) => {
@@ -173,7 +185,6 @@ export default function App() {
       if (viewRef.current === "room" && currentPhase !== "closing") return;
       viewRef.current = "room";
       setRoute({ view: "room" });
-      setCornerPeeking(false);
       if (pushHistory && window.location.hash !== "#room") window.history.pushState(null, "", "#room");
       if (!roomMounted) setRoomMounted(true);
       if (roomReadyRef.current) settleRoomLoading();
@@ -181,7 +192,7 @@ export default function App() {
 
       if (roomReadyRef.current) {
         setTransitionPhase("opening");
-        animateReveal(1, { onComplete: finishOpening });
+        animateReveal(1, { duration: ARCHIVE_ROOM_REVEAL_DURATION, onComplete: finishOpening });
       } else {
         setTransitionPhase("preparing");
         animateReveal(0.14, {
@@ -189,7 +200,7 @@ export default function App() {
           onComplete: () => {
             if (roomReadyRef.current) {
               setTransitionPhase("opening");
-              animateReveal(1, { onComplete: finishOpening });
+              animateReveal(1, { duration: ARCHIVE_ROOM_REVEAL_DURATION, onComplete: finishOpening });
             }
           },
         });
@@ -200,11 +211,10 @@ export default function App() {
     if (viewRef.current === "index" && currentPhase !== "opening" && currentPhase !== "preparing") return;
     viewRef.current = "index";
     setRoute(indexRouteRef.current);
-    setCornerPeeking(false);
     const indexHash = hashForIndex(indexRouteRef.current);
     if (pushHistory && window.location.hash !== indexHash) window.history.pushState(null, "", indexHash);
     setTransitionPhase("closing");
-    animateReveal(0, { onComplete: finishClosing });
+    animateReveal(0, { duration: ARCHIVE_ROOM_REVEAL_DURATION, onComplete: finishClosing });
   }, [animateReveal, beginRoomLoading, finishClosing, finishOpening, roomMounted, setTransitionPhase, settleRoomLoading]);
 
   const applyIndexRoute = useCallback((next: IndexRoute, push = true) => {
@@ -254,8 +264,46 @@ export default function App() {
   }, [applyIndexRoute, turnPage]);
 
   useEffect(() => {
+    if (!archiveRequest) return;
+    openIndex(archiveRequest);
+    clearArchiveRequest();
+  }, [archiveRequest, clearArchiveRequest, openIndex]);
+
+  useEffect(() => () => settleRoomLoading(), [settleRoomLoading]);
+
+  const handleThemeChange = useCallback((theme: ThemeId, showAll = false, focused = false) => {
+    applyIndexRoute({ view: "index", theme, archive: showAll, focused });
+  }, [applyIndexRoute]);
+
+  const handleProjectOpen = useCallback((entry: { id: string; primaryTheme: ThemeId }) => {
+    projectOriginRoute.current = indexRouteRef.current;
+    applyIndexRoute({ view: "index", theme: entry.primaryTheme, focused: true, projectId: entry.id });
+  }, [applyIndexRoute]);
+
+  const handleProjectClose = useCallback((theme: ThemeId) => {
+    if (projectOriginRoute.current) {
+      projectOriginRoute.current = null;
+      window.history.back();
+      return;
+    }
+    applyIndexRoute({ view: "index", theme, focused: true }, false);
+  }, [applyIndexRoute]);
+
+  useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
+      if (viewRef.current === "index") {
+        const current = indexRouteRef.current;
+        if (current.projectId) {
+          handleProjectClose(current.theme);
+          return;
+        }
+        if (current.focused) {
+          focus(null);
+          applyIndexRoute({ view: "index", theme: current.theme, focused: false }, false);
+          return;
+        }
+      }
       if (focused) {
         focus(null);
         return;
@@ -265,23 +313,7 @@ export default function App() {
 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [focused, openIndex]);
-
-  useEffect(() => {
-    if (!archiveRequest) return;
-    openIndex(archiveRequest);
-    clearArchiveRequest();
-  }, [archiveRequest, clearArchiveRequest, openIndex]);
-
-  useEffect(() => () => settleRoomLoading(), [settleRoomLoading]);
-
-  const handleThemeChange = useCallback((theme: ThemeId, showAll = false) => {
-    applyIndexRoute({ view: "index", theme, archive: showAll });
-  }, [applyIndexRoute]);
-
-  const handleProjectOpen = useCallback((entry: { id: string; primaryTheme: ThemeId }) => {
-    applyIndexRoute({ view: "index", theme: entry.primaryTheme, archive: true, projectId: entry.id });
-  }, [applyIndexRoute]);
+  }, [applyIndexRoute, focused, handleProjectClose, openIndex]);
 
   const brightnessPercent = Math.round(lampBrightness * 100);
   const markRoomReady = useCallback(() => {
@@ -293,17 +325,33 @@ export default function App() {
       animateReveal(1, { onComplete: finishOpening });
     }
   }, [animateReveal, finishOpening, setTransitionPhase, settleRoomLoading]);
-  const handleCornerPeek = useCallback((peeking: boolean) => {
-    if (viewRef.current === "index" && viewTransitionRef.current === "idle") setCornerPeeking(peeking);
-  }, []);
   const indexCovered = route.view === "room" && revealProgress >= 0.999;
   const roomInteractive = route.view === "room" && viewTransition === "idle" && revealProgress >= 0.999;
+
+  useEffect(() => {
+    const target = pendingTransitionFocus.current;
+    if (!target) return;
+
+    const ready = target === "room"
+      ? roomInteractive
+      : route.view === "index" && viewTransition === "idle" && !roomMounted;
+    if (!ready) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      if (pendingTransitionFocus.current !== target) return;
+      const control = target === "room" ? roomExitRef.current : indexTrigger.current;
+      if (!control) return;
+      control.focus({ preventScroll: true });
+      pendingTransitionFocus.current = null;
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [roomInteractive, roomMounted, route.view, viewTransition]);
 
   return (
     <div className={["app", isNight && "app--evening"].filter(Boolean).join(" ")}>
       {roomMounted && (
         <RoomRevealSurface progress={revealProgress} interactive={roomInteractive}>
-          <Suspense fallback={<div className="room-loading" role="status" aria-label="加载 Room" />}>
+            <Suspense fallback={<div className="room-loading" role="status" aria-label={copy.loadingRoom} />}>
             <RoomScene
               isNight={isNight}
               onReady={markRoomReady}
@@ -312,7 +360,10 @@ export default function App() {
           </Suspense>
           {roomInteractive && (
             <header className="hud">
-              <span className="hud__name">Olivia Wong</span>
+              <div className="hud__identity">
+                <span className="hud__name">{language === "zh" ? "王心蕊" : "Olivia Wong"}</span>
+                <LanguageSwitch />
+              </div>
               <div className="hud__actions">
                 <div className="hud__light">
                   <input
@@ -324,8 +375,10 @@ export default function App() {
                     value={brightnessPercent}
                     style={{ "--value": brightnessPercent + "%" } as CSSProperties}
                     onChange={(event) => setLampBrightness(Number(event.currentTarget.value) / 100)}
-                    aria-label="台灯预设亮度"
-                    aria-valuetext={brightnessPercent + "%" + (lampPower ? "，已开启" : "，已关闭")}
+                    aria-label={copy.lampBrightness}
+                    aria-valuetext={brightnessPercent + "%" + (language === "zh"
+                      ? lampPower ? "，已开启" : "，已关闭"
+                      : lampPower ? " · on" : " · off")}
                   />
                 </div>
                 <button
@@ -335,9 +388,9 @@ export default function App() {
                     tactileFeedback("press", tactileMuted);
                     toggleLampPower();
                   }}
-                  aria-label={lampPower ? "关闭台灯" : "打开台灯"}
+                  aria-label={lampPower ? copy.turnLampOff : copy.turnLampOn}
                   aria-pressed={lampPower}
-                  title={lampPower ? "关闭台灯" : "打开台灯"}
+                  title={lampPower ? copy.turnLampOff : copy.turnLampOn}
                 >
                   <span aria-hidden="true">{lampPower ? "◉" : "○"}</span>
                 </button>
@@ -345,9 +398,9 @@ export default function App() {
                   className="hud__btn hud__btn--icon"
                   type="button"
                   onClick={() => setTactileMuted(!tactileMuted)}
-                  aria-label={tactileMuted ? "开启台灯机械反馈" : "关闭台灯机械反馈"}
+                  aria-label={tactileMuted ? copy.tactileOn : copy.tactileOff}
                   aria-pressed={!tactileMuted}
-                  title={tactileMuted ? "开启机械反馈" : "关闭机械反馈"}
+                  title={tactileMuted ? copy.tactileOn : copy.tactileOff}
                 >
                   <span aria-hidden="true">{tactileMuted ? "○" : "⌁"}</span>
                 </button>
@@ -362,30 +415,22 @@ export default function App() {
 
       {roomError && (
         <div className="room-loading-error" role="alert">
-          <span>{roomError}</span>
-          <button type="button" onClick={() => window.location.reload()}>Retry</button>
-          <button type="button" onClick={() => openIndex()}>Return to Index</button>
+          <span>{copy.roomLoadError}</span>
+          <button type="button" onClick={() => window.location.reload()}>{copy.retry}</button>
+          <button type="button" onClick={() => openIndex()}>{copy.returnToIndex}</button>
         </div>
       )}
 
-      {!indexCovered && (
+      {route.view === "index" && viewTransition === "idle" && !indexRoute.focused && !indexRoute.projectId && (
         <PaperCorner
           ref={indexTrigger}
-          className={
-            viewTransition === "preparing" || viewTransition === "opening"
-              ? "paper-corner--opening"
-              : undefined
-          }
           label="Room"
-          ariaLabel="Enter Room"
-          title="Enter Room"
+          ariaLabel={copy.enterRoom}
+          title={copy.enterRoom}
           onClick={enterRoom}
-          onPeekChange={handleCornerPeek}
           disabled={viewTransition !== "idle"}
         />
       )}
-
-      <RoomPeek visible={cornerPeeking && route.view === "index"} />
 
       <audio ref={audioRef} src="/audio/now-playing.mp3" loop preload="none" />
 
@@ -398,12 +443,15 @@ export default function App() {
         }}
       >
           <Archive
+            active={route.view === "index"}
             initialTheme={indexRoute.theme}
+            initialFocused={Boolean(indexRoute.focused || indexRoute.projectId)}
             showThemeArchive={Boolean(indexRoute.archive || indexRoute.projectId)}
             projectId={indexRoute.projectId}
             onClose={enterRoom}
             onThemeChange={handleThemeChange}
             onProjectOpen={handleProjectOpen}
+            onProjectClose={handleProjectClose}
           />
       </div>
     </div>
