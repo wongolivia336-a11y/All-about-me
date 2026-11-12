@@ -176,7 +176,9 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
 
       {worldLayerVisible ? (
         <div className="leaf-world-shell__dock" aria-live="polite">
-          <div className="leaf-world-shell__portal-effect" aria-hidden="true" />
+          <div className="leaf-world-shell__portal-effect" aria-hidden="true">
+            <span className="leaf-world-shell__portal-film" />
+          </div>
           <section ref={worldRef} className="leaf-world" tabIndex={-1} aria-labelledby="leaf-world-title">
             <header className="leaf-world__header">
               <div className="leaf-world__header-top">

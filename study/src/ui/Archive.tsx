@@ -7,6 +7,7 @@ import {
 import { CONTACT_EMAIL, GITHUB_USER } from "../data/links";
 import type { ThemeZoomOrigin } from "../brand/Heartwheel";
 import { projectText, themeText, useLanguage } from "../i18n";
+import { ContactLinks } from "./ContactLinks";
 import { LeafWorld as LeafCanvas, type ThemeSelectionSource } from "./LeafWorld";
 import { LanguageSwitch } from "./LanguageSwitch";
 
@@ -453,29 +454,7 @@ export function Archive({
                   <span className="archive__hero-family-name">{heroFamilyName}<i aria-hidden="true">.</i></span>
                 </h1>
                 <p className="archive__lede">{copy.heroLead}</p>
-                <p className="archive__social-note">
-                  <span>{copy.socialLinkLead}</span>
-                  <a
-                    href={`https://github.com/${GITHUB_USER}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={copy.githubOpen}
-                    title={copy.githubOpen}
-                  >
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <path fill="currentColor" d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.55.1.76-.24.76-.54v-2.08c-3.1.67-3.76-1.32-3.76-1.32-.5-1.29-1.24-1.63-1.24-1.63-1.02-.7.08-.69.08-.69 1.12.08 1.7 1.15 1.7 1.15 1 1.7 2.61 1.21 3.25.93.1-.72.39-1.21.71-1.49-2.48-.28-5.08-1.24-5.08-5.52 0-1.22.44-2.22 1.15-3-.12-.28-.5-1.42.11-2.96 0 0 .94-.3 3.05 1.14a10.58 10.58 0 0 1 5.55 0c2.1-1.44 3.04-1.14 3.04-1.14.61 1.54.23 2.68.12 2.96.71.78 1.14 1.78 1.14 3.01 0 4.28-2.6 5.23-5.09 5.5.4.35.75 1.03.75 2.08v3.06c0 .3.2.65.76.54A11.1 11.1 0 0 0 12 .9Z" />
-                    </svg>
-                  </a>
-                  <a
-                    href={`mailto:${CONTACT_EMAIL}`}
-                    aria-label={copy.emailContact}
-                    title={copy.emailContact}
-                  >
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M3.5 5.5h17v13h-17zM4 6l8 6 8-6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-                    </svg>
-                  </a>
-                </p>
+                <ContactLinks />
                 <div className="archive__hero-actions">
                   <button type="button" onClick={() => scrollToSection("selected-works")}>
                     {copy.seeSelected}

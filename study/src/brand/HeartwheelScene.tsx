@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import type { ThemeId } from "../data/library";
 import { themeConfig, themeOrder } from "../data/themeConfig";
-import { HeartwheelFallback, leafColors } from "./HeartwheelFallback";
+import { HeartwheelFallback } from "./HeartwheelFallback";
 
 function canUseWebGL() {
   if (typeof document === "undefined") return false;
@@ -157,10 +157,10 @@ function LeafMesh({
   return (
     <group ref={group} rotation={[0, 0, angle]}>
       <mesh geometry={geometry.shell} castShadow={false} receiveShadow={false}>
-        <meshPhysicalMaterial color={leafColors[theme]} roughness={0.72} metalness={0.01} clearcoat={0.08} clearcoatRoughness={0.86} />
+        <meshPhysicalMaterial color={themeConfig[theme].leafColor} roughness={0.72} metalness={0.01} clearcoat={0.08} clearcoatRoughness={0.86} />
       </mesh>
       <mesh geometry={geometry.surface} castShadow={false} receiveShadow={false}>
-        <meshStandardMaterial color={leafColors[theme]} roughness={0.62} metalness={0.01} side={THREE.DoubleSide} />
+        <meshStandardMaterial color={themeConfig[theme].leafColor} roughness={0.62} metalness={0.01} side={THREE.DoubleSide} />
       </mesh>
       <mesh geometry={geometry.vein} castShadow={false} receiveShadow={false}>
         <meshStandardMaterial color="#b7d0b7" roughness={0.78} transparent opacity={0.48} />

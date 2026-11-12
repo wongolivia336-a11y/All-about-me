@@ -23,6 +23,13 @@ export interface Copy {
   heroTitle: string;
   heroLead: string;
   socialLinkLead: string;
+  socialLinksLabel: string;
+  linkedinContact: string;
+  officialAccountContact: string;
+  wechatContact: string;
+  xiaohongshuContact: string;
+  phoneContact: string;
+  contactLinkPending: string;
   seeSelected: string;
   startConversation: string;
   backToArchive: string;
@@ -150,7 +157,14 @@ const translations: Record<Language, Copy> = {
     heroEyebrow: "Design engineer / AI products / creative technology",
     heroTitle: "Olivia Wong.",
     heroLead: "I design for the space between technology and being human.",
-    socialLinkLead: "Find the work, or say hello:",
+    socialLinkLead: "My projects and experiments live on GitHub. I’m happy to talk design or collaboration by email, LinkedIn, WeChat, Xiaohongshu, or phone.",
+    socialLinksLabel: "Social and contact links",
+    linkedinContact: "Open LinkedIn profile",
+    officialAccountContact: "Open WeChat Official Account",
+    wechatContact: "Open WeChat contact",
+    xiaohongshuContact: "Open Xiaohongshu profile",
+    phoneContact: "Call Olivia",
+    contactLinkPending: "Link not added yet",
     seeSelected: "See selected work ↓",
     startConversation: "Start a conversation ↗",
     backToArchive: "← Back to archive",
@@ -276,7 +290,14 @@ const translations: Record<Language, Copy> = {
     heroEyebrow: "设计工程 / AI 产品 / 创意技术",
     heroTitle: "Olivia Wong.",
     heroLead: "我在技术与人的交界处设计体验。",
-    socialLinkLead: "看看我的项目，或直接联系：",
+    socialLinkLead: "作品与实验都放在 GitHub；想聊设计、合作，或只是打个招呼，也欢迎通过邮件、领英、微信、小红书或电话联系我。",
+    socialLinksLabel: "社交平台与联系方式",
+    linkedinContact: "打开 LinkedIn 主页",
+    officialAccountContact: "打开微信公众号",
+    wechatContact: "打开微信联系入口",
+    xiaohongshuContact: "打开小红书主页",
+    phoneContact: "致电 Olivia",
+    contactLinkPending: "尚未设置入口",
     seeSelected: "查看精选作品 ↓",
     startConversation: "开始交流 ↗",
     backToArchive: "← 返回档案",

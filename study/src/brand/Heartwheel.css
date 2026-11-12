@@ -125,8 +125,9 @@
   place-content: center;
   gap: 5px;
   padding: 8px 5px;
+  appearance: none;
   border: 0;
-  border-radius: 2px;
+  border-radius: 999px;
   background: transparent;
   color: var(--label-ink);
   font: inherit;
@@ -135,7 +136,8 @@
   transform-origin: center;
   pointer-events: auto;
   cursor: pointer;
-  transition: background 180ms ease, color 180ms ease;
+  box-shadow: none;
+  transition: background 280ms ease, color 220ms ease, text-shadow 280ms ease;
 }
 
 .heartwheel__label:nth-child(2) {
@@ -171,12 +173,16 @@
 .heartwheel__label:hover,
 .heartwheel__label:focus-visible,
 .heartwheel__label--selected {
-  background: color-mix(in srgb, var(--label-accent) 24%, transparent);
+  background: radial-gradient(ellipse at center,
+    color-mix(in srgb, var(--label-accent) 25%, transparent) 0%,
+    color-mix(in srgb, var(--label-accent) 13%, transparent) 48%,
+    transparent 78%);
+  text-shadow: 0 1px 12px color-mix(in srgb, var(--label-accent) 32%, transparent);
 }
 
 .heartwheel__label:focus-visible {
-  outline: 2px solid var(--label-ink);
-  outline-offset: 4px;
+  outline: 2px solid color-mix(in srgb, var(--label-ink) 84%, white);
+  outline-offset: 3px;
 }
 
 @media (max-width: 620px) {

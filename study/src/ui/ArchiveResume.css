@@ -252,37 +252,69 @@
 }
 
 .archive__social-note {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 9px;
-  margin: 16px 0 0;
+  max-width: 43ch;
+  margin: 18px 0 0;
   color: var(--color-muted);
-  font: 11px/1.5 var(--font-mono);
 }
 
-.archive__social-note a {
-  display: inline-grid;
-  width: 30px;
-  height: 30px;
+.archive__social-note p {
+  margin: 0;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.62;
+}
+
+.archive__social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.archive__social-link {
+  display: grid;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
   place-items: center;
-  border: 1px solid var(--color-line-strong);
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
   border-radius: 50%;
-  color: var(--color-ink);
-  transition: color 180ms var(--motion-standard), background-color 180ms var(--motion-standard), transform 180ms var(--motion-standard);
+  background: rgb(255 255 255 / 72%);
+  color: color-mix(in srgb, var(--color-ink) 80%, #58765f);
+  box-shadow: 0 1px 3px rgb(30 39 32 / 4%);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: color 220ms var(--motion-standard), background-color 220ms var(--motion-standard), border-color 220ms var(--motion-standard), box-shadow 220ms var(--motion-standard), transform 220ms var(--motion-standard);
 }
 
-.archive__social-note a:hover,
-.archive__social-note a:focus-visible {
-  background: #e8f0e9;
+.archive__social-link:hover {
+  border-color: color-mix(in srgb, #58765f 35%, transparent);
+  background: color-mix(in srgb, #eaf0e9 76%, white);
   color: #355e48;
-  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgb(36 58 42 / 10%);
+  transform: translateY(-2px) scale(1.035);
 }
 
-.archive__social-note svg {
+.archive__social-link:focus-visible {
+  outline: 2px solid #58765f;
+  outline-offset: 3px;
+}
+
+.archive__social-link--pending,
+.archive__social-link--pending:disabled {
+  border-color: color-mix(in srgb, var(--color-ink) 8%, transparent);
+  background: rgb(255 255 255 / 38%);
+  color: color-mix(in srgb, var(--color-muted) 74%, transparent);
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: .7;
+}
+
+.archive__social-link svg {
   display: block;
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
 }
 
 .archive__hero-actions {
@@ -1287,7 +1319,10 @@
   .archive__identity h1 { max-width: 8ch; font-size: clamp(64px, 16vw, 76px); line-height: .84; }
   .archive__identity .archive__eyebrow { max-width: 35ch; margin-bottom: 16px; font-size: 10px; }
   .archive__lede { max-width: 38ch; margin-top: 18px; font-size: 16px; }
-  .archive__social-note { margin-top: 14px; font-size: 10px; }
+  .archive__social-note { margin-top: 14px; }
+  .archive__social-note p { font-size: 11px; }
+  .archive__social-links { gap: 7px; margin-top: 10px; }
+  .archive__social-link { width: 32px; height: 32px; }
   .archive__hero-actions { gap: 8px 12px; margin-top: 22px; }
   .archive__hero-actions button,
   .archive__hero-actions a { min-height: 42px; padding: 0 12px; font-size: 11px; }

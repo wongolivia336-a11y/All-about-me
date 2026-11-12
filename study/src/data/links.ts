@@ -24,6 +24,13 @@ export const GITHUB_USER = "wongolivia336-a11y";
 
 export const CONTACT_EMAIL = "Wongolivia336@gmail.com";
 
+/** Public contact destinations. Keep unset until the account owner supplies them. */
+export const LINKEDIN_URL: string | null = null;
+export const WECHAT_OFFICIAL_URL: string | null = null;
+export const WECHAT_CONTACT_URL: string | null = null;
+export const XIAOHONGSHU_URL: string | null = null;
+export const CONTACT_PHONE: string | null = null;
+
 /** Shown on the phone — the platforms you publish to. */
 export const phoneApps: Account[] = [
   {

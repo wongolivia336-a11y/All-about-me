@@ -179,12 +179,12 @@
   bottom: 1px;
   z-index: 2;
   padding: 3px 4px 4px;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-line-strong, #b9b3a5) 68%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-line-strong, #b9b3a5) 42%, transparent);
   color: var(--color-muted, #454740);
   font: 500 10px/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   letter-spacing: 0.05em;
   white-space: nowrap;
-  transition: transform 180ms ease, color 180ms ease;
+  transition: transform 260ms ease, color 260ms ease;
 }
 
 .paper-corner__leaf {
@@ -197,10 +197,21 @@
   transform-origin: 100% 0;
   transform: rotate(0deg) translateZ(0);
   clip-path: polygon(0 0, 100% 0, 100% 100%);
-  background: #E3E2DB;
-  box-shadow: -2px 3px 6px rgba(39, 31, 22, 0.09);
-  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 280ms ease;
+  border-right: 1px solid rgb(255 255 255 / 48%);
+  border-bottom: 1px solid rgb(78 75 64 / 8%);
+  background: linear-gradient(145deg, rgb(255 255 255 / 94%) 0%, rgb(245 245 239 / 90%) 42%, rgb(224 224 214 / 82%) 100%);
+  box-shadow: -1px 2px 5px rgb(39 31 22 / 6%), -5px 7px 16px rgb(39 31 22 / 3%);
+  backdrop-filter: blur(3px);
+  transition: transform 340ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 340ms ease, filter 340ms ease;
   transform-style: preserve-3d;
+}
+
+.paper-corner__leaf::before {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(142deg, rgb(255 255 255 / 42%), transparent 44%, rgb(101 96 79 / 5%));
+  content: "";
+  pointer-events: none;
 }
 
 .paper-corner__grain {
@@ -209,7 +220,7 @@
   width: 128px;
   height: 128px;
   max-width: none;
-  opacity: 0.22;
+  opacity: 0.15;
   mix-blend-mode: multiply;
 }
 
@@ -219,8 +230,8 @@
   left: 0;
   width: 74px;
   height: 1px;
-  background: var(--color-line-strong, #b9b3a5);
-  opacity: 0.62;
+  background: linear-gradient(90deg, rgb(255 255 255 / 74%), var(--color-line-strong, #b9b3a5) 52%, rgb(255 255 255 / 18%));
+  opacity: 0.48;
   transform: rotate(45deg);
   transform-origin: left center;
 }
@@ -231,15 +242,16 @@
   bottom: 0;
   width: 52px;
   height: 1px;
-  background: color-mix(in srgb, var(--color-ink, #454740) 18%, transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-ink, #454740) 17%, transparent), transparent);
   transform: rotate(-45deg) translate(17px, 17px);
   transform-origin: center;
 }
 
 .paper-corner:hover .paper-corner__leaf,
 .paper-corner:focus-visible .paper-corner__leaf {
-  transform: rotate(-3deg) translate(-1px, 3px);
-  box-shadow: -3px 5px 8px rgba(39, 31, 22, 0.12);
+  transform: rotate(-2.2deg) translate(-1px, 2px);
+  box-shadow: -2px 4px 9px rgb(39 31 22 / 9%), -7px 10px 20px rgb(39 31 22 / 5%);
+  filter: saturate(1.03);
 }
 
 .paper-corner:hover .paper-corner__label,
