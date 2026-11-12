@@ -56,6 +56,7 @@ export interface Copy {
   enterWorld: string;
   worldNavigation: string;
   viewAllTheme: string;
+  selectLeafHint: string;
   overviewTitle: string;
   overviewDescription: string;
   currentTheme: string;
@@ -183,6 +184,7 @@ const translations: Record<Language, Copy> = {
     enterWorld: "Enter this world ↗",
     worldNavigation: "Switch between the four worlds",
     viewAllTheme: "View all ",
+    selectLeafHint: "Select a leaf to enter its world.",
     overviewTitle: "Four hearts. Four ways of seeing.",
     overviewDescription: "A selection of real projects, questions, experiments and things worth collecting.",
     currentTheme: "Current theme: ",
@@ -308,6 +310,7 @@ const translations: Record<Language, Copy> = {
     enterWorld: "进入这个世界 ↗",
     worldNavigation: "切换四个世界",
     viewAllTheme: "查看全部 ",
+    selectLeafHint: "选择一片叶片，进入它的世界。",
     overviewTitle: "四颗心，四种观看方式。",
     overviewDescription: "一些真实项目、问题、实验，以及值得留下的事物。",
     currentTheme: "当前主题：",

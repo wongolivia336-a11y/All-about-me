@@ -1,15 +1,14 @@
 .leaf-world-shell {
   display: grid;
-  grid-template-columns: minmax(280px, .42fr) minmax(0, .58fr);
-  align-items: start;
-  gap: clamp(32px, 5vw, 78px);
+  grid-template-columns: minmax(280px, 1.08fr) minmax(0, .92fr);
+  align-items: center;
+  gap: clamp(24px, 4vw, 58px);
   width: 100%;
   color: var(--color-ink, #202320);
 }
 
 .leaf-world-shell__control {
-  position: sticky;
-  top: 24px;
+  position: relative;
   min-width: 0;
 }
 
@@ -33,95 +32,89 @@
   white-space: nowrap;
 }
 
+.leaf-world-shell__overview:not(:disabled) { cursor: pointer; }
 .leaf-world-shell__overview:not(:disabled):hover,
 .leaf-world-shell__overview:not(:disabled):focus-visible {
   color: var(--color-ink);
   text-decoration: underline;
   text-underline-offset: 4px;
 }
-
 .leaf-world-shell__overview:disabled { cursor: default; opacity: .75; }
 
 .leaf-world-shell .heartwheel {
   width: 100%;
-  max-width: 430px;
-  margin: 2px auto 0;
+  max-width: 520px;
+  margin: 4px auto 0;
 }
 
 .leaf-world-shell .heartwheel__stage { width: 100%; }
 
 .leaf-world-shell__selected-label {
+  min-height: 16px;
   margin: 12px 0 0;
   color: var(--color-muted);
-  font: 11px/1.4 var(--font-mono);
+  font: 10px/1.45 var(--font-mono);
   letter-spacing: .05em;
+  text-align: center;
 }
 
 .leaf-world-shell__dock {
   position: relative;
   min-width: 0;
-  min-height: 405px;
-  padding-left: clamp(18px, 2.4vw, 36px);
+  min-height: 430px;
+  padding: 0;
+  overflow: hidden;
   clip-path: none;
   will-change: clip-path, opacity;
-  transition: clip-path 540ms var(--motion-standard), opacity 260ms ease;
+  transition: clip-path 1460ms cubic-bezier(.28,.08,.18,1), opacity 240ms ease;
 }
 
 .leaf-world-shell[data-transition="entering"] .leaf-world-shell__dock {
-  opacity: .42;
-  clip-path: circle(0 at var(--zoom-x) var(--zoom-y));
+  opacity: .94;
+  clip-path: circle(var(--zoom-size, 34px) at var(--zoom-x, 50vw) var(--zoom-y, 50vh));
 }
 
 .leaf-world-shell[data-transition="focused"] .leaf-world-shell__dock {
-  clip-path: circle(155vmax at var(--zoom-x) var(--zoom-y));
+  opacity: 1;
+  clip-path: circle(160vmax at var(--zoom-x, 50vw) var(--zoom-y, 50vh));
 }
 
 .leaf-world-shell[data-transition="exiting"] .leaf-world-shell__dock {
-  opacity: .2;
-  clip-path: circle(0 at var(--zoom-x) var(--zoom-y));
-}
-
-.leaf-world-shell__dock::before {
-  position: absolute;
-  top: 38%;
-  left: -2px;
-  width: clamp(20px, 3vw, 52px);
-  height: 1px;
-  background: var(--color-line-strong, #858c85);
-  content: "";
-  opacity: .7;
+  opacity: .96;
+  clip-path: circle(var(--zoom-size, 34px) at var(--zoom-x, 50vw) var(--zoom-y, 50vh));
+  transition-duration: 1120ms, 220ms;
 }
 
 .leaf-world-shell__resting,
-.leaf-preview,
 .leaf-world {
   position: relative;
-  min-height: 405px;
-  border-top: 1px solid var(--color-line, #d7d9d4);
-  border-bottom: 1px solid var(--color-line, #d7d9d4);
+  min-height: 430px;
+  border: 0;
+  background: transparent;
 }
 
 .leaf-world-shell__resting {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: clamp(25px, 5vw, 62px);
-  background: color-mix(in srgb, var(--color-paper) 86%, white);
+  padding: clamp(22px, 4vw, 54px) 0;
 }
 
 .leaf-world-shell__eyebrow,
-.leaf-world__eyebrow,
-.leaf-preview__eyebrow {
+.leaf-world__eyebrow {
   margin: 0 0 12px;
   color: var(--color-muted);
   font: 11px/1.4 var(--font-mono);
   letter-spacing: .055em;
 }
 
+.leaf-world-shell__resting .leaf-world-shell__eyebrow { color: var(--intro-ink, var(--color-muted)); }
+
 .leaf-world-shell__resting h2 {
-  max-width: 13ch;
+  max-width: 12ch;
   margin: 0;
-  font-size: clamp(32px, 4vw, 58px);
+  color: var(--color-ink);
+  font-size: clamp(34px, 4vw, 58px);
   font-weight: 400;
   letter-spacing: -.055em;
   line-height: .98;
@@ -135,144 +128,266 @@
   line-height: 1.55;
 }
 
-.leaf-world-shell__facts {
-  display: grid;
-  gap: 9px;
-  margin-top: 24px;
-  padding-top: 15px;
-  border-top: 1px solid var(--color-line);
+.leaf-world-shell__hint {
+  width: fit-content;
+  margin-top: 28px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid color-mix(in srgb, var(--intro-ink, var(--color-ink)) 48%, transparent);
+  color: var(--intro-ink, var(--color-ink));
+  font: 11px/1.4 var(--font-mono);
 }
 
-.leaf-world-shell__facts p {
-  display: grid;
-  grid-template-columns: 82px 1fr;
-  gap: 12px;
-  margin: 0;
-  color: var(--color-ink);
-  font-size: 13px;
-  line-height: 1.35;
+.leaf-world-shell[data-mode="focused"] .leaf-world-shell__control,
+.leaf-world-shell[data-transition="exiting"] .leaf-world-shell__control {
+  visibility: hidden;
+  pointer-events: none;
 }
 
-.leaf-world-shell__facts span {
-  color: var(--color-muted);
-  font: 10px/1.3 var(--font-mono);
-  letter-spacing: .05em;
-  text-transform: uppercase;
+.leaf-world-shell[data-mode="focused"] .leaf-world-shell__dock,
+.leaf-world-shell[data-transition="exiting"] .leaf-world-shell__dock {
+  position: fixed;
+  z-index: var(--layer-world, 40);
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  padding: calc(24px + env(safe-area-inset-top)) clamp(24px, 5vw, 72px) calc(24px + env(safe-area-inset-bottom));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #fff;
 }
 
-.leaf-world-shell__resting-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px 24px;
-  margin-top: 35px;
-}
-
-.leaf-world-shell__resting-links button,
-.leaf-world__header > button,
-.leaf-world__card button,
-.leaf-preview__button {
-  border: 0;
-  background: transparent;
-  color: var(--color-ink);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.leaf-world-shell__resting-links button,
-.leaf-world__header > button {
-  padding: 0 0 4px;
-  border-bottom: 1px solid currentColor;
-  font: 12px/1.3 var(--font-mono);
-}
-
-.leaf-world-shell__resting-links button:hover,
-.leaf-world-shell__resting-links button:focus-visible,
-.leaf-world__header > button:hover,
-.leaf-world__header > button:focus-visible {
-  color: var(--color-muted);
-}
-
-.leaf-preview {
-  overflow: hidden;
-  background: var(--color-surface, #fff);
-  box-shadow: 0 20px 46px -38px var(--preview-ink);
-  animation: leaf-preview-in 360ms var(--motion-standard) both;
-}
-
-.leaf-preview::before {
+.leaf-world-shell__portal-effect {
   position: absolute;
-  inset: 0 auto 0 0;
-  width: 5px;
-  background: var(--preview-accent);
-  content: "";
+  z-index: 2;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
-.leaf-preview__button { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(190px, .92fr); width: 100%; min-height: 405px; padding: 0; }
-.leaf-preview__visual { position: relative; min-height: 405px; overflow: hidden; background: color-mix(in srgb, var(--preview-accent) 25%, var(--color-paper)); }
-.leaf-preview__visual img { display: block; width: 100%; height: 100%; object-fit: cover; filter: saturate(.82) contrast(.98); transition: transform 450ms var(--motion-standard), filter 300ms ease; }
-.leaf-preview__button:hover .leaf-preview__visual img,
-.leaf-preview__button:focus-visible .leaf-preview__visual img { transform: scale(1.035); filter: saturate(1) contrast(1); }
-.leaf-preview__stamp { position: absolute; top: 16px; left: 18px; color: var(--preview-ink); font: 11px/1 var(--font-mono); letter-spacing: .07em; }
-.leaf-preview__empty { display: grid; height: 100%; place-items: center; color: var(--preview-ink); font: 12px/1.2 var(--font-mono); }
-.leaf-preview__body { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; min-width: 0; padding: clamp(22px, 3vw, 46px); }
-.leaf-preview__body strong { max-width: 10ch; color: var(--color-ink); font-size: clamp(28px, 3.6vw, 52px); font-weight: 400; letter-spacing: -.055em; line-height: .98; }
-.leaf-preview__body > span:not(.leaf-preview__eyebrow):not(.leaf-preview__cta) { max-width: 29ch; margin-top: 17px; color: var(--color-muted); font-size: 14px; line-height: 1.52; }
-.leaf-preview__cta { margin-top: 30px; padding-bottom: 4px; border-bottom: 1px solid currentColor; color: var(--preview-ink); font: 12px/1.3 var(--font-mono); }
+.leaf-world-shell__portal-effect::before,
+.leaf-world-shell__portal-effect::after {
+  position: absolute;
+  top: var(--zoom-y, 50vh);
+  left: var(--zoom-x, 50vw);
+  content: "";
+  pointer-events: none;
+}
 
-.leaf-world { padding: clamp(22px, 3vw, 40px); background: var(--color-surface, #fff); animation: leaf-world-in 420ms var(--motion-standard) both; }
-.leaf-world__header { display: flex; justify-content: space-between; align-items: end; gap: 20px; padding-bottom: 25px; border-bottom: 1px solid var(--color-line); }
-.leaf-world__header h2 { max-width: 12ch; margin: 0; font-size: clamp(32px, 4vw, 58px); font-weight: 400; letter-spacing: -.055em; line-height: .98; }
-.leaf-world__header p:not(.leaf-world__eyebrow) { max-width: 38ch; margin: 14px 0 0; color: var(--color-muted); font-size: 14px; line-height: 1.5; }
-.leaf-world__cards { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(140px, .65fr); gap: 14px; padding-top: 18px; }
-.leaf-world__card { min-width: 0; border: 1px solid var(--color-line); background: var(--color-paper); transition: transform 180ms var(--motion-standard), border-color 180ms ease; }
-.leaf-world__card:hover, .leaf-world__card:focus-within { border-color: var(--card-ink); transform: translateY(-2px); }
+.leaf-world-shell__portal-effect::before {
+  width: 150vmax;
+  height: 150vmax;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--portal-accent) 34%, white) 0%, color-mix(in srgb, var(--portal-accent) 16%, transparent) 34%, transparent 69%);
+  filter: blur(18px);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.035);
+}
+
+.leaf-world-shell__portal-effect::after {
+  width: var(--zoom-size, 34px);
+  height: var(--zoom-size, 34px);
+  border: 1px solid color-mix(in srgb, var(--portal-accent) 78%, white);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 88%);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.3);
+}
+
+.leaf-world-shell[data-mode="focused"] .leaf-world-shell__portal-effect::before {
+  animation: leaf-pigment-in 1460ms cubic-bezier(.22,.62,.25,1) both;
+}
+
+.leaf-world-shell[data-mode="focused"] .leaf-world-shell__portal-effect::after {
+  animation: leaf-membrane-in 1180ms cubic-bezier(.16,.64,.3,1) both,
+    leaf-membrane-second 1180ms 110ms cubic-bezier(.16,.64,.3,1) both;
+}
+
+.leaf-world-shell[data-transition="exiting"] .leaf-world-shell__portal-effect::before {
+  animation: leaf-pigment-out 1120ms cubic-bezier(.57,0,.22,1) both;
+}
+
+.leaf-world-shell[data-transition="exiting"] .leaf-world-shell__portal-effect::after {
+  animation: leaf-membrane-out 820ms cubic-bezier(.57,0,.22,1) both;
+}
+
+.leaf-world {
+  z-index: 1;
+  min-height: calc(100dvh - 48px);
+  padding: clamp(22px, 3vw, 40px);
+  background: transparent;
+}
+
+.leaf-world__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 20px 30px;
+  padding-bottom: 25px;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.leaf-world__header-top,
+.leaf-world__world-nav { grid-column: 1 / -1; }
+
+.leaf-world__header h2 {
+  grid-column: 1;
+  max-width: 12ch;
+  margin: 0;
+  font-size: clamp(44px, 7vw, 94px);
+  font-weight: 400;
+  letter-spacing: -.06em;
+  line-height: .96;
+}
+
+.leaf-world__header > p:not(.leaf-world__eyebrow) {
+  grid-column: 2;
+  max-width: 38ch;
+  margin: 0 0 5px;
+  color: var(--color-muted);
+  font-size: clamp(14px, 1.3vw, 18px);
+  line-height: 1.55;
+}
+
+.leaf-world__cards {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(140px, .65fr);
+  gap: 14px;
+  padding-top: 22px;
+}
+
+.leaf-world-shell[data-mode="focused"] .leaf-world__header-top,
+.leaf-world-shell[data-mode="focused"] .leaf-world__header h2,
+.leaf-world-shell[data-mode="focused"] .leaf-world__header > p,
+.leaf-world-shell[data-mode="focused"] .leaf-world__world-nav,
+.leaf-world-shell[data-mode="focused"] .leaf-world__card,
+.leaf-world-shell[data-mode="focused"] .leaf-world__empty {
+  animation: leaf-world-ink-in 680ms cubic-bezier(.17,.86,.25,1) both;
+}
+
+.leaf-world-shell[data-mode="focused"] .leaf-world__header h2 { animation-delay: 100ms; }
+.leaf-world-shell[data-mode="focused"] .leaf-world__header > p { animation-delay: 180ms; }
+.leaf-world-shell[data-mode="focused"] .leaf-world__world-nav { animation-delay: 250ms; }
+.leaf-world-shell[data-mode="focused"] .leaf-world__card:nth-child(1) { animation-delay: 260ms; }
+.leaf-world-shell[data-mode="focused"] .leaf-world__card:nth-child(2) { animation-delay: 340ms; }
+.leaf-world-shell[data-mode="focused"] .leaf-world__card:nth-child(3) { animation-delay: 420ms; }
+.leaf-world-shell[data-mode="focused"] .leaf-world__card:nth-child(4) { animation-delay: 500ms; }
+
+.leaf-world__card {
+  min-width: 0;
+  border: 1px solid var(--color-line);
+  background: rgb(255 255 255 / 86%);
+  transition: transform 180ms var(--motion-standard), border-color 180ms ease;
+}
+
+.leaf-world__card:hover,
+.leaf-world__card:focus-within { border-color: var(--card-ink); transform: translateY(-2px); }
 .leaf-world__card--primary { grid-row: span 2; }
-.leaf-world__card button { display: block; width: 100%; padding: 0; }
-.leaf-world__card-visual { display: block; aspect-ratio: 1.55; overflow: hidden; background: color-mix(in srgb, var(--card-accent) 20%, var(--color-paper)); }
+.leaf-world__card button { display: block; width: 100%; padding: 0; border: 0; background: transparent; color: var(--color-ink); font: inherit; text-align: left; cursor: pointer; }
+.leaf-world__card-visual { display: block; aspect-ratio: 1.55; overflow: hidden; background: color-mix(in srgb, var(--card-accent) 20%, white); }
 .leaf-world__card--primary .leaf-world__card-visual { aspect-ratio: 1.12; }
 .leaf-world__card-visual img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 360ms var(--motion-standard); }
-.leaf-world__card:hover img, .leaf-world__card:focus-within img { transform: scale(1.03); }
+.leaf-world__card:hover img,
+.leaf-world__card:focus-within img { transform: scale(1.03); }
 .leaf-world__card-copy { display: flex; flex-direction: column; align-items: flex-start; min-height: 146px; padding: 14px; }
 .leaf-world__card-meta { color: var(--color-muted); font: 10px/1.2 var(--font-mono); letter-spacing: .05em; }
 .leaf-world__card-copy strong { margin-top: 18px; color: var(--color-ink); font-size: clamp(18px, 2.2vw, 28px); font-weight: 400; letter-spacing: -.04em; line-height: 1.05; }
 .leaf-world__card-copy > span:last-child { margin-top: 10px; color: var(--color-muted); font-size: 12px; line-height: 1.45; }
-.leaf-world__empty { color: var(--color-muted); }
+.leaf-world__empty { position: relative; z-index: 1; color: var(--color-muted); }
 
-@keyframes leaf-preview-in { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: translateX(0); } }
-@keyframes leaf-world-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes leaf-world-ink-in {
+  0% { opacity: 0; filter: blur(2px); transform: translate3d(0, 15px, 0); }
+  72% { filter: blur(0); }
+  100% { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0); }
+}
+
+@keyframes leaf-pigment-in {
+  0% { opacity: .02; transform: translate(-50%, -50%) scale(.035); }
+  24% { opacity: .52; transform: translate(-50%, -50%) scale(.32); }
+  62% { opacity: .24; transform: translate(-50%, -50%) scale(.98); }
+  100% { opacity: .035; transform: translate(-50%, -50%) scale(1.42); }
+}
+
+@keyframes leaf-pigment-out {
+  from { opacity: .035; transform: translate(-50%, -50%) scale(1.42); }
+  52% { opacity: .16; transform: translate(-50%, -50%) scale(.38); }
+  to { opacity: 0; transform: translate(-50%, -50%) scale(.035); }
+}
+
+@keyframes leaf-membrane-in {
+  0% { opacity: .78; transform: translate(-50%, -50%) scale(.3); }
+  37% { opacity: .62; transform: translate(-50%, -50%) scale(1.55); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(5.2); }
+}
+
+@keyframes leaf-membrane-second {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  10% { box-shadow: 0 0 0 1px color-mix(in srgb, var(--portal-accent) 56%, white); }
+}
+
+@keyframes leaf-membrane-out {
+  0% { opacity: .38; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(.24); }
+}
+
+@media (max-width: 1080px) {
+  .leaf-world-shell { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 24px; }
+  .leaf-world-shell .heartwheel { max-width: 480px; }
+}
 
 @media (max-width: 900px) {
-  .leaf-world-shell { grid-template-columns: minmax(220px, .4fr) minmax(0, .6fr); gap: 26px; }
-  .leaf-world-shell__dock { padding-left: 16px; }
-  .leaf-preview__button { grid-template-columns: 1fr; }
-  .leaf-preview__visual { min-height: 220px; }
-  .leaf-preview { min-height: 0; }
-  .leaf-preview__body { min-height: 260px; }
-  .leaf-world__cards { grid-template-columns: 1fr; }
-  .leaf-world__card--primary { grid-row: auto; }
+  .leaf-world-shell { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 20px; }
+  .leaf-world-shell .heartwheel { max-width: 430px; }
 }
 
 @media (max-width: 680px) {
-  .leaf-world-shell { grid-template-columns: 1fr; gap: 14px; }
-  .leaf-world-shell__control { position: relative; top: auto; }
-  .leaf-world-shell .heartwheel { max-width: 280px; }
-  .leaf-world-shell__selected-label { text-align: center; }
-  .leaf-world-shell__dock { padding-left: 0; min-height: 0; }
-  .leaf-world-shell__dock::before { display: none; }
-  .leaf-world-shell__resting,
-  .leaf-preview,
-  .leaf-world { min-height: 0; }
-  .leaf-world-shell__resting { padding: 26px 20px; }
-  .leaf-preview__button { min-height: 0; }
-  .leaf-preview__body { min-height: 235px; padding: 24px 20px 28px; }
-  .leaf-world { padding: 20px; }
-  .leaf-world__header { align-items: start; flex-direction: column; }
+  .leaf-world-shell { grid-template-columns: 1fr; gap: 10px; }
+  .leaf-world-shell__control { width: 100%; max-width: 420px; margin: 0 auto; }
+  .leaf-world-shell .heartwheel { max-width: 320px; }
+  .leaf-world-shell__selected-label { margin-top: 4px; }
+  .leaf-world-shell__resting { min-height: 0; padding: 2px 2px 16px; }
+  .leaf-world-shell__resting h2 { font-size: clamp(28px, 8vw, 40px); }
+  .leaf-world-shell__resting > p:not(.leaf-world-shell__eyebrow) { margin-top: 10px; font-size: 13px; }
+  .leaf-world-shell__hint { margin-top: 14px; }
+  .leaf-world { min-height: calc(100dvh - 42px); padding: 20px; }
+  .leaf-world__header { grid-template-columns: 1fr; align-items: start; gap: 14px; padding-bottom: 18px; }
+  .leaf-world__header-top,
+  .leaf-world__header h2,
+  .leaf-world__header > p:not(.leaf-world__eyebrow),
+  .leaf-world__world-nav { grid-column: 1; }
+  .leaf-world__header h2 { max-width: 12ch; font-size: clamp(48px, 15vw, 76px); }
+  .leaf-world__header > p:not(.leaf-world__eyebrow) { margin: 0; font-size: 14px; }
+  .leaf-world__cards { grid-template-columns: 1fr; gap: 22px; padding-top: 18px; }
+  .leaf-world__card--primary { grid-row: auto; }
+  .leaf-world__card-visual,
+  .leaf-world__card--primary .leaf-world__card-visual { aspect-ratio: 1.55; }
+  .leaf-world__card-copy { min-height: 0; padding: 12px 0 16px; }
+  .leaf-world__card-copy strong { margin-top: 10px; font-size: 22px; }
+  .leaf-world__card-copy > span:last-child { margin-top: 6px; font-size: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .leaf-preview, .leaf-world, .leaf-preview__visual img, .leaf-world__card, .leaf-world__card-visual img, .leaf-world-shell__dock { animation: none; transition-duration: .01ms; }
+  .leaf-world-shell__dock,
+  .leaf-world-shell__portal-effect,
+  .leaf-world-shell__portal-effect::before,
+  .leaf-world-shell__portal-effect::after,
+  .leaf-world__header-top,
+  .leaf-world__header h2,
+  .leaf-world__header > p,
+  .leaf-world__world-nav,
+  .leaf-world__card,
+  .leaf-world__empty {
+    animation: none !important;
+    transition-duration: .01ms !important;
+  }
   .leaf-world-shell[data-transition="entering"] .leaf-world-shell__dock,
   .leaf-world-shell[data-transition="exiting"] .leaf-world-shell__dock,
-  .leaf-world-shell[data-transition="focused"] .leaf-world-shell__dock { clip-path: none; opacity: 1; }
+  .leaf-world-shell[data-transition="focused"] .leaf-world-shell__dock {
+    clip-path: none;
+    opacity: 1;
+  }
 }

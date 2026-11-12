@@ -17,7 +17,7 @@ interface ArchiveProps {
   showThemeArchive: boolean;
   projectId?: string;
   onClose: () => void;
-  onThemeChange: (theme: ThemeId, showAll?: boolean, focused?: boolean) => void;
+  onThemeChange: (theme: ThemeId, showAll?: boolean, focused?: boolean, origin?: ThemeZoomOrigin) => void;
   onProjectOpen: (entry: ArchiveEntry, origin?: ThemeZoomOrigin) => void;
   onProjectClose: (theme: ThemeId) => void;
 }
@@ -335,14 +335,18 @@ export function Archive({
       : language === "zh" ? "王心蕊 — Four Hearts" : "Olivia Wong — Four Hearts";
   }, [active, language, selectedProject]);
 
-  const selectTheme = (theme: ThemeId, source: ThemeSelectionSource = "select") => {
+  const selectTheme = (
+    theme: ThemeId,
+    source: ThemeSelectionSource = "select",
+    origin?: ThemeZoomOrigin,
+  ) => {
     // Only a deliberate second click on an active leaf toggles Overview.
     // Drag-and-snap of the same leaf keeps the focus intact.
     const zoomOut = source === "select" && activeTheme === theme && viewMode === "focused";
     setActiveTheme(theme);
     setViewMode(zoomOut ? "overview" : "focused");
     setSelectedProjectId(undefined);
-    onThemeChange(theme, false, !zoomOut);
+    onThemeChange(theme, false, !zoomOut, origin);
   };
 
   const openProject = (entry: ArchiveEntry, origin?: ThemeZoomOrigin) => {
