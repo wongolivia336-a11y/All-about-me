@@ -9,6 +9,7 @@
     "lint": "oxlint src",
     "test:heartwheel": "node scripts/verify-heartwheel-geometry.mjs",
     "test:room-reveal": "node scripts/verify-room-reveal.mjs",
+    "test:calibration": "node scripts/calibrate-four-hearts.mjs",
     "proof:posters": "node scripts/proof-posters.mjs",
     "preview": "vite preview"
   },

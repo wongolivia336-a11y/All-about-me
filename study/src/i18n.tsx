@@ -54,6 +54,7 @@ export interface Copy {
   themeGroup: string;
   selectTheme: string;
   fourThemeIndex: string;
+  questionPageTitle: string;
   portfolioMapAria: string;
   privateIndex: string;
   seeProject: string;
@@ -189,6 +190,7 @@ const translations: Record<Language, Copy> = {
     themeGroup: "Four Hearts themes",
     selectTheme: "Select ",
     fourThemeIndex: "THE LIVING INDEX",
+    questionPageTitle: "Research",
     portfolioMapAria: "Four-theme visual index",
     privateIndex: "PRIVATE INDEX",
     seeProject: "View project: ",
@@ -322,6 +324,7 @@ const translations: Record<Language, Copy> = {
     themeGroup: "Four Hearts 主题",
     selectTheme: "选择 ",
     fourThemeIndex: "四叶生活索引",
+    questionPageTitle: "研究",
     portfolioMapAria: "四个主题的作品视觉索引",
     privateIndex: "私人索引",
     seeProject: "查看项目：",
@@ -465,6 +468,7 @@ export function themeText(theme: ThemeId, language: Language) {
 interface ProjectText {
   title: string;
   summary: string;
+  worldSummary?: string;
   tags: readonly string[];
 }
 
@@ -486,12 +490,12 @@ const projectTextById: Record<string, Record<Language, ProjectText>> = {
     zh: { title: "KNOCK KNOCK", summary: "一个通过光、声音和等待建立关系的陪伴机器人交互原型。", tags: ["交互", "光", "陪伴机器人"] },
   },
   "zhang-zao": {
-    en: { title: "Two Sides of a Mirror", summary: "A multidimensional text-visualization study on bringing classical imagery into contemporary experience.", tags: ["Research", "Text visualization", "Culture"] },
-    zh: { title: "镜子的两面", summary: "古典意象如何进入现代经验的多维文本可视化研究。", tags: ["研究", "文本可视化", "文化"] },
+    en: { title: "Two Sides of a Mirror", summary: "A multidimensional text-visualization study on bringing classical imagery into contemporary experience.", worldSummary: "Text visualization traces classical imagery into contemporary experience.", tags: ["Research", "Text visualization", "Culture"] },
+    zh: { title: "镜子的两面", summary: "古典意象如何进入现代经验的多维文本可视化研究。", worldSummary: "用文本可视化追踪古典意象如何进入现代经验。", tags: ["研究", "文本可视化", "文化"] },
   },
   qiaopi: {
-    en: { title: "A Letter, After It Arrives", summary: "A data narrative tracing overseas remittance letters to a village in Chaoshan.", tags: ["Data story", "Archive", "Geography"] },
-    zh: { title: "一封侨批，抵达之后", summary: "从海外寄批地到潮汕村庄的侨批数据叙事。", tags: ["数据叙事", "档案", "地理"] },
+    en: { title: "A Letter, After It Arrives", summary: "A data narrative tracing overseas remittance letters to a village in Chaoshan.", worldSummary: "Following remittance letters from overseas to a Chaoshan village.", tags: ["Data story", "Archive", "Geography"] },
+    zh: { title: "一封侨批，抵达之后", summary: "从海外寄批地到潮汕村庄的侨批数据叙事。", worldSummary: "沿着侨批的寄递轨迹，连接海外与潮汕村庄。", tags: ["数据叙事", "档案", "地理"] },
   },
   "film-shelf": {
     en: { title: "Film shelf", summary: "A small shelf for returning to the films of Lynch, Edward Yang and Hou Hsiao-hsien.", tags: ["Cinema", "Film notes", "Room object"] },
@@ -510,6 +514,7 @@ export function projectText(entry: ArchiveEntry, language: Language) {
   return {
     title: localized?.title ?? entry.title,
     summary: localized?.summary ?? entry.summary,
+    worldSummary: localized?.worldSummary,
     tags: localized?.tags ?? entry.tags,
     type: translations[language].themeType[entry.type],
     status: translations[language].themeStatus[entry.status],

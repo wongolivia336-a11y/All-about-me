@@ -26,6 +26,7 @@ function WorldCard({ entry, primary, onOpen }: { entry: ArchiveEntry; primary?: 
   const { language, copy } = useLanguage();
   const definition = themeText(entry.primaryTheme, language);
   const localized = projectText(entry, language);
+  const summary = localized.worldSummary ?? localized.summary;
   return (
     <article
       className={["leaf-world__card", primary && "leaf-world__card--primary"].filter(Boolean).join(" ")}
@@ -44,9 +45,11 @@ function WorldCard({ entry, primary, onOpen }: { entry: ArchiveEntry; primary?: 
           {entry.cover ? <img src={entry.cover} alt="" width="1800" height="630" /> : <span>{copy.noPublicCover}</span>}
         </span>
         <span className="leaf-world__card-copy">
-          <span className="leaf-world__card-meta">{definition.label} · {entry.year}</span>
+          {entry.primaryTheme !== "question" ? (
+            <span className="leaf-world__card-meta">{definition.label} · {entry.year}</span>
+          ) : null}
           <strong>{localized.title}</strong>
-          <span>{localized.summary}</span>
+          <span>{summary}</span>
         </span>
       </button>
     </article>
@@ -69,6 +72,7 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
   );
   const activeDefinition = themeText(activeTheme, language);
   const previewDefinition = themeText(previewTheme ?? activeTheme, language);
+  const isQuestionPage = activeTheme === "question";
 
   useLayoutEffect(() => {
     if (focused === previousFocused.current) return;
@@ -190,10 +194,17 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
               </span>
             ) : null}
           </div>
-          <section ref={worldRef} className="leaf-world" tabIndex={-1} aria-labelledby="leaf-world-title">
+          <section
+            ref={worldRef}
+            className={isQuestionPage ? "leaf-world leaf-world--question" : "leaf-world"}
+            tabIndex={-1}
+            aria-labelledby="leaf-world-title"
+          >
             <header className="leaf-world__header">
               <div className="leaf-world__header-top">
-                <p className="leaf-world__eyebrow">{copy.fourThemeIndex} / {activeDefinition.label}</p>
+                {!isQuestionPage ? (
+                  <p className="leaf-world__eyebrow">{copy.fourThemeIndex} / {activeDefinition.label}</p>
+                ) : null}
                 <div className="leaf-world__overlay-actions">
                   <LanguageSwitch />
                   <button type="button" onClick={() => changeTheme(activeTheme, "select")}>
@@ -201,10 +212,14 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
                   </button>
                 </div>
               </div>
-              <h2 id="leaf-world-title">{activeDefinition.shortLabel}</h2>
-              <p className="leaf-world__description">{activeDefinition.description}</p>
+              <h2 id="leaf-world-title">
+                {isQuestionPage ? copy.questionPageTitle : activeDefinition.shortLabel}
+              </h2>
+              {!isQuestionPage ? (
+                <p className="leaf-world__description">{activeDefinition.description}</p>
+              ) : null}
               <nav className="leaf-world__world-nav" aria-label={copy.worldNavigation}>
-                {themeOrder.map((theme, index) => {
+                {themeOrder.map((theme) => {
                   const definition = themeText(theme, language);
                   const selected = theme === activeTheme;
                   return (
@@ -214,7 +229,6 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
                       aria-current={selected ? "page" : undefined}
                       onClick={() => changeTheme(theme, "drag")}
                     >
-                      <span aria-hidden="true">0{index + 1}</span>
                       {definition.label}
                     </button>
                   );
