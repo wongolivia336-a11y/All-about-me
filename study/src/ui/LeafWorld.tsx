@@ -1,7 +1,8 @@
 import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Heartwheel, type ThemeZoomOrigin } from "../brand/Heartwheel";
+import { HEART_PATH } from "../brand/HeartTextTexture";
 import { library, type ArchiveEntry, type ThemeId } from "../data/library";
-import { themeOrder } from "../data/themeConfig";
+import { themeConfig, themeOrder } from "../data/themeConfig";
 import { projectText, themeText, useLanguage } from "../i18n";
 import { LanguageSwitch } from "./LanguageSwitch";
 import "./LeafWorld.css";
@@ -18,8 +19,8 @@ interface LeafWorldProps {
 const visibleEntries = library.filter(
   (entry) => entry.status === "published" || entry.status === "prototype",
 );
-const PORTAL_OPEN_DURATION_MS = 1460;
-const PORTAL_CLOSE_DURATION_MS = 1120;
+const PORTAL_OPEN_DURATION_MS = 2480;
+const PORTAL_CLOSE_DURATION_MS = 2000;
 
 function WorldCard({ entry, primary, onOpen }: { entry: ArchiveEntry; primary?: boolean; onOpen: (origin: ThemeZoomOrigin) => void }) {
   const { language, copy } = useLanguage();
@@ -130,7 +131,10 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
     "--zoom-x": zoomOrigin ? `${zoomOrigin.x}px` : "50vw",
     "--zoom-y": zoomOrigin ? `${zoomOrigin.y}px` : "50vh",
     "--zoom-size": `${Math.max(28, Math.min(86, (zoomOrigin?.size ?? 72) * 0.44))}px`,
+    "--zoom-leaf-size": `${Math.max(44, Math.min(96, zoomOrigin?.size ?? 72))}px`,
+    "--zoom-angle": `${zoomOrigin?.angle ?? 0}deg`,
     "--portal-accent": activeDefinition.accent,
+    "--portal-leaf-color": themeConfig[activeTheme].leafColor,
   } as CSSProperties;
   const worldLayerVisible = focused || transitionPhase !== "overview";
 
@@ -178,6 +182,13 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
         <div className="leaf-world-shell__dock" aria-live="polite">
           <div className="leaf-world-shell__portal-effect" aria-hidden="true">
             <span className="leaf-world-shell__portal-film" />
+            {zoomOrigin ? (
+              <span className="leaf-world-shell__portal-leaf">
+                <svg viewBox="-80 -155 160 160" aria-hidden="true">
+                  <path d={HEART_PATH} />
+                </svg>
+              </span>
+            ) : null}
           </div>
           <section ref={worldRef} className="leaf-world" tabIndex={-1} aria-labelledby="leaf-world-title">
             <header className="leaf-world__header">

@@ -12,6 +12,7 @@ export interface ThemeZoomOrigin {
   x: number;
   y: number;
   size?: number;
+  angle?: number;
 }
 
 interface HeartwheelProps {
@@ -176,7 +177,9 @@ export function Heartwheel({
 
   const originFromTheme = (theme: ThemeId): ThemeZoomOrigin | undefined => {
     const leaf = stageRef.current?.querySelector(`[data-heart-leaf="${theme}"] .heartwheel__leaf-hit`);
-    return leaf ? originFromElement(leaf) : undefined;
+    return leaf
+      ? { ...originFromElement(leaf), angle: rotationRef.current + themeConfig[theme].leafAngle }
+      : undefined;
   };
 
   const chooseTheme = (theme: ThemeId, origin?: ThemeZoomOrigin) => {

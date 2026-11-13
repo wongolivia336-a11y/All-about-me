@@ -163,7 +163,7 @@ function LeafMesh({
         <meshStandardMaterial color={themeConfig[theme].leafColor} roughness={0.62} metalness={0.01} side={THREE.DoubleSide} />
       </mesh>
       <mesh geometry={geometry.vein} castShadow={false} receiveShadow={false}>
-        <meshStandardMaterial color="#b7d0b7" roughness={0.78} transparent opacity={0.48} />
+        <meshStandardMaterial color={themeConfig[theme].accent} roughness={0.78} transparent opacity={0.48} />
       </mesh>
     </group>
   );

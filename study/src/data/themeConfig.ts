@@ -30,7 +30,7 @@ export const themeConfig: Record<ThemeId, ThemeDefinition> = {
     verb: "make systems legible",
     accent: "#B8CBB7",
     ink: "#38503c",
-    leafColor: "#47765A",
+    leafColor: "#AEC4AF",
     texture: ["SYSTEM", "SHIP", "CARE", "ITERATE", "INTERFACE"],
   },
   question: {
@@ -44,7 +44,7 @@ export const themeConfig: Record<ThemeId, ThemeDefinition> = {
     verb: "stay with the question",
     accent: "#BBCDD1",
     ink: "#38525b",
-    leafColor: "#557E83",
+    leafColor: "#AFC2C5",
     texture: ["WHY", "EVIDENCE", "MAP", "NOTICE", "METHOD"],
   },
   play: {
@@ -58,7 +58,7 @@ export const themeConfig: Record<ThemeId, ThemeDefinition> = {
     verb: "follow the spark",
     accent: "#D9BCB2",
     ink: "#60443e",
-    leafColor: "#829365",
+    leafColor: "#D4B3A6",
     texture: ["TRY", "LISTEN", "LOOP", "MAKE", "AGAIN"],
   },
   keep: {
@@ -72,7 +72,7 @@ export const themeConfig: Record<ThemeId, ThemeDefinition> = {
     verb: "keep what matters",
     accent: "#DCD0BE",
     ink: "#62533e",
-    leafColor: "#A47D68",
+    leafColor: "#D7C6A7",
     texture: ["READ", "WATCH", "HEAR", "COLLECT", "REMEMBER"],
   },
 };

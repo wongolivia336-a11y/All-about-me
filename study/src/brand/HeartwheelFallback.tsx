@@ -7,7 +7,7 @@ export function HeartwheelFallback() {
       {themeOrder.map((theme) => (
         <g key={theme} transform={`rotate(${themeConfig[theme].leafAngle} 0 0)`}>
           <path d={HEART_PATH} fill={themeConfig[theme].leafColor} />
-          <path d="M 0 0 C 0 -38 0 -76 0 -114" fill="none" stroke="#b7d0b7" strokeWidth="2.2" strokeLinecap="round" opacity=".48" />
+          <path d="M 0 0 C 0 -38 0 -76 0 -114" fill="none" stroke={themeConfig[theme].accent} strokeWidth="2.2" strokeLinecap="round" opacity=".48" />
         </g>
       ))}
       <circle cx="0" cy="0" r="6" fill="#355e48" />

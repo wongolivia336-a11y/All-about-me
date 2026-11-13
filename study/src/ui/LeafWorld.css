@@ -66,7 +66,7 @@
   overflow: hidden;
   clip-path: none;
   will-change: clip-path, opacity;
-  transition: clip-path 1460ms cubic-bezier(.28,.08,.18,1), opacity 240ms ease;
+  transition: clip-path 2480ms cubic-bezier(.22,.72,.18,1), opacity 320ms ease;
 }
 
 .leaf-world-shell[data-transition="entering"] .leaf-world-shell__dock {
@@ -82,7 +82,7 @@
 .leaf-world-shell[data-transition="exiting"] .leaf-world-shell__dock {
   opacity: .96;
   clip-path: circle(var(--zoom-size, 34px) at var(--zoom-x, 50vw) var(--zoom-y, 50vh));
-  transition-duration: 1120ms, 220ms;
+  transition-duration: 2000ms, 320ms;
 }
 
 .leaf-world-shell__resting,
@@ -190,6 +190,56 @@
     transparent 0%, #000 17%, #000 48%, transparent 72%);
   opacity: 0;
   mix-blend-mode: soft-light;
+  transform: scale(.02);
+  transform-origin: var(--zoom-x, 50vw) var(--zoom-y, 50vh);
+  will-change: opacity, transform;
+}
+
+.leaf-world-shell__portal-leaf {
+  position: absolute;
+  top: var(--zoom-y, 50vh);
+  left: var(--zoom-x, 50vw);
+  display: grid;
+  width: var(--zoom-leaf-size, 72px);
+  height: var(--zoom-leaf-size, 72px);
+  place-items: center;
+  opacity: 0;
+  filter: drop-shadow(0 5px 18px color-mix(in srgb, var(--portal-accent) 28%, transparent));
+  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(var(--zoom-angle, 0deg)) scale(.72);
+  transform-origin: center;
+  will-change: opacity, transform, filter;
+}
+
+.leaf-world-shell__portal-leaf svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.leaf-world-shell__portal-leaf svg path {
+  fill: var(--portal-leaf-color, var(--portal-accent));
+}
+
+.leaf-world-shell__portal-leaf::before,
+.leaf-world-shell__portal-leaf::after {
+  position: absolute;
+  inset: -12%;
+  border-radius: 50%;
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+}
+
+.leaf-world-shell__portal-leaf::before {
+  background: radial-gradient(circle, rgb(255 255 255 / 84%) 0%, color-mix(in srgb, var(--portal-accent) 52%, white) 24%, color-mix(in srgb, var(--portal-accent) 19%, transparent) 54%, transparent 74%);
+  filter: blur(4px);
+}
+
+.leaf-world-shell__portal-leaf::after {
+  border: 1px solid color-mix(in srgb, var(--portal-accent) 64%, white);
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 62%), inset 0 0 8px color-mix(in srgb, var(--portal-accent) 25%, transparent);
 }
 
 .leaf-world-shell__portal-effect::before {
@@ -213,28 +263,51 @@
 }
 
 .leaf-world-shell[data-mode="focused"] .leaf-world-shell__portal-effect::before {
-  animation: leaf-pigment-in 1460ms cubic-bezier(.22,.62,.25,1) both;
+  animation: leaf-pigment-in 2480ms cubic-bezier(.22,.62,.25,1) both;
 }
 
 .leaf-world-shell[data-mode="focused"] .leaf-world-shell__portal-effect::after {
-  animation: leaf-membrane-in 1180ms cubic-bezier(.16,.64,.3,1) both,
-    leaf-membrane-second 1180ms 110ms cubic-bezier(.16,.64,.3,1) both;
+  animation: leaf-membrane-in 1920ms cubic-bezier(.16,.64,.3,1) both;
 }
 
 .leaf-world-shell[data-mode="focused"] .leaf-world-shell__portal-film {
-  animation: leaf-membrane-film-in 1460ms cubic-bezier(.22,.62,.25,1) both;
+  animation: leaf-membrane-film-in 2480ms cubic-bezier(.22,.62,.25,1) both;
+}
+
+.leaf-world-shell[data-mode="focused"] .leaf-world-shell__portal-leaf {
+  animation: leaf-shape-inflate 1980ms cubic-bezier(.18,.72,.22,1) both;
+}
+
+.leaf-world-shell[data-mode="focused"] .leaf-world-shell__portal-leaf::before {
+  animation: leaf-bubble-core-in 1320ms 360ms cubic-bezier(.18,.72,.22,1) both;
+}
+
+.leaf-world-shell[data-mode="focused"] .leaf-world-shell__portal-leaf::after {
+  animation: leaf-bubble-pop-in 1680ms 240ms cubic-bezier(.18,.72,.22,1) both;
 }
 
 .leaf-world-shell[data-transition="exiting"] .leaf-world-shell__portal-effect::before {
-  animation: leaf-pigment-out 1120ms cubic-bezier(.57,0,.22,1) both;
+  animation: leaf-pigment-out 2000ms cubic-bezier(.57,0,.22,1) both;
 }
 
 .leaf-world-shell[data-transition="exiting"] .leaf-world-shell__portal-effect::after {
-  animation: leaf-membrane-out 820ms cubic-bezier(.57,0,.22,1) both;
+  animation: leaf-membrane-out 1760ms cubic-bezier(.57,0,.22,1) both;
 }
 
 .leaf-world-shell[data-transition="exiting"] .leaf-world-shell__portal-film {
-  animation: leaf-membrane-film-out 1120ms cubic-bezier(.57,0,.22,1) both;
+  animation: leaf-membrane-film-out 2000ms cubic-bezier(.57,0,.22,1) both;
+}
+
+.leaf-world-shell[data-transition="exiting"] .leaf-world-shell__portal-leaf {
+  animation: leaf-shape-condense 1900ms cubic-bezier(.57,0,.22,1) both;
+}
+
+.leaf-world-shell[data-transition="exiting"] .leaf-world-shell__portal-leaf::before {
+  animation: leaf-bubble-core-out 1600ms cubic-bezier(.57,0,.22,1) both;
+}
+
+.leaf-world-shell[data-transition="exiting"] .leaf-world-shell__portal-leaf::after {
+  animation: leaf-bubble-pop-out 1740ms cubic-bezier(.57,0,.22,1) both;
 }
 
 .leaf-world {
@@ -330,45 +403,107 @@
 }
 
 @keyframes leaf-pigment-in {
-  0% { opacity: .02; transform: translate(-50%, -50%) scale(.035); }
-  24% { opacity: .52; transform: translate(-50%, -50%) scale(.32); }
-  62% { opacity: .24; transform: translate(-50%, -50%) scale(.98); }
-  100% { opacity: .035; transform: translate(-50%, -50%) scale(1.42); }
+  0% { opacity: .01; transform: translate(-50%, -50%) scale(.035); }
+  18% { opacity: .3; transform: translate(-50%, -50%) scale(.18); }
+  38% { opacity: .55; transform: translate(-50%, -50%) scale(.52); }
+  57% { opacity: .34; transform: translate(-50%, -50%) scale(1.02); }
+  76% { opacity: .16; transform: translate(-50%, -50%) scale(1.3); }
+  100% { opacity: .025; transform: translate(-50%, -50%) scale(1.5); }
 }
 
 @keyframes leaf-pigment-out {
-  from { opacity: .035; transform: translate(-50%, -50%) scale(1.42); }
-  52% { opacity: .16; transform: translate(-50%, -50%) scale(.38); }
-  to { opacity: 0; transform: translate(-50%, -50%) scale(.035); }
+  0% { opacity: .06; transform: translate(-50%, -50%) scale(1.5); }
+  32% { opacity: .22; transform: translate(-50%, -50%) scale(1.04); }
+  58% { opacity: .38; transform: translate(-50%, -50%) scale(.48); }
+  78% { opacity: .2; transform: translate(-50%, -50%) scale(.15); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(.035); }
 }
 
 @keyframes leaf-membrane-in {
-  0% { opacity: .78; transform: translate(-50%, -50%) scale(.3); }
-  37% { opacity: .62; transform: translate(-50%, -50%) scale(1.55); }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(5.2); }
-}
-
-@keyframes leaf-membrane-second {
-  0%, 100% { box-shadow: 0 0 0 0 transparent; }
-  10% { box-shadow: 0 0 0 1px color-mix(in srgb, var(--portal-accent) 56%, white); }
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.2); filter: blur(2px); }
+  18% { opacity: .68; transform: translate(-50%, -50%) scale(.74); filter: blur(.4px); }
+  36% { opacity: .92; transform: translate(-50%, -50%) scale(1.18); filter: blur(0); }
+  46% { opacity: .8; transform: translate(-50%, -50%) scale(1.02); }
+  53% { opacity: .92; transform: translate(-50%, -50%) scale(1.24); }
+  62% { opacity: .28; transform: translate(-50%, -50%) scale(2.12); filter: blur(1px); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(5.6); filter: blur(5px); }
 }
 
 @keyframes leaf-membrane-out {
-  0% { opacity: .38; transform: translate(-50%, -50%) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(.24); }
+  0% { opacity: .05; transform: translate(-50%, -50%) scale(5.6); filter: blur(5px); }
+  36% { opacity: .2; transform: translate(-50%, -50%) scale(2.2); filter: blur(1px); }
+  62% { opacity: .76; transform: translate(-50%, -50%) scale(1.08); filter: blur(0); }
+  72% { opacity: .9; transform: translate(-50%, -50%) scale(1.2); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(.2); filter: blur(2px); }
 }
 
 @keyframes leaf-membrane-film-in {
-  0% { opacity: 0; }
-  22% { opacity: .46; }
-  58% { opacity: .24; }
-  100% { opacity: 0; }
+  0% { opacity: 0; transform: scale(.02); }
+  16% { opacity: .22; transform: scale(.18); }
+  38% { opacity: .42; transform: scale(.62); }
+  56% { opacity: .28; transform: scale(1.02); }
+  78% { opacity: .12; transform: scale(1.25); }
+  100% { opacity: 0; transform: scale(1.46); }
 }
 
 @keyframes leaf-membrane-film-out {
-  0% { opacity: 0; }
-  35% { opacity: .28; }
-  100% { opacity: 0; }
+  0% { opacity: .03; transform: scale(1.46); }
+  26% { opacity: .12; transform: scale(1.04); }
+  56% { opacity: .3; transform: scale(.4); }
+  76% { opacity: .4; transform: scale(.1); }
+  100% { opacity: 0; transform: scale(.02); }
+}
+
+@keyframes leaf-shape-inflate {
+  0% { opacity: .96; transform: translate(-50%, -50%) rotate(var(--zoom-angle, 0deg)) scale(.72); filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--portal-accent) 24%, transparent)); }
+  18% { opacity: 1; transform: translate(-50%, -50%) rotate(var(--zoom-angle, 0deg)) scale(1.06); }
+  36% { opacity: 1; transform: translate(-50%, -50%) rotate(var(--zoom-angle, 0deg)) scale(1.28); }
+  48% { opacity: .96; transform: translate(-50%, -50%) rotate(var(--zoom-angle, 0deg)) scale(1.52); filter: drop-shadow(0 8px 20px color-mix(in srgb, var(--portal-accent) 34%, transparent)); }
+  57% { opacity: .76; transform: translate(-50%, -50%) rotate(var(--zoom-angle, 0deg)) scale(1.78); }
+  70% { opacity: .24; transform: translate(-50%, -50%) rotate(var(--zoom-angle, 0deg)) scale(2.32); filter: blur(6px); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--zoom-angle, 0deg)) scale(3.2); filter: blur(18px); }
+}
+
+@keyframes leaf-shape-condense {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--zoom-angle, 0deg)) scale(3.2); filter: blur(16px); }
+  32% { opacity: .16; transform: translate(-50%, -50%) rotate(var(--zoom-angle, 0deg)) scale(2.1); filter: blur(7px); }
+  54% { opacity: .62; transform: translate(-50%, -50%) rotate(var(--zoom-angle, 0deg)) scale(1.2); filter: blur(2px); }
+  74% { opacity: .98; transform: translate(-50%, -50%) rotate(var(--zoom-angle, 0deg)) scale(1.04); filter: blur(0); }
+  86% { opacity: 1; transform: translate(-50%, -50%) rotate(var(--zoom-angle, 0deg)) scale(1.1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--zoom-angle, 0deg)) scale(.72); }
+}
+
+@keyframes leaf-bubble-core-in {
+  0% { opacity: 0; transform: scale(.18); }
+  34% { opacity: .56; transform: scale(.86); }
+  52% { opacity: .82; transform: scale(1.12); }
+  63% { opacity: .18; transform: scale(1.8); }
+  100% { opacity: 0; transform: scale(2.6); }
+}
+
+@keyframes leaf-bubble-pop-in {
+  0% { opacity: 0; transform: scale(.16); }
+  30% { opacity: .34; transform: scale(.72); }
+  46% { opacity: .82; transform: scale(1.08); }
+  54% { opacity: .96; transform: scale(1.22); }
+  63% { opacity: .3; transform: scale(2.1); }
+  100% { opacity: 0; transform: scale(3.7); }
+}
+
+@keyframes leaf-bubble-core-out {
+  0% { opacity: 0; transform: scale(2.6); }
+  42% { opacity: .24; transform: scale(1.35); }
+  68% { opacity: .78; transform: scale(.76); }
+  82% { opacity: .34; transform: scale(.36); }
+  100% { opacity: 0; transform: scale(.14); }
+}
+
+@keyframes leaf-bubble-pop-out {
+  0% { opacity: 0; transform: scale(3.7); }
+  40% { opacity: .24; transform: scale(1.7); }
+  65% { opacity: .86; transform: scale(.78); }
+  78% { opacity: .96; transform: scale(.58); }
+  100% { opacity: 0; transform: scale(.12); }
 }
 
 @media (max-width: 1080px) {
@@ -413,6 +548,9 @@
   .leaf-world-shell__portal-effect::before,
   .leaf-world-shell__portal-effect::after,
   .leaf-world-shell__portal-film,
+  .leaf-world-shell__portal-leaf,
+  .leaf-world-shell__portal-leaf::before,
+  .leaf-world-shell__portal-leaf::after,
   .leaf-world__header-top,
   .leaf-world__header h2,
   .leaf-world__header > p,
