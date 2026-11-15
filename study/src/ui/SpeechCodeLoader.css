@@ -99,4 +99,3 @@
   .speech-loader::after,
   .speech-loader__track::before { transition-duration: 0s; animation: none; }
 }
-

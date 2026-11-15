@@ -177,12 +177,14 @@ await tap('[data-heart-theme="build"]');
 await waitFor("location.hash === '#index/build' && Boolean(document.querySelector('.leaf-world'))");
 await sleep(350);
 
+await moveTo('[data-project-entry="bioaz-agent-workbench"][data-project-context="theme-world"]');
+await sleep(200);
 const cardOrigin = await evaluate(`(() => { const r = document.querySelector('[data-project-entry="bioaz-agent-workbench"][data-project-context="theme-world"]').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`);
 await tap('[data-project-entry="bioaz-agent-workbench"]');
 await waitFor("document.querySelector('.archive__project-detail') && location.hash.includes('/bioaz-agent-workbench')");
 await sleep(50);
-const projectEnterZoom = await evaluate(`(() => { const el = document.querySelector('.archive__project-detail'); const s = getComputedStyle(el); return { phase: el?.dataset.transition, clip: s.clipPath, originX: parseFloat(s.getPropertyValue('--detail-x')), originY: parseFloat(s.getPropertyValue('--detail-y')), width: el?.getBoundingClientRect().width, height: el?.getBoundingClientRect().height }; })()`);
-check("Z1 to Z2 zooms from the selected card across the viewport", ["entering", "entered"].includes(projectEnterZoom.phase) && projectEnterZoom.clip.includes("circle") && Math.abs(projectEnterZoom.originX - cardOrigin.x) < 2 && Math.abs(projectEnterZoom.originY - cardOrigin.y) < 2 && projectEnterZoom.width >= 1400 && projectEnterZoom.height >= 850, { ...projectEnterZoom, source: cardOrigin });
+const projectEnterZoom = await evaluate(`(() => { const el = document.querySelector('.archive__project-detail'); const s = getComputedStyle(el); const r = el?.getBoundingClientRect(); return { phase: el?.dataset.transition, clip: s.clipPath, originX: parseFloat(s.getPropertyValue('--detail-x')), originY: parseFloat(s.getPropertyValue('--detail-y')), left: r?.left, top: r?.top, width: r?.width, height: r?.height }; })()`);
+check("Z1 to Z2 zooms from the selected card across the viewport", ["entering", "entered"].includes(projectEnterZoom.phase) && projectEnterZoom.clip.includes("circle") && Math.abs(projectEnterZoom.originX + projectEnterZoom.left - cardOrigin.x) < 2 && Math.abs(projectEnterZoom.originY + projectEnterZoom.top - cardOrigin.y) < 2 && projectEnterZoom.width >= 1400 && projectEnterZoom.height >= 850, { ...projectEnterZoom, source: cardOrigin });
 await sleep(300);
 const detail = await evaluate(`(() => { const image = document.querySelector('.archive__project-cover'); return { hash: location.hash, title: document.querySelector('.archive__project-detail h2')?.textContent, image: image?.getAttribute('src'), imageLoaded: Boolean(image?.complete && image.naturalWidth > 0) }; })()`);
 await capture("z2-bioaz-1440x900");

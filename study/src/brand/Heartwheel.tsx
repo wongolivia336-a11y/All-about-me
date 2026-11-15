@@ -1,13 +1,18 @@
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import type { ThemeId } from "../data/library";
 import { themeConfig, themeOrder } from "../data/themeConfig";
 import { themeText, useLanguage } from "../i18n";
 import { HEART_PATH, HeartTextTexture } from "./HeartTextTexture";
+import { HeartwheelFallback } from "./HeartwheelFallback";
 import "./Heartwheel.css";
+
+const HeartwheelScene = lazy(() => import("./HeartwheelScene").then(({ HeartwheelScene: Scene }) => ({ default: Scene })));
 
 export interface ThemeZoomOrigin {
   x: number;
   y: number;
+  size?: number;
+  angle?: number;
 }
 
 interface HeartwheelProps {
@@ -27,6 +32,7 @@ type Gesture = {
 type SettleAnimation = {
   target: number;
   velocity: number;
+  onSettled?: () => void;
 };
 
 const SNAP_ANGLE = 90;
@@ -92,25 +98,28 @@ export function Heartwheel({
     stageRef.current?.style.setProperty("--heartwheel-rotation", `${next}deg`);
   };
 
-  const animateToRotation = (target: number) => {
+  const animateToRotation = (target: number, onSettled?: () => void) => {
     const from = rotationRef.current;
     const initialVelocity = angularVelocity.current;
     targetRotation.current = target;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       cancelSettle();
       applyRotation(target);
+      onSettled?.();
       return;
     }
     cancelSettle(false);
 
     if (Math.abs(target - from) < 0.01 && Math.abs(initialVelocity) < 0.1) {
       applyRotation(target);
+      onSettled?.();
       return;
     }
 
     const animation: SettleAnimation = {
       target,
       velocity: initialVelocity,
+      onSettled,
     };
     animationRef.current = animation;
     lastFrameAt.current = performance.now();
@@ -135,6 +144,7 @@ export function Heartwheel({
         animationRef.current = null;
         lastFrameAt.current = null;
         angularVelocity.current = 0;
+        animation.onSettled?.();
       }
     };
 
@@ -158,21 +168,30 @@ export function Heartwheel({
 
   const originFromElement = (element: Element): ThemeZoomOrigin => {
     const bounds = element.getBoundingClientRect();
-    return { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 };
+    return {
+      x: bounds.left + bounds.width / 2,
+      y: bounds.top + bounds.height / 2,
+      size: Math.min(bounds.width, bounds.height),
+    };
+  };
+
+  const originFromTheme = (theme: ThemeId): ThemeZoomOrigin | undefined => {
+    const leaf = stageRef.current?.querySelector(`[data-heart-leaf="${theme}"] .heartwheel__leaf-hit`);
+    return leaf
+      ? { ...originFromElement(leaf), angle: rotationRef.current + themeConfig[theme].leafAngle }
+      : undefined;
   };
 
   const chooseTheme = (theme: ThemeId, origin?: ThemeZoomOrigin) => {
     const next = nearestTarget(rotationRef.current, theme);
-    animateToRotation(next);
-    onThemeChange(theme, "select", origin);
+    animateToRotation(next, () => onThemeChange(theme, "select", originFromTheme(theme) ?? origin));
   };
 
   const commitGesture = () => {
     const current = rotationRef.current;
     const snapped = Math.round(current / SNAP_ANGLE) * SNAP_ANGLE;
     const theme = themeForRotation(snapped);
-    animateToRotation(snapped);
-    onThemeChange(theme, "drag");
+    animateToRotation(snapped, () => onThemeChange(theme, "drag", originFromTheme(theme)));
   };
 
   const finishGesture = (pointerId: number) => {
@@ -299,6 +318,11 @@ export function Heartwheel({
         }}
       >
         <div className="heartwheel__orbit">
+          <div className="heartwheel__scene" aria-hidden="true">
+            <Suspense fallback={<HeartwheelFallback />}>
+              <HeartwheelScene activeTheme={activeTheme} focused={focused} hoveredTheme={hoveredTheme} />
+            </Suspense>
+          </div>
           <svg className="heartwheel__svg" viewBox="-170 -170 340 340" role="presentation">
             <defs>
               {themeOrder.map((theme) => (
@@ -319,7 +343,6 @@ export function Heartwheel({
                   transform={`rotate(${themeConfig[theme].leafAngle} 0 0)`}
                 >
                   <g className="heartwheel__leaf-visual">
-                    <path className="heartwheel__leaf-fill" d={HEART_PATH} />
                     <HeartTextTexture theme={theme} clipId={`heart-clip-${theme}`} />
                   </g>
                   <path

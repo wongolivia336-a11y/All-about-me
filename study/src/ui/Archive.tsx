@@ -7,6 +7,7 @@ import {
 import { CONTACT_EMAIL, GITHUB_USER } from "../data/links";
 import type { ThemeZoomOrigin } from "../brand/Heartwheel";
 import { projectText, themeText, useLanguage } from "../i18n";
+import { ContactLinks } from "./ContactLinks";
 import { LeafWorld as LeafCanvas, type ThemeSelectionSource } from "./LeafWorld";
 import { LanguageSwitch } from "./LanguageSwitch";
 
@@ -17,7 +18,7 @@ interface ArchiveProps {
   showThemeArchive: boolean;
   projectId?: string;
   onClose: () => void;
-  onThemeChange: (theme: ThemeId, showAll?: boolean, focused?: boolean) => void;
+  onThemeChange: (theme: ThemeId, showAll?: boolean, focused?: boolean, origin?: ThemeZoomOrigin) => void;
   onProjectOpen: (entry: ArchiveEntry, origin?: ThemeZoomOrigin) => void;
   onProjectClose: (theme: ThemeId) => void;
 }
@@ -212,6 +213,9 @@ export function Archive({
   onProjectClose,
 }: ArchiveProps) {
   const { language, copy } = useLanguage();
+  const heroNameParts = copy.heroTitle.replace(/\.$/, "").split(" ");
+  const heroGivenName = heroNameParts[0] || "Olivia";
+  const heroFamilyName = heroNameParts.slice(1).join(" ") || "Wong";
   const [activeTheme, setActiveTheme] = useState<ThemeId>(initialTheme);
   const [viewMode, setViewMode] = useState<"overview" | "focused">(initialFocused ? "focused" : "overview");
   const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(projectId);
@@ -332,14 +336,18 @@ export function Archive({
       : language === "zh" ? "王心蕊 — Four Hearts" : "Olivia Wong — Four Hearts";
   }, [active, language, selectedProject]);
 
-  const selectTheme = (theme: ThemeId, source: ThemeSelectionSource = "select") => {
+  const selectTheme = (
+    theme: ThemeId,
+    source: ThemeSelectionSource = "select",
+    origin?: ThemeZoomOrigin,
+  ) => {
     // Only a deliberate second click on an active leaf toggles Overview.
     // Drag-and-snap of the same leaf keeps the focus intact.
     const zoomOut = source === "select" && activeTheme === theme && viewMode === "focused";
     setActiveTheme(theme);
     setViewMode(zoomOut ? "overview" : "focused");
     setSelectedProjectId(undefined);
-    onThemeChange(theme, false, !zoomOut);
+    onThemeChange(theme, false, !zoomOut, origin);
   };
 
   const openProject = (entry: ArchiveEntry, origin?: ThemeZoomOrigin) => {
@@ -441,8 +449,12 @@ export function Archive({
             <section className="archive__hero" aria-labelledby="archive-title" aria-hidden={worldFocused} inert={worldFocused}>
               <div className="archive__identity">
                 <p className="archive__eyebrow"><span className="archive__status-dot" aria-hidden="true" />{copy.heroEyebrow}</p>
-                <h1 id="archive-title">{copy.heroTitle}</h1>
+                <h1 id="archive-title">
+                  <span className="archive__hero-given-name">{heroGivenName}</span>
+                  <span className="archive__hero-family-name">{heroFamilyName}<i aria-hidden="true">.</i></span>
+                </h1>
                 <p className="archive__lede">{copy.heroLead}</p>
+                <ContactLinks />
                 <div className="archive__hero-actions">
                   <button type="button" onClick={() => scrollToSection("selected-works")}>
                     {copy.seeSelected}

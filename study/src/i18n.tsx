@@ -22,6 +22,14 @@ export interface Copy {
   heroEyebrow: string;
   heroTitle: string;
   heroLead: string;
+  socialLinkLead: string;
+  socialLinksLabel: string;
+  linkedinContact: string;
+  officialAccountContact: string;
+  wechatContact: string;
+  xiaohongshuContact: string;
+  phoneContact: string;
+  contactLinkPending: string;
   seeSelected: string;
   startConversation: string;
   backToArchive: string;
@@ -46,6 +54,7 @@ export interface Copy {
   themeGroup: string;
   selectTheme: string;
   fourThemeIndex: string;
+  questionPageTitle: string;
   portfolioMapAria: string;
   privateIndex: string;
   seeProject: string;
@@ -55,6 +64,7 @@ export interface Copy {
   enterWorld: string;
   worldNavigation: string;
   viewAllTheme: string;
+  selectLeafHint: string;
   overviewTitle: string;
   overviewDescription: string;
   currentTheme: string;
@@ -89,6 +99,7 @@ export interface Copy {
   githubRateLimit: string;
   githubLoading: string;
   githubOpen: string;
+  emailContact: string;
   linkedinMissing: string;
   githubRepos: string;
   githubFollowers: string;
@@ -145,8 +156,16 @@ const translations: Record<Language, Copy> = {
     contact: "Contact",
     archiveAria: "Olivia Wong / Four Hearts personal archive",
     heroEyebrow: "Design engineer / AI products / creative technology",
-    heroTitle: "A living archive of things I build, question, play with, and collect.",
-    heroLead: "I make human-centred tools and interactive systems for ideas that are still becoming.",
+    heroTitle: "Olivia Wong.",
+    heroLead: "I design for the space between technology and being human.",
+    socialLinkLead: "My projects and experiments live on GitHub. I’m happy to talk design or collaboration by email, LinkedIn, WeChat, Xiaohongshu, or phone.",
+    socialLinksLabel: "Social and contact links",
+    linkedinContact: "Open LinkedIn profile",
+    officialAccountContact: "Open WeChat Official Account",
+    wechatContact: "Open WeChat contact",
+    xiaohongshuContact: "Open Xiaohongshu profile",
+    phoneContact: "Call Olivia",
+    contactLinkPending: "Link not added yet",
     seeSelected: "See selected work ↓",
     startConversation: "Start a conversation ↗",
     backToArchive: "← Back to archive",
@@ -171,6 +190,7 @@ const translations: Record<Language, Copy> = {
     themeGroup: "Four Hearts themes",
     selectTheme: "Select ",
     fourThemeIndex: "THE LIVING INDEX",
+    questionPageTitle: "Research",
     portfolioMapAria: "Four-theme visual index",
     privateIndex: "PRIVATE INDEX",
     seeProject: "View project: ",
@@ -180,6 +200,7 @@ const translations: Record<Language, Copy> = {
     enterWorld: "Enter this world ↗",
     worldNavigation: "Switch between the four worlds",
     viewAllTheme: "View all ",
+    selectLeafHint: "Select a leaf to enter its world.",
     overviewTitle: "Four hearts. Four ways of seeing.",
     overviewDescription: "A selection of real projects, questions, experiments and things worth collecting.",
     currentTheme: "Current theme: ",
@@ -214,6 +235,7 @@ const translations: Record<Language, Copy> = {
     githubRateLimit: "GitHub rate limit reached. Please try again later.",
     githubLoading: "Loading GitHub…",
     githubOpen: "Open GitHub profile",
+    emailContact: "Email Olivia",
     linkedinMissing: "LinkedIn link not set — the profile can only be opened as a static link.",
     githubRepos: "repositories",
     githubFollowers: "followers",
@@ -268,8 +290,16 @@ const translations: Record<Language, Copy> = {
     contact: "联系",
     archiveAria: "王心蕊 / Four Hearts 个人档案",
     heroEyebrow: "设计工程 / AI 产品 / 创意技术",
-    heroTitle: "记录我构建、追问、试验与珍藏的事物。",
-    heroLead: "我为仍在成形中的想法，设计以人为本的工具与交互系统。",
+    heroTitle: "Olivia Wong.",
+    heroLead: "我在技术与人的交界处设计体验。",
+    socialLinkLead: "作品与实验都放在 GitHub；想聊设计、合作，或只是打个招呼，也欢迎通过邮件、领英、微信、小红书或电话联系我。",
+    socialLinksLabel: "社交平台与联系方式",
+    linkedinContact: "打开 LinkedIn 主页",
+    officialAccountContact: "打开微信公众号",
+    wechatContact: "打开微信联系入口",
+    xiaohongshuContact: "打开小红书主页",
+    phoneContact: "致电 Olivia",
+    contactLinkPending: "尚未设置入口",
     seeSelected: "查看精选作品 ↓",
     startConversation: "开始交流 ↗",
     backToArchive: "← 返回档案",
@@ -294,6 +324,7 @@ const translations: Record<Language, Copy> = {
     themeGroup: "Four Hearts 主题",
     selectTheme: "选择 ",
     fourThemeIndex: "四叶生活索引",
+    questionPageTitle: "研究",
     portfolioMapAria: "四个主题的作品视觉索引",
     privateIndex: "私人索引",
     seeProject: "查看项目：",
@@ -303,6 +334,7 @@ const translations: Record<Language, Copy> = {
     enterWorld: "进入这个世界 ↗",
     worldNavigation: "切换四个世界",
     viewAllTheme: "查看全部 ",
+    selectLeafHint: "选择一片叶片，进入它的世界。",
     overviewTitle: "四颗心，四种观看方式。",
     overviewDescription: "一些真实项目、问题、实验，以及值得留下的事物。",
     currentTheme: "当前主题：",
@@ -337,6 +369,7 @@ const translations: Record<Language, Copy> = {
     githubRateLimit: "GitHub 接口调用频率超限，请稍后再试。",
     githubLoading: "正在读取 GitHub…",
     githubOpen: "打开 GitHub 主页",
+    emailContact: "给 Olivia 发邮件",
     linkedinMissing: "尚未设置 LinkedIn 链接；目前只能作为静态链接打开。",
     githubRepos: "个仓库",
     githubFollowers: "位关注者",
@@ -435,6 +468,7 @@ export function themeText(theme: ThemeId, language: Language) {
 interface ProjectText {
   title: string;
   summary: string;
+  worldSummary?: string;
   tags: readonly string[];
 }
 
@@ -456,12 +490,12 @@ const projectTextById: Record<string, Record<Language, ProjectText>> = {
     zh: { title: "KNOCK KNOCK", summary: "一个通过光、声音和等待建立关系的陪伴机器人交互原型。", tags: ["交互", "光", "陪伴机器人"] },
   },
   "zhang-zao": {
-    en: { title: "Two Sides of a Mirror", summary: "A multidimensional text-visualization study on bringing classical imagery into contemporary experience.", tags: ["Research", "Text visualization", "Culture"] },
-    zh: { title: "镜子的两面", summary: "古典意象如何进入现代经验的多维文本可视化研究。", tags: ["研究", "文本可视化", "文化"] },
+    en: { title: "Two Sides of a Mirror", summary: "A multidimensional text-visualization study on bringing classical imagery into contemporary experience.", worldSummary: "Text visualization traces classical imagery into contemporary experience.", tags: ["Research", "Text visualization", "Culture"] },
+    zh: { title: "镜子的两面", summary: "古典意象如何进入现代经验的多维文本可视化研究。", worldSummary: "用文本可视化追踪古典意象如何进入现代经验。", tags: ["研究", "文本可视化", "文化"] },
   },
   qiaopi: {
-    en: { title: "A Letter, After It Arrives", summary: "A data narrative tracing overseas remittance letters to a village in Chaoshan.", tags: ["Data story", "Archive", "Geography"] },
-    zh: { title: "一封侨批，抵达之后", summary: "从海外寄批地到潮汕村庄的侨批数据叙事。", tags: ["数据叙事", "档案", "地理"] },
+    en: { title: "A Letter, After It Arrives", summary: "A data narrative tracing overseas remittance letters to a village in Chaoshan.", worldSummary: "Following remittance letters from overseas to a Chaoshan village.", tags: ["Data story", "Archive", "Geography"] },
+    zh: { title: "一封侨批，抵达之后", summary: "从海外寄批地到潮汕村庄的侨批数据叙事。", worldSummary: "沿着侨批的寄递轨迹，连接海外与潮汕村庄。", tags: ["数据叙事", "档案", "地理"] },
   },
   "film-shelf": {
     en: { title: "Film shelf", summary: "A small shelf for returning to the films of Lynch, Edward Yang and Hou Hsiao-hsien.", tags: ["Cinema", "Film notes", "Room object"] },
@@ -480,6 +514,7 @@ export function projectText(entry: ArchiveEntry, language: Language) {
   return {
     title: localized?.title ?? entry.title,
     summary: localized?.summary ?? entry.summary,
+    worldSummary: localized?.worldSummary,
     tags: localized?.tags ?? entry.tags,
     type: translations[language].themeType[entry.type],
     status: translations[language].themeStatus[entry.status],

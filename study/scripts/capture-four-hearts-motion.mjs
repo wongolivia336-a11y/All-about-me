@@ -75,4 +75,3 @@ await capture("zoom-entered");
 
 socket.close();
 console.log(`Motion evidence written to ${output}`);
-
