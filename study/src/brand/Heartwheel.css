@@ -120,7 +120,7 @@
   top: 25%;
   left: 50%;
   display: grid;
-  width: 31%;
+  width: 28%;
   min-height: 54px;
   place-content: center;
   gap: 5px;
@@ -160,8 +160,9 @@
 }
 
 .heartwheel__label span {
-  font: 600 clamp(11px, 1.3vw, 15px)/1 var(--font-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
-  letter-spacing: 0.06em;
+  font: 600 clamp(11px, 1.25vw, 14px)/1 var(--font-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
+  letter-spacing: 0.035em;
+  white-space: nowrap;
 }
 
 .heartwheel__label small {
@@ -191,7 +192,7 @@
   }
 
   .heartwheel__label {
-    width: 36%;
+    width: 32%;
     min-height: 48px;
   }
 

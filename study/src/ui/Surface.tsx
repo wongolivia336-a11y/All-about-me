@@ -1,6 +1,5 @@
 import { useFocusedRoom } from "../interaction/studyStore";
 import { CinemaPanel } from "./CinemaPanel";
-import { GitHubPanel } from "./GitHubPanel";
 import { MusicPanel } from "./MusicPanel";
 import { Panel } from "./Panel";
 import { PhonePanel } from "./PhonePanel";
@@ -19,7 +18,8 @@ export function Surface() {
     case "portfolio":
       return <PortfolioViewer />;
     case "laptop":
-      return <GitHubPanel />;
+      // Laptop UI lives on the physical display in the 3D scene.
+      return null;
     case "phone":
       return <PhonePanel />;
     case "marshall":

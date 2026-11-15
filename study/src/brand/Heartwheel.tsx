@@ -423,7 +423,7 @@ export function Heartwheel({
                   }}
                   data-heart-theme={theme}
                 >
-                  <span>{themeText(theme, language).label}</span>
+                  <span>{theme === "question" ? (language === "zh" ? "追问" : "ASK") : themeText(theme, language).label}</span>
                   <small>{themeText(theme, language).descriptor}</small>
                 </button>
               );

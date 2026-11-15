@@ -68,10 +68,9 @@ export const hotspots: Hotspot[] = [
     label: "Work",
     blurb: "作品与系统",
     path: "/work",
-    // Back off enough to keep the complete lid, keyboard and front edge in
-    // view beside the DOM work panel. The target stays tied to layout.laptop.
-    ...at([layout.laptop.pos[0] + 0.09, 0.75, layout.laptop.pos[2] - 0.02], 0.08, [
-      0, 0.18, 0.66,
+    // A reading distance for the live desktop on the physical laptop display.
+    ...at([layout.laptop.pos[0], 0.8, layout.laptop.pos[2] - 0.02], 0.08, [
+      0, 0.085, 0.46,
     ]),
   },
   {

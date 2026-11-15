@@ -1,14 +1,15 @@
 import { useLayoutEffect, useMemo, useRef } from "react";
-import { RoundedBox } from "@react-three/drei";
+import { Html, RoundedBox } from "@react-three/drei";
 import { Object3D, type InstancedMesh } from "three";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { phoneApps } from "../data/links";
 import { Hotspot } from "../interaction/Hotspot";
-import { requestArchive, useFocusedRoom } from "../interaction/studyStore";
+import { useFocusedRoom } from "../interaction/studyStore";
 import { useLanguage, type Language } from "../i18n";
 import { DESK_TOP_Y, layout } from "./layout";
 import { makeAppScreen, makeSiteScreen, palette } from "./theme";
 import { useLocalizedCanvasTexture } from "./useLocalizedCanvasTexture";
+import { LaptopDesktop } from "./LaptopDesktop";
 
 const makePhoneScreen = (language: Language) => makeAppScreen(phoneApps, language);
 
@@ -28,6 +29,7 @@ export function Devices() {
 
 function Laptop() {
   const { language } = useLanguage();
+  const { focused } = useFocusedRoom();
   const screen = useLocalizedCanvasTexture(language, makeSiteScreen);
 
   const baseH = 0.011;
@@ -38,7 +40,6 @@ function Laptop() {
   return (
     <Hotspot
       id="laptop"
-      onSelect={() => requestArchive("work")}
       labelAt={[pos[0], DESK_TOP_Y + 0.34, pos[2]]}
     >
       <group position={[pos[0], 0, pos[2]]} rotation={[0, rotY, 0]}>
@@ -130,6 +131,17 @@ function Laptop() {
             <planeGeometry args={[0.286, 0.184]} />
             <meshBasicMaterial map={screen} toneMapped={false} />
           </mesh>
+          {focused === "laptop" && (
+            <Html
+              transform
+              center
+              position={[0, 0.105, 0.00465]}
+              scale={0.0005}
+              zIndexRange={[8, 2]}
+            >
+              <LaptopDesktop />
+            </Html>
+          )}
           <mesh position={[0, 0.205, 0.00385]}>
             <circleGeometry args={[0.00145, 12]} />
             <meshBasicMaterial color="#4f5458" />

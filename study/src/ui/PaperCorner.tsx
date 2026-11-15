@@ -5,6 +5,7 @@ interface PaperCornerProps {
   ariaLabel: string;
   title: string;
   onClick: () => void;
+  onPreload?: () => void;
   disabled?: boolean;
   className?: string;
 }
@@ -19,6 +20,7 @@ export const PaperCorner = forwardRef<HTMLButtonElement, PaperCornerProps>(funct
     ariaLabel,
     title,
     onClick,
+    onPreload,
     disabled = false,
     className,
   },
@@ -80,6 +82,8 @@ export const PaperCorner = forwardRef<HTMLButtonElement, PaperCornerProps>(funct
       className={["paper-corner", className].filter(Boolean).join(" ")}
       type="button"
       onClick={onClick}
+      onPointerEnter={onPreload}
+      onFocus={onPreload}
       aria-label={ariaLabel}
       title={title}
       disabled={disabled}

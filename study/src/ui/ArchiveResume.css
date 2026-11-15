@@ -1468,3 +1468,58 @@
     opacity: 1;
   }
 }
+
+/* One quiet glass vocabulary for secondary actions; no ornamental underlines. */
+.archive__contact-link,
+.archive__hero-actions a,
+.archive__resume-grid button,
+.archive__project-links a,
+.archive__footer-links a,
+.archive__footer-links button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 34px;
+  padding: 7px 14px;
+  border: 1px solid rgb(121 149 166 / 16%);
+  border-radius: 999px;
+  background: linear-gradient(140deg, rgb(255 255 255 / 78%), rgb(220 233 239 / 38%));
+  box-shadow: inset 0 1px rgb(255 255 255 / 85%), 0 3px 13px rgb(37 60 73 / 4%);
+  backdrop-filter: blur(14px) saturate(1.14);
+  -webkit-backdrop-filter: blur(14px) saturate(1.14);
+  color: #355363;
+  text-decoration: none;
+  transition: background 230ms ease, border-color 230ms ease, box-shadow 230ms ease, transform 250ms var(--motion-standard);
+}
+.archive__contact-link:hover,
+.archive__contact-link:focus-visible,
+.archive__hero-actions a:hover,
+.archive__hero-actions a:focus-visible,
+.archive__resume-grid button:hover,
+.archive__resume-grid button:focus-visible,
+.archive__project-links a:hover,
+.archive__project-links a:focus-visible,
+.archive__footer-links a:hover,
+.archive__footer-links button:hover {
+  border-color: rgb(113 153 176 / 32%);
+  background: linear-gradient(140deg, rgb(255 255 255 / 95%), rgb(205 225 235 / 65%));
+  box-shadow: inset 0 1px #fff, 0 6px 18px rgb(47 74 91 / 8%);
+  color: #263f4e;
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+.archive__nav button:hover,
+.archive__nav button:focus-visible { text-decoration: none; color: #315367; }
+.archive__nav button { border-radius: 999px; transition: color 220ms ease, background 220ms ease; }
+.archive__nav button:hover { background: rgb(222 235 241 / 45%); }
+.archive__resume-grid button { margin-top: auto; }
+.archive__project-links { display: flex; flex-wrap: wrap; gap: 10px; }
+.archive__contact-link { margin-left: 2px; }
+.archive__footer-links a,
+.archive__footer-links button { min-height: 30px; font-size: 10px; }
+
+@media (max-width: 720px) {
+  .archive__hero-actions a,
+  .archive__resume-grid button { min-height: 40px; padding: 0 14px; }
+}

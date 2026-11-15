@@ -5,10 +5,11 @@ interface RoomRevealSurfaceProps {
   children: ReactNode;
   progress: number;
   interactive: boolean;
+  sceneReady: boolean;
 }
 const viewportSize = () => ({ width: window.innerWidth, height: window.innerHeight });
 
-export function RoomRevealSurface({ children, progress, interactive }: RoomRevealSurfaceProps) {
+export function RoomRevealSurface({ children, progress, interactive, sceneReady }: RoomRevealSurfaceProps) {
   const [viewport, setViewport] = useState(viewportSize);
 
   useEffect(() => {
@@ -27,6 +28,7 @@ export function RoomRevealSurface({ children, progress, interactive }: RoomRevea
       className="room-reveal-surface"
       data-reveal-progress={progress.toFixed(3)}
       data-reveal-interactive={interactive ? "true" : "false"}
+      data-scene-ready={sceneReady ? "true" : "false"}
       aria-hidden={!interactive}
       style={{
         clipPath,

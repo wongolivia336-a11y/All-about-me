@@ -5,8 +5,8 @@ interface AnimateOptions {
   onComplete?: () => void;
 }
 
-const easeOut = (value: number) => 1 - Math.pow(1 - value, 3);
-export const ARCHIVE_ROOM_REVEAL_DURATION = 2400;
+const easeInOut = (value: number) => (1 - Math.cos(Math.PI * value)) / 2;
+export const ARCHIVE_ROOM_REVEAL_DURATION = 1750;
 
 /** A single, interruptible progress driver shared by the reveal layers. */
 export function useRoomReveal(initialProgress: number) {
@@ -48,7 +48,7 @@ export function useRoomReveal(initialProgress: number) {
     const frame = (now: number) => {
       if (token !== animationToken.current) return;
       const elapsed = Math.min(1, (now - startedAt) / duration);
-      setProgressValue(from + (normalizedTarget - from) * easeOut(elapsed));
+      setProgressValue(from + (normalizedTarget - from) * easeInOut(elapsed));
       if (elapsed >= 1) {
         frameRef.current = null;
         options.onComplete?.();

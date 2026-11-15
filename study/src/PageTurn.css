@@ -41,6 +41,25 @@
   will-change: clip-path;
 }
 
+/* The back of the unfolding sheet stays present while WebGL initializes;
+   the room then appears through the paper instead of popping in mid-fold. */
+.room-reveal-surface::after {
+  position: absolute;
+  z-index: 9;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 83% 7%, rgb(255 255 255 / 80%), transparent 53%),
+    linear-gradient(145deg, #f8f8f5 0%, #e7e9e6 46%, #d7dedc 100%);
+  opacity: 1;
+  content: "";
+  pointer-events: none;
+  transition: opacity 820ms cubic-bezier(.2,.7,.22,1);
+}
+.room-reveal-surface[data-scene-ready="true"]::after { opacity: 0; }
+.app--evening .room-reveal-surface::after {
+  background: linear-gradient(140deg, #31323a, #202127 65%, #171419);
+}
+
 .room-loading-error {
   position: fixed;
   z-index: var(--layer-room-error);
@@ -299,6 +318,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .room-reveal-surface::after { transition-duration: .01ms; }
   .room-exit {
     transition-duration: 0.01ms;
   }

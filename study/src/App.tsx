@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import type { Collection, ThemeId } from "./data/library";
 import { themes } from "./data/library";
 import {
@@ -63,6 +63,7 @@ const isNightNow = () => {
 };
 
 const RoomScene = lazy(() => import("./scene/RoomScene"));
+const preloadRoomScene = () => { void import("./scene/RoomScene"); };
 
 export default function App() {
   const { begin } = useLoading();
@@ -98,6 +99,8 @@ export default function App() {
   const [roomError, setRoomError] = useState<string | null>(null);
   const viewTransitionRef = useRef<"idle" | "preparing" | "opening" | "closing">("idle");
   const roomReadyRef = useRef(false);
+  const revealCompletedRef = useRef(initialRoute.view === "room");
+  const [roomReady, setRoomReady] = useState(false);
   const [viewTransition, setViewTransition] = useState<"idle" | "preparing" | "opening" | "closing">("idle");
   const [roomMounted, setRoomMounted] = useState(initialRoute.view === "room");
   const { progress: revealProgress, animateTo: animateReveal, cancel: cancelReveal } = useRoomReveal(
@@ -174,6 +177,8 @@ export default function App() {
     pendingTransitionFocus.current = "index";
     setRoomMounted(false);
     roomReadyRef.current = false;
+    revealCompletedRef.current = false;
+    setRoomReady(false);
     setTransitionPhase("idle");
     settleRoomLoading();
   }, [setTransitionPhase, settleRoomLoading]);
@@ -189,21 +194,17 @@ export default function App() {
       if (roomReadyRef.current) settleRoomLoading();
       else beginRoomLoading(false);
 
-      if (roomReadyRef.current) {
-        setTransitionPhase("opening");
-        animateReveal(1, { duration: ARCHIVE_ROOM_REVEAL_DURATION, onComplete: finishOpening });
-      } else {
-        setTransitionPhase("preparing");
-        animateReveal(0.14, {
-          duration: 300,
-          onComplete: () => {
-            if (roomReadyRef.current) {
-              setTransitionPhase("opening");
-              animateReveal(1, { duration: ARCHIVE_ROOM_REVEAL_DURATION, onComplete: finishOpening });
-            }
-          },
-        });
-      }
+      // Run one uninterrupted fold. The paper surface hides the WebGL warmup
+      // and dissolves when ready; the timeline never freezes at 14% again.
+      revealCompletedRef.current = false;
+      setTransitionPhase("opening");
+      animateReveal(1, {
+        duration: ARCHIVE_ROOM_REVEAL_DURATION,
+        onComplete: () => {
+          revealCompletedRef.current = true;
+          if (roomReadyRef.current) finishOpening();
+        },
+      });
       return;
     }
 
@@ -318,14 +319,16 @@ export default function App() {
   const markRoomReady = useCallback(() => {
     if (roomReadyRef.current) return;
     roomReadyRef.current = true;
+    setRoomReady(true);
     settleRoomLoading();
-    if (viewTransitionRef.current === "preparing" || viewTransitionRef.current === "opening") {
-      setTransitionPhase("opening");
-      animateReveal(1, { onComplete: finishOpening });
-    }
-  }, [animateReveal, finishOpening, setTransitionPhase, settleRoomLoading]);
+    if (viewTransitionRef.current === "opening" && revealCompletedRef.current) finishOpening();
+  }, [finishOpening, settleRoomLoading]);
   const indexCovered = route.view === "room" && revealProgress >= 0.999;
-  const roomInteractive = route.view === "room" && viewTransition === "idle" && revealProgress >= 0.999;
+  const roomInteractive = route.view === "room" && roomReady && viewTransition === "idle" && revealProgress >= 0.999;
+  // Keep the expensive Canvas element stable while the page mask advances.
+  const roomScene = useMemo(() => (
+    <RoomScene isNight={isNight} onReady={markRoomReady} onAssetProgress={reportRoomProgress} />
+  ), [isNight, markRoomReady, reportRoomProgress]);
 
   useEffect(() => {
     const target = pendingTransitionFocus.current;
@@ -349,13 +352,9 @@ export default function App() {
   return (
     <div className={["app", isNight && "app--evening"].filter(Boolean).join(" ")}>
       {roomMounted && (
-        <RoomRevealSurface progress={revealProgress} interactive={roomInteractive}>
+        <RoomRevealSurface progress={revealProgress} interactive={roomInteractive} sceneReady={roomReady}>
             <Suspense fallback={<div className="room-loading" role="status" aria-label={copy.loadingRoom} />}>
-            <RoomScene
-              isNight={isNight}
-              onReady={markRoomReady}
-              onAssetProgress={reportRoomProgress}
-            />
+              {roomScene}
           </Suspense>
           {roomInteractive && (
             <header className="hud">
@@ -417,6 +416,7 @@ export default function App() {
           ariaLabel={copy.enterRoom}
           title={copy.enterRoom}
           onClick={enterRoom}
+          onPreload={preloadRoomScene}
           disabled={viewTransition !== "idle"}
         />
       )}
