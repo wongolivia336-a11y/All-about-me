@@ -11,13 +11,26 @@ const NOTE_KEY = "four-hearts-desktop-note";
 const SKIN_KEY = "four-hearts-desktop-skin";
 const ICON_POSITION_KEY = "four-hearts-desktop-icon-positions";
 
-const websites = library.flatMap((entry) => {
-  const website = entry.links.find((link) => /^https:\/\//.test(link.url) && !link.url.includes("github.com"))?.url;
-  const github = entry.links.find((link) => link.url.includes("github.com"))?.url;
-  return website ? [{ entry, website, github }] : [];
-}).slice(0, 7);
+type Project = {
+  entry: (typeof library)[number];
+  website?: string;
+  github?: string;
+};
+type WebsiteProject = Project & { website: string };
 
-type Project = (typeof websites)[number];
+const projects: Project[] = library
+  .filter((entry) => entry.portfolioOrder !== undefined)
+  .sort((a, b) => (a.portfolioOrder ?? 99) - (b.portfolioOrder ?? 99))
+  .map((entry) => ({
+    entry,
+    website: entry.links.find((link) => /^https:\/\//.test(link.url) && !/github\.com/i.test(link.url))?.url,
+    github: entry.links.find((link) => /github\.com/i.test(link.url))?.url,
+  }));
+
+const defaultIconPosition = (index: number): IconPosition => ({
+  x: 12 + (index % 3) * 94,
+  y: 4 + Math.floor(index / 3) * 68,
+});
 type Skin = "win98" | "system7" | "aqua";
 type AppKind = "browser" | "finder" | "notes" | "settings" | "about";
 type WindowTab = "web" | "info";
@@ -79,7 +92,7 @@ function readIconPositions(): Record<string, IconPosition> {
  * The visitor can switch to the native responsive viewport at any time.
  */
 function WebsiteFrame({ project, mode, revision, language }: {
-  project: Project;
+  project: WebsiteProject;
   mode: "desktop" | "fluid";
   revision: number;
   language: Language;
@@ -136,6 +149,21 @@ function WebsiteFrame({ project, mode, revision, language }: {
   );
 }
 
+function ProjectPlaceholder({ project, language }: { project: Project; language: Language }) {
+  const zh = language === "zh";
+  const localized = projectText(project.entry, language);
+  return (
+    <div className="laptop-os__project-placeholder">
+      <span className="laptop-os__eyebrow">FOUR HEARTS PROJECT FILE / {String(project.entry.portfolioOrder ?? 0).padStart(2, "0")}</span>
+      <span className="laptop-os__placeholder-mark" aria-hidden="true">✳</span>
+      <h3>{localized.title}</h3>
+      <p>{localized.summary}</p>
+      {project.github && <a href={project.github} target="_blank" rel="noopener noreferrer">{zh ? "打开 GitHub 项目 ↗" : "Open project on GitHub ↗"}</a>}
+      <small>{zh ? "独立网页入口暂未添加；这里先收好项目说明和源码入口。" : "A standalone site is not listed yet. The project notes and source link are here for now."}</small>
+    </div>
+  );
+}
+
 export function LaptopDesktop({ language }: { language: Language }) {
   const zh = language === "zh";
   const [skin, setSkin] = useState<Skin>(() => {
@@ -169,7 +197,7 @@ export function LaptopDesktop({ language }: { language: Language }) {
 
   const active = useMemo(() => [...windows].filter((item) => !item.minimized).sort((a, b) => b.z - a.z)[0], [windows]);
   const sorted = useMemo(() => [...windows].sort((a, b) => a.z - b.z), [windows]);
-  const selectedProject = (id?: string) => websites.find((item) => item.entry.id === id);
+  const selectedProject = (id?: string) => projects.find((item) => item.entry.id === id);
 
   const updateWindow = (id: string, patch: Partial<WindowState>) => {
     setWindows((items) => items.map((item) => item.id === id ? { ...item, ...patch } : item));
@@ -191,7 +219,7 @@ export function LaptopDesktop({ language }: { language: Language }) {
         return items.map((item) => item.id === id ? { ...item, minimized: false, z } : item);
       }
       const offset = items.length % 3;
-      const titles = { finder: "Projects", notes: "Studio Notes", settings: "Control Panel", about: "About FOUR HEARTS", browser: project?.entry.title ?? "Web" };
+      const titles = { finder: "Projects", notes: "Studio Notes", settings: "Control Panel", about: "About FOUR HEARTS", browser: project ? projectText(project.entry, language).title : "Web" };
       return [...items, {
         id, app, projectId,
         title: titles[app],
@@ -223,7 +251,7 @@ export function LaptopDesktop({ language }: { language: Language }) {
   };
   const beginIconDrag = (event: PointerEvent<HTMLButtonElement>, id: string, index: number) => {
     if (event.button !== 0) return;
-    const position = iconPositions[id] ?? { x: 15 + (index % 2) * 98, y: Math.floor(index / 2) * 68 };
+    const position = iconPositions[id] ?? defaultIconPosition(index);
     iconGesture.current = { id, pointerId: event.pointerId, x: event.clientX, y: event.clientY, left: position.x, top: position.y, moved: false };
     event.currentTarget.setPointerCapture(event.pointerId);
     event.stopPropagation();
@@ -298,7 +326,10 @@ export function LaptopDesktop({ language }: { language: Language }) {
     event.stopPropagation();
   };
 
-  const projectList = websites.filter(({ entry }) => `${entry.title} ${entry.tags.join(" ")}`.toLowerCase().includes(finderQuery.toLowerCase()));
+  const projectList = projects.filter(({ entry }) => {
+    const localized = projectText(entry, language);
+    return `${localized.title} ${localized.summary} ${localized.tags.join(" ")}`.toLowerCase().includes(finderQuery.toLowerCase());
+  });
 
   return (
     <div
@@ -336,8 +367,8 @@ export function LaptopDesktop({ language }: { language: Language }) {
       </header>
 
       <div className="laptop-os__shortcuts">
-        {websites.map(({ entry }, index) => {
-          const position = iconPositions[entry.id] ?? { x: 15 + (index % 2) * 98, y: Math.floor(index / 2) * 68 };
+        {projects.map(({ entry }, index) => {
+          const position = iconPositions[entry.id] ?? defaultIconPosition(index);
           return <button
             key={entry.id}
             type="button"
@@ -354,7 +385,7 @@ export function LaptopDesktop({ language }: { language: Language }) {
             }}
             title={zh ? `${projectText(entry, language).title} · 拖动图标，点击打开` : `${projectText(entry, language).title} · Drag to move, click to open`}
           >
-            <span className="laptop-os__project-icon" style={{ "--icon-tone": ["#9cc3bd", "#c8b8a6", "#a2b9ce", "#d6b9ba", "#b2baa5", "#a8b5b7", "#d7c6a6"][index] } as CSSProperties} aria-hidden="true"><span>✳</span></span>
+            <span className="laptop-os__project-icon" style={{ "--icon-tone": ["#9cc3bd", "#c8b8a6", "#a2b9ce", "#d6b9ba", "#b2baa5", "#a8b5b7", "#d7c6a6"][index % 7] } as CSSProperties} aria-hidden="true"><span>✳</span></span>
             <span>{projectText(entry, language).title}</span>
           </button>;
         })}
@@ -399,29 +430,35 @@ export function LaptopDesktop({ language }: { language: Language }) {
 
             {item.app === "browser" && project && <>
               <nav className="laptop-os__browser-bar" aria-label={zh ? "浏览器工具栏" : "Browser toolbar"}>
-                <button type="button" className="laptop-os__browser-tab" aria-pressed={item.tab === "web"} onClick={() => updateWindow(item.id, { tab: "web" })}>{zh ? "网页" : "Web"}</button>
+                <button type="button" className="laptop-os__browser-tab" aria-pressed={item.tab === "web"} onClick={() => updateWindow(item.id, { tab: "web" })}>{project.website ? (zh ? "网页" : "Web") : (zh ? "项目" : "Project")}</button>
                 <button type="button" className="laptop-os__browser-tab" aria-pressed={item.tab === "info"} onClick={() => updateWindow(item.id, { tab: "info" })}>{zh ? "档案" : "Info"}</button>
-                <span className="laptop-os__address" title={project.website}>⌁ {project.website.replace(/^https?:\/\//, "")}</span>
-                <button type="button" title={zh ? "刷新" : "Reload"} aria-label={zh ? "刷新网页" : "Reload website"} onClick={() => updateWindow(item.id, { revision: item.revision + 1, tab: "web" })}>↻</button>
-                <button type="button" className="laptop-os__viewport-toggle" onClick={() => setWebMode((mode) => mode === "desktop" ? "fluid" : "desktop")} aria-label={zh ? "切换网页视口" : "Switch website viewport"} title={zh ? "切换桌面/自适应视口" : "Desktop / responsive viewport"}>{webMode === "desktop" ? "1024" : "AUTO"}</button>
+                <span className="laptop-os__address" title={project.website ?? project.github ?? projectText(project.entry, language).title}>
+                  ⌁ {project.website ? project.website.replace(/^https?:\/\//, "") : project.github ? project.github.replace(/^https?:\/\//, "") : projectText(project.entry, language).title}
+                </span>
+                {project.website && <button type="button" title={zh ? "刷新" : "Reload"} aria-label={zh ? "刷新网页" : "Reload website"} onClick={() => updateWindow(item.id, { revision: item.revision + 1, tab: "web" })}>↻</button>}
+                {project.website && <button type="button" className="laptop-os__viewport-toggle" onClick={() => setWebMode((mode) => mode === "desktop" ? "fluid" : "desktop")} aria-label={zh ? "切换网页视口" : "Switch website viewport"} title={zh ? "切换桌面/自适应视口" : "Desktop / responsive viewport"}>{webMode === "desktop" ? "1024" : "AUTO"}</button>}
               </nav>
               <div className="laptop-os__window-body">
                 {item.tab === "web"
-                  ? <WebsiteFrame project={project} mode={webMode} revision={item.revision} language={language} />
+                  ? project.website
+                    ? <WebsiteFrame project={{ ...project, website: project.website }} mode={webMode} revision={item.revision} language={language} />
+                    : <ProjectPlaceholder project={project} language={language} />
                   : <div className="laptop-os__project-info">
                     {project.entry.cover && <img src={project.entry.cover} alt="" />}
                     <span className="laptop-os__eyebrow">{project.entry.year} / {project.entry.collection.toUpperCase()}</span>
                     <h3>{projectText(project.entry, language).title}</h3>
                     <p>{projectText(project.entry, language).summary}</p>
-                    <div className="laptop-os__project-links"><a href={project.website} target="_blank" rel="noopener noreferrer">{zh ? "在独立窗口查看 ↗" : "Open full website ↗"}</a>{project.github && <a href={project.github} target="_blank" rel="noopener noreferrer">GitHub ↗</a>}</div>
-                    <small>{zh ? "如果嵌入网站限制显示，可以在独立窗口打开。" : "If the embedded page is restricted, open the full website."}</small>
+                    <div className="laptop-os__project-links">{project.entry.links.map((link, index) => <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer">{projectText(project.entry, language).links[index]} ↗</a>)}</div>
+                    <small>{project.website
+                      ? (zh ? "如果嵌入网站限制显示，可以在独立窗口打开。" : "If the embedded page is restricted, open the full website.")
+                      : (zh ? "独立网页入口暂未添加；可先从 GitHub 查看项目资料。" : "A standalone site is not listed yet. Open the GitHub source for now.")}</small>
                   </div>}
               </div>
-              <footer className="laptop-os__statusbar"><span>{webMode === "desktop" ? "DESKTOP 1024 PX" : "RESPONSIVE VIEW"}</span><span>{zh ? "你仍在 Room 中" : "Still inside the Room"}</span></footer>
+              <footer className="laptop-os__statusbar"><span>{project.website ? (webMode === "desktop" ? "DESKTOP 1024 PX" : "RESPONSIVE VIEW") : (zh ? "项目说明 / 源码入口" : "PROJECT NOTES / SOURCE")}</span><span>{zh ? "你仍在 Room 中" : "Still inside the Room"}</span></footer>
             </>}
 
             {item.app === "finder" && <div className="laptop-os__app-content laptop-os__finder">
-              <div className="laptop-os__finder-sidebar"><span>✿</span><strong>Olivia</strong><small>{zh ? "我的项目" : "My projects"}</small><small>{websites.length} {zh ? "个站点" : "websites"}</small></div>
+              <div className="laptop-os__finder-sidebar"><span>✿</span><strong>Olivia</strong><small>{zh ? "我的项目" : "My projects"}</small><small>{projects.length} {zh ? "个项目" : "projects"}</small></div>
               <div className="laptop-os__finder-main"><label><span>⌕</span><input value={finderQuery} onChange={(event) => setFinderQuery(event.target.value)} placeholder={zh ? "搜索项目" : "Find a project"} /></label><div className="laptop-os__finder-list">{projectList.map(({ entry }) => <button type="button" key={entry.id} onClick={() => openApp("browser", entry.id)}><span className="laptop-os__file-icon">▣</span><span><strong>{projectText(entry, language).title}</strong><small>{entry.year} · {entry.collection}</small></span><span>↗</span></button>)}</div></div>
             </div>}
 
@@ -452,3 +489,4 @@ export function LaptopDesktop({ language }: { language: Language }) {
     </div>
   );
 }
+
