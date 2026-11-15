@@ -39,6 +39,10 @@ export interface Copy {
   practiceEyebrow: string;
   selectedWorks: string;
   selectedWorksDescription: string;
+  allProjectsEyebrow: string;
+  allProjects: string;
+  allProjectsDescription: string;
+  viewAllProjects: string;
   aboutEyebrow: string;
   aboutTitle: string;
   aboutBody: string;
@@ -177,6 +181,10 @@ const translations: Record<Language, Copy> = {
     practiceEyebrow: "A cross-section of the practice",
     selectedWorks: "Selected works",
     selectedWorksDescription: "Three starting points across product, inquiry and interaction.",
+    allProjectsEyebrow: "The complete index",
+    allProjects: "All projects",
+    allProjectsDescription: "Twelve projects across products, research, moving image and playful experiments. Open a project for its notes and available links.",
+    viewAllProjects: "Browse all 12 projects",
     aboutEyebrow: "A note from the studio",
     aboutTitle: "Technical work, with attention to how it feels to be inside.",
     aboutBody: "I work where interaction, systems and human attention meet. The work can be technical, but it starts with noticing what people need to feel understood.",
@@ -313,6 +321,10 @@ const translations: Record<Language, Copy> = {
     practiceEyebrow: "实践的一组切面",
     selectedWorks: "精选作品",
     selectedWorksDescription: "从产品、研究与交互开始了解我的实践。",
+    allProjectsEyebrow: "项目全貌",
+    allProjects: "全部项目",
+    allProjectsDescription: "从产品、研究到影像与交互实验，收录十二个项目。点开项目可以继续看简介与现有入口。",
+    viewAllProjects: "浏览全部 12 个项目",
     aboutEyebrow: "来自工作室的一段话",
     aboutTitle: "关注技术，也关注身处其中的感受。",
     aboutBody: "我在交互、系统与人的注意力交汇处工作。工作可以很技术，但起点是留意人们需要怎样的理解与回应。",
@@ -488,20 +500,44 @@ const projectTextById: Record<string, Record<Language, ProjectText>> = {
     zh: { title: "Healther", summary: "本地优先的长期健康管理工具：提醒、记录、报告整理与可信科普。", tags: ["健康", "本地优先", "产品系统"] },
   },
   "meow-gallery": {
-    en: { title: "meow gallery", summary: "A small ritual for pausing with real cat sounds—easy to ignore, worth stopping for.", tags: ["Creative technology", "Sound", "Personal experiment"] },
-    zh: { title: "meow gallery", summary: "把真实猫叫做成可被忽略、也值得停一下的休息仪式。", tags: ["创意技术", "声音", "个人实验"] },
+    en: { title: "meow gallery", summary: "A little desktop companion that brings a cat into the screen through playful interaction and sound.", tags: ["Desktop pet", "Cat", "Creative technology"] },
+    zh: { title: "meow gallery", summary: "一个像桌宠一样待在屏幕里的小项目，用互动和猫叫陪你停一会儿。", tags: ["桌面宠物", "猫", "创意技术"] },
   },
   "knock-knock": {
     en: { title: "KNOCK KNOCK", summary: "An interaction prototype for a companion robot that builds connection through light, sound and waiting.", tags: ["Interaction", "Light", "Companion robot"] },
     zh: { title: "KNOCK KNOCK", summary: "一个通过光、声音和等待建立关系的陪伴机器人交互原型。", tags: ["交互", "光", "陪伴机器人"] },
   },
   "zhang-zao": {
-    en: { title: "Two Sides of a Mirror", summary: "A multidimensional text-visualization study on bringing classical imagery into contemporary experience.", worldSummary: "Text visualization traces classical imagery into contemporary experience.", tags: ["Research", "Text visualization", "Culture"] },
-    zh: { title: "镜子的两面", summary: "古典意象如何进入现代经验的多维文本可视化研究。", worldSummary: "用文本可视化追踪古典意象如何进入现代经验。", tags: ["研究", "文本可视化", "文化"] },
+    en: { title: "Zhangzao / Two Sides of a Mirror", summary: "A multidimensional text and data visualization study on bringing classical imagery into contemporary experience.", worldSummary: "Data visualization traces classical imagery into contemporary experience.", tags: ["Data visualization", "Research", "Culture"] },
+    zh: { title: "张导 / 镜子的两面", summary: "以数据可视化探索古典意象如何进入现代经验。", worldSummary: "用数据可视化追踪古典意象如何进入现代经验。", tags: ["数据可视化", "研究", "文化"] },
   },
   qiaopi: {
     en: { title: "A Letter, After It Arrives", summary: "A data narrative tracing overseas remittance letters to a village in Chaoshan.", worldSummary: "Following remittance letters from overseas to a Chaoshan village.", tags: ["Data story", "Archive", "Geography"] },
     zh: { title: "一封侨批，抵达之后", summary: "从海外寄批地到潮汕村庄的侨批数据叙事。", worldSummary: "沿着侨批的寄递轨迹，连接海外与潮汕村庄。", tags: ["数据叙事", "档案", "地理"] },
+  },
+  peekaboo: {
+    en: { title: "Peekaboo", summary: "A video interpretation of Yuan Zheshen’s novel 《寂寞的游戏》, translating its literary world into moving images.", tags: ["Film", "Literary adaptation", "Moving image"] },
+    zh: { title: "Peekaboo", summary: "将袁哲生小说《寂寞的游戏》转译为一部影像作品。", tags: ["影像", "文学转译", "视频"] },
+  },
+  "zhenru-temple": {
+    en: { title: "Zhenru Temple", summary: "A 3D model and interactive-space concept exploring how the temple can extend into an inhabitable digital world.", tags: ["3D modeling", "Interactive space", "Digital world"] },
+    zh: { title: "真如寺", summary: "真如寺的 3D 建模与可交互空间概念，探索寺院空间如何延展为可进入的数字世界。", tags: ["3D 建模", "交互空间", "数字世界"] },
+  },
+  "so-shaped": {
+    en: { title: "So Shaped", summary: "An independent storefront in progress, bringing product, identity and an online shopping experience together.", tags: ["Independent store", "Brand", "E-commerce"] },
+    zh: { title: "So Shaped", summary: "一个正在构思中的独立站，把产品、品牌与线上购物体验放进同一个小世界。", tags: ["独立站", "品牌", "线上商店"] },
+  },
+  "gama-qgis": {
+    en: { title: "Gamma QGIS", summary: "A University Road study combining Grasshopper and street agents to explore the street environment and urban life.", tags: ["University Road", "Grasshopper", "Street agents"] },
+    zh: { title: "伽马 QGIS", summary: "以大学路为场域，结合 Grasshopper 与街道智能体，研究街道环境和城市生活。", tags: ["大学路", "Grasshopper", "街道智能体"] },
+  },
+  glassaha: {
+    en: { title: "glassaha", summary: "A set of front-end experiments with frosted glass, transparency, blur and interaction.", tags: ["Frontend", "Frosted glass", "Visual experiment"] },
+    zh: { title: "glassaha", summary: "围绕雾面玻璃视觉展开的一组前端实验，研究透明、模糊与层次如何回应交互。", tags: ["前端实验", "雾面玻璃", "视觉设计"] },
+  },
+  "psychologist-cafe": {
+    en: { title: "Psychologist Café", summary: "An existentialist café concept that brings questions of freedom, choice and everyday life into a spatial experience.", tags: ["Existentialism", "Cafe concept", "Space"] },
+    zh: { title: "Psychologist 咖啡馆", summary: "以存在主义为主题的咖啡馆概念，把关于自由、选择与日常的思考放进空间体验。", tags: ["存在主义", "咖啡馆概念", "空间体验"] },
   },
   "film-shelf": {
     en: { title: "Film shelf", summary: "A small shelf for returning to the films of Lynch, Edward Yang and Hou Hsiao-hsien.", tags: ["Cinema", "Film notes", "Room object"] },
@@ -588,3 +624,4 @@ const englishPhoneApps: Record<string, string> = {
 export function phoneAppText(id: string, fallback: string, language: Language) {
   return language === "en" ? englishPhoneApps[id] ?? fallback : fallback;
 }
+
