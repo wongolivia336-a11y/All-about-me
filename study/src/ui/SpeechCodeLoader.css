@@ -9,7 +9,7 @@
   height: 100dvh;
   overflow: hidden;
   padding: 28px 32px 30px;
-  background: #f7f4ee;
+  background: #fff;
   color: #1f1b16;
   opacity: 1;
   transition: opacity 360ms cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0s;
@@ -66,7 +66,6 @@
 .speech-loader__caption { right: 1.8%; bottom: 18%; color: #9ca49e; font-family: var(--font-sans, system-ui, sans-serif); font-size: 12px; letter-spacing: -.01em; text-transform: none; }
 
 .speech-loader__footer { align-items: end; text-transform: none; }
-.speech-loader__eyebrow { display: block; margin-bottom: 12px; color: #77746d; font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
 .speech-loader__footer p { margin: 0; font: 400 clamp(20px, 2.4vw, 32px)/1.02 var(--font-sans, system-ui, sans-serif); letter-spacing: -.045em; }
 .speech-loader__footer small { display: block; margin-top: 8px; color: #9ca49e; font: 12px/1.4 var(--font-sans, system-ui, sans-serif); }
 .speech-loader__progress-copy { display: grid; justify-items: end; gap: 10px; min-width: 150px; color: #2a476e; font: 11px/1 var(--font-mono, ui-monospace, monospace); }
@@ -75,7 +74,7 @@
 .speech-loader__track i { position: absolute; inset: 0 auto 0 0; display: block; background: #2a476e; }
 
 .speech-loader__error { position: absolute; right: 48px; bottom: 64px; z-index: 3; display: flex; align-items: center; gap: 16px; color: #6c6258; font: 12px/1.4 var(--font-mono, ui-monospace, monospace); }
-.speech-loader__error button { min-width: 44px; min-height: 36px; padding: 0 12px; border: 1px solid rgba(31, 27, 22, 0.35); border-radius: 4px; background: transparent; color: #1f1b16; font: inherit; cursor: pointer; }
+.speech-loader__error button { min-width: 44px; min-height: var(--control-height-standard, 40px); padding: 0 var(--control-padding-inline, 14px); border: 1px solid rgba(31, 27, 22, 0.35); border-radius: var(--control-radius-standard, 8px); background: transparent; color: #1f1b16; font: var(--control-font-weight, 500) var(--control-font-size, 13px)/var(--control-line-height, 1.2) var(--font-sans, system-ui, sans-serif); cursor: pointer; }
 .speech-loader__error button:hover,
 .speech-loader__error button:focus-visible { border-color: #1f1b16; }
 
@@ -91,6 +90,7 @@
   .speech-loader__footer { display: block; }
   .speech-loader__progress-copy { justify-items: start; margin-top: 22px; }
   .speech-loader__error { right: 28px; bottom: 44px; left: 28px; flex-wrap: wrap; }
+  .speech-loader__error button { min-height: var(--control-hit-target, 44px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

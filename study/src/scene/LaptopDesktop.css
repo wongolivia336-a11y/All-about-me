@@ -1,13 +1,14 @@
 /* A small, fully interactive desktop rendered on the physical Three.js screen. */
 .laptop-os {
+  --os-control-height: 24px;
+  --os-control-compact-height: 22px;
+  --os-control-radius: 3px;
   --os-chrome: #dfe4df;
   --os-paper: #f8f8f4;
   --os-ink: #293a40;
   --os-muted: #53666d;
   --os-line: #81949a;
   --os-title: #365f72;
-  --os-wall-a: #8baeb6;
-  --os-wall-b: #638f9b;
   position: relative;
   isolation: isolate;
   width: 548px;
@@ -21,6 +22,7 @@
   user-select: none;
   pointer-events: auto;
 }
+.laptop-os::after { position: absolute; z-index: 98; inset: 1px; border: 1px solid rgb(238 241 231 / 14%); background: repeating-linear-gradient(0deg, rgb(13 24 25 / 5%) 0 1px, transparent 1px 3px), radial-gradient(ellipse at center, transparent 64%, rgb(8 18 20 / 9%) 100%); content: ""; pointer-events: none; }
 
 .laptop-os[data-skin="system7"] {
   --os-chrome: #eeeae5;
@@ -29,8 +31,6 @@
   --os-muted: #555;
   --os-line: #717171;
   --os-title: #393939;
-  --os-wall-a: #d7ded5;
-  --os-wall-b: #aebdb2;
   font-family: Geneva, "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -41,8 +41,6 @@
   --os-muted: #536879;
   --os-line: #a3b6c1;
   --os-title: #557c96;
-  --os-wall-a: #b8d9dc;
-  --os-wall-b: #749eb8;
   font-family: "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -58,18 +56,37 @@
 .laptop-os__wallpaper {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse 65% 85% at 78% 17%, rgb(255 255 255 / 26%), transparent 75%),
-    radial-gradient(ellipse 60% 65% at 20% 95%, rgb(27 79 97 / 22%), transparent 78%),
-    linear-gradient(132deg, var(--os-wall-a), var(--os-wall-b));
+  background-color: #f2f0df;
+  background-image: url("/images/steve-jobs-macintosh.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
-.laptop-os__wallpaper::after {
+.laptop-os__github-link {
   position: absolute;
-  inset: 0;
-  background-image: repeating-linear-gradient(0deg, rgb(255 255 255 / 3%) 0 1px, transparent 1px 4px);
-  content: "";
-  pointer-events: none;
+  z-index: 6;
+  bottom: 37px;
+  left: 9px;
+  display: inline-flex;
+  max-width: calc(100% - 18px);
+  align-items: center;
+  gap: 5px;
+  overflow: hidden;
+  padding: 5px 7px;
+  border: 1px solid rgb(255 255 255 / 30%);
+  border-radius: 3px;
+  background: rgb(15 19 20 / 58%);
+  color: #fff;
+  font: 8px/1.2 ui-monospace, "SF Mono", Consolas, monospace;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
 }
+.laptop-os__github-link span { flex: none; font-size: 11px; transition: transform 160ms ease; }
+.laptop-os__github-link:hover { border-color: rgb(255 255 255 / 65%); background: rgb(15 19 20 / 76%); }
+.laptop-os__github-link:hover span { transform: translate(2px, -2px); }
 .laptop-os__menubar {
   position: absolute;
   z-index: 50;
@@ -86,10 +103,10 @@
 }
 .laptop-os__menubar button {
   flex: 0 0 auto;
-  height: 21px;
+  height: var(--os-control-compact-height);
   padding: 0 8px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--os-control-radius);
   background: transparent;
   font-size: 10.5px;
 }
@@ -101,14 +118,11 @@
 
 .laptop-os__shortcuts {
   position: absolute;
-  top: 36px;
-  left: 13px;
-  display: grid;
-  grid-template-columns: repeat(2, 89px);
-  grid-auto-rows: 66px;
-  gap: 2px 8px;
+  inset: 36px 0 31px;
+  pointer-events: none;
 }
 .laptop-os__shortcut {
+  position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -123,9 +137,15 @@
   color: #fbfdfb !important;
   text-align: center;
   text-shadow: 0 1px 3px rgb(18 44 58 / 65%);
+  pointer-events: auto;
+  touch-action: none;
+  cursor: grab;
+  transition: transform 180ms cubic-bezier(.2, 1.45, .4, 1), background 140ms ease, box-shadow 180ms ease;
 }
 .laptop-os__shortcut:hover,
 .laptop-os__shortcut:focus-visible { border-color: rgb(255 255 255 / 42%); background: rgb(29 58 69 / 37%); }
+.laptop-os__shortcut:active { cursor: grabbing; }
+.laptop-os__shortcut[data-dragging="true"] { z-index: 10; transform: rotate(2deg) scale(1.08); border-color: rgb(255 255 255 / 76%); background: rgb(29 58 69 / 58%); box-shadow: 0 8px 16px rgb(13 29 35 / 24%); cursor: grabbing; }
 .laptop-os__shortcut > span:last-child {
   display: -webkit-box;
   max-width: 85px;
@@ -158,9 +178,6 @@
 .laptop-os__utility:hover { background: rgb(29 58 69 / 37%); border-color: rgb(255 255 255 / 45%); }
 .laptop-os__utility > span { display: grid; width: 26px; height: 25px; place-items: center; border: 2px solid #e4e9e6; border-radius: 3px; background: #c0d2d1; color: #3c5963; font-size: 16px; text-shadow: none; box-shadow: 2px 3px 0 rgb(30 47 52 / 22%); }
 .laptop-os__utility small { font-size: 10px; }
-.laptop-os__wallpaper-signature { position: absolute; right: 95px; bottom: 60px; display: flex; flex-direction: column; align-items: flex-end; color: rgb(244 251 248 / 58%); text-align: right; pointer-events: none; }
-.laptop-os__wallpaper-signature strong { font: italic 37px/.95 Georgia, serif; letter-spacing: -.055em; }
-.laptop-os__wallpaper-signature span { margin-top: 4px; font: 10px/1 ui-monospace, monospace; letter-spacing: .03em; }
 
 .laptop-os__window {
   position: absolute;
@@ -175,9 +192,15 @@
   border-radius: 2px;
   background: var(--os-paper);
   box-shadow: 4px 6px 0 rgb(27 47 54 / 26%), 0 0 0 1px rgb(17 37 45 / 30%);
+  transform-origin: 24px calc(100% - 15px);
+  transition: transform 190ms cubic-bezier(.2, 1.35, .35, 1), opacity 180ms ease, visibility 0s, box-shadow 150ms ease;
+  animation: laptop-window-open 200ms cubic-bezier(.2, 1.3, .35, 1) both;
 }
 .laptop-os__window--max { inset: 28px 6px 30px; width: auto; height: auto; }
 .laptop-os__window--active { box-shadow: 4px 7px 0 rgb(27 47 54 / 29%), 0 0 0 1px rgb(17 37 45 / 42%); }
+.laptop-os__window--move { transform: scale(1.008); box-shadow: 6px 9px 0 rgb(27 47 54 / 32%), 0 0 0 1px rgb(17 37 45 / 50%); transition: box-shadow 120ms ease; }
+.laptop-os__window--resize { box-shadow: 5px 8px 0 rgb(27 47 54 / 30%), 0 0 0 1px rgb(17 37 45 / 46%); }
+.laptop-os__window--minimized { transform: translate(-210px, 135px) scale(.08); opacity: 0; visibility: hidden; pointer-events: none; transition: transform 190ms cubic-bezier(.2, 1.35, .35, 1), opacity 180ms ease, visibility 0s linear 190ms, box-shadow 150ms ease; }
 .laptop-os[data-skin="aqua"] .laptop-os__window { border-radius: 8px 8px 6px 6px; border-color: rgb(228 235 242 / 85%); box-shadow: 0 9px 22px rgb(34 55 77 / 26%); }
 .laptop-os[data-skin="system7"] .laptop-os__window { border: 2px solid #2d2d2d; border-radius: 0; box-shadow: 3px 4px 0 rgb(0 0 0 / 27%); }
 .laptop-os__titlebar {
@@ -194,7 +217,8 @@
 .laptop-os__titlebar strong { flex: 1; min-width: 0; overflow: hidden; font-size: 11.5px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .laptop-os__title-icon { font-size: 13px; color: rgb(255 255 255 / 90%); }
 .laptop-os__window-actions { display: flex; gap: 3px; }
-.laptop-os__window-actions button { display: grid; width: 21px; height: 19px; place-items: center; padding: 0; border: 1px solid #657779; border-top-color: #fff; border-left-color: #fff; background: #e1e6e1; color: #263c45; font-size: 14px; font-weight: 700; line-height: 1; }
+.laptop-os__window-actions button { display: grid; width: var(--os-control-height); height: var(--os-control-height); place-items: center; padding: 0; border: 1px solid #657779; border-top-color: #fff; border-left-color: #fff; border-radius: var(--os-control-radius); background: #e1e6e1; color: #263c45; }
+.laptop-os__window-actions svg { display: block; width: 12px; height: 12px; overflow: visible; fill: none; stroke: currentColor; stroke-linecap: square; stroke-linejoin: miter; stroke-width: 1.25; }
 .laptop-os__window-actions button:hover { background: #fff; color: #1b3039; }
 .laptop-os[data-skin="system7"] .laptop-os__titlebar { background: repeating-linear-gradient(0deg, #efefec 0 2px, #aaa 2px 3px); color: #222; }
 .laptop-os[data-skin="system7"] .laptop-os__titlebar strong { padding: 2px 5px; background: #f6f6f4; }
@@ -203,7 +227,7 @@
 .laptop-os__resize-handle { position: absolute; z-index: 3; right: 0; bottom: 0; width: 17px; height: 17px; cursor: nwse-resize; background: repeating-linear-gradient(135deg, transparent 0 4px, rgb(72 91 97 / 40%) 4px 5px, transparent 5px 7px); clip-path: polygon(100% 0, 100% 100%, 0 100%); }
 
 .laptop-os__browser-bar { display: flex; flex: 0 0 30px; align-items: center; gap: 4px; padding: 3px 6px; border-bottom: 1px solid rgb(90 106 110 / 28%); background: color-mix(in srgb, var(--os-chrome) 60%, white); }
-.laptop-os__browser-bar > button { flex: 0 0 auto; min-width: 29px; height: 23px; padding: 0 5px; border: 1px solid transparent; border-radius: 2px; background: transparent; color: #344e5c; font-size: 10px; }
+.laptop-os__browser-bar > button { flex: 0 0 auto; min-width: 29px; height: var(--os-control-compact-height); padding: 0 5px; border: 1px solid transparent; border-radius: var(--os-control-radius); background: transparent; color: #344e5c; font-size: 10px; }
 .laptop-os__browser-bar > button:hover { border-color: #a5b5bb; background: #fff; color: #203744; }
 .laptop-os__browser-bar .laptop-os__browser-tab[aria-pressed="true"] { border-color: #aebec4; background: #fff; color: #223f4e; font-weight: 700; }
 .laptop-os__browser-bar .laptop-os__viewport-toggle { min-width: 39px; border-color: #acb9bd; background: #f6f8f6; font: 9px/1 ui-monospace, monospace; }
@@ -240,11 +264,12 @@
 .laptop-os__finder-list small { color: #68797c; font-size: 9px; }
 .laptop-os__file-icon { color: #587e89; font-size: 20px; }
 
-.laptop-os__notes { display: flex; flex-direction: column; padding: 11px 16px 9px; background: #fff8df; }
-.laptop-os__notes-heading { display: flex; justify-content: space-between; gap: 8px; align-items: center; color: #695d42; font-size: 10px; }
+.laptop-os__notes { display: grid; grid-template-columns: minmax(0, 1fr) 116px; grid-template-rows: auto minmax(0, 1fr) auto; gap: 0 9px; padding: 11px 16px 9px; background: #fff8df; }
+.laptop-os__notes-heading { display: flex; grid-column: 1 / -1; justify-content: space-between; gap: 8px; align-items: center; color: #695d42; font-size: 10px; }
 .laptop-os__notes-heading span { color: #617865; font-size: 9px; }
-.laptop-os__notes textarea { flex: 1; width: 100%; min-height: 0; margin-top: 10px; border: 0; outline: none; resize: none; background: transparent; color: #3a4137; font: 14px/1.65 Georgia, "Noto Serif", serif; }
-.laptop-os__notes-foot { margin-top: 8px; color: #968d75; font: 9px/1 ui-monospace, monospace; }
+.laptop-os__notes textarea { grid-column: 1; grid-row: 2; width: 100%; min-height: 0; margin-top: 10px; border: 0; outline: none; resize: none; background: transparent; color: #3a4137; font: 14px/1.65 Georgia, "Noto Serif", serif; }
+.laptop-os__notes-art { grid-column: 2; grid-row: 2; width: 100%; height: 100%; max-height: 148px; align-self: center; object-fit: contain; filter: drop-shadow(0 5px 6px rgb(72 55 39 / 12%)); pointer-events: none; }
+.laptop-os__notes-foot { grid-column: 1 / -1; grid-row: 3; margin-top: 8px; color: #968d75; font: 9px/1 ui-monospace, monospace; }
 .laptop-os__settings { padding: 13px 15px; }
 .laptop-os__settings p { margin: 0 0 8px; color: #425b63; font: 600 11px/1.3 ui-monospace, monospace; }
 .laptop-os__settings p:not(:first-child) { margin-top: 15px; }
@@ -260,7 +285,8 @@
 .laptop-os__view-options button:hover,
 .laptop-os__view-options button[aria-pressed="true"] { background: #e8f1f3; border-color: #497a8c; color: #284657; }
 .laptop-os__about { display: flex; align-items: center; gap: 18px; padding: 18px 20px; }
-.laptop-os__about-mark { font-size: 62px; color: #557f84; }
+.laptop-os__about-mark { display: grid; width: 74px; height: 74px; flex: none; place-items: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #557f84; font-size: 62px; cursor: pointer; transition: transform 180ms cubic-bezier(.2, 1.45, .4, 1), color 150ms ease; }
+.laptop-os__about-mark:hover { transform: rotate(-12deg) scale(1.12); color: #b87968; }
 .laptop-os__about h3 { margin: 5px 0 8px; font-size: 20px; letter-spacing: -.035em; }
 .laptop-os__about p { margin: 0 0 9px; color: #48616a; font-size: 12px; line-height: 1.5; }
 .laptop-os__about small { color: #738186; font-size: 10px; }
@@ -272,6 +298,12 @@
 .laptop-os__start-menu > button span { width: 22px; color: #486f7d; font-size: 17px; text-align: center; }
 .laptop-os__start-menu > button:hover { background: #dbe7e9; color: #214457; }
 .laptop-os__menu-caption { padding: 8px 9px 3px; border-top: 1px solid #cbd4d2; color: #6b7976; font: 9px/1.3 ui-monospace, monospace; }
+.laptop-os__easter-egg { position: absolute; z-index: 100; bottom: 40px; left: 50%; display: flex; max-width: calc(100% - 24px); align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid rgb(255 255 255 / 68%); background: rgb(248 248 242 / 94%); color: #384f52; font: 11px/1.35 Georgia, "Noto Serif", serif; box-shadow: 0 5px 15px rgb(19 34 37 / 24%); transform: translateX(-50%); animation: laptop-easter-pop 260ms cubic-bezier(.2, 1.4, .35, 1) both; pointer-events: none; }
+.laptop-os__easter-egg span { color: #b87968; font-size: 18px; }
+.laptop-os__brand:active,
+.laptop-os__window-actions button:active,
+.laptop-os__start:active,
+.laptop-os__task:active { transform: translateY(1px); }
 .laptop-os__taskbar { position: absolute; z-index: 80; inset: auto 0 0; display: flex; align-items: center; gap: 6px; height: 30px; padding: 3px 5px; border-top: 2px solid #f9faf5; background: var(--os-chrome); box-shadow: inset 0 1px #fff; }
 .laptop-os__start,
 .laptop-os__task { flex: none; display: inline-flex; align-items: center; gap: 5px; height: 23px; padding: 0 8px; border: 1px solid #73858a; border-top-color: #fff; border-left-color: #fff; background: color-mix(in srgb, var(--os-chrome) 65%, white); color: #263d44; font-size: 10px !important; }
@@ -292,4 +324,13 @@
 
 @media (prefers-reduced-motion: reduce) {
   .laptop-os * { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}
+
+@keyframes laptop-window-open {
+  from { opacity: 0; transform: translateY(5px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes laptop-easter-pop {
+  from { opacity: 0; transform: translate(-50%, 8px) scale(.92); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
 }

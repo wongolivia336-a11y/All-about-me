@@ -121,13 +121,13 @@
   left: 50%;
   display: grid;
   width: 28%;
-  min-height: 54px;
+  min-height: var(--control-hit-target, 44px);
   place-content: center;
   gap: 5px;
   padding: 8px 5px;
   appearance: none;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--control-radius-standard, 8px);
   background: transparent;
   color: var(--label-ink);
   font: inherit;
@@ -160,15 +160,14 @@
 }
 
 .heartwheel__label span {
-  font: 600 clamp(11px, 1.25vw, 14px)/1 var(--font-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
-  letter-spacing: 0.035em;
+  font: 600 var(--control-font-size, 13px)/var(--control-line-height, 1.2) var(--font-sans, system-ui, sans-serif);
+  letter-spacing: 0.015em;
   white-space: nowrap;
 }
 
 .heartwheel__label small {
   color: var(--label-ink);
-  font-size: 10px;
-  line-height: 1.1;
+  font: 10px/1.1 var(--font-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
   opacity: .89;
 }
 
@@ -194,7 +193,7 @@
 
   .heartwheel__label {
     width: 32%;
-    min-height: 48px;
+    min-height: var(--control-hit-target, 44px);
   }
 
   .heartwheel__label small {

@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import { entriesFor } from "../data/library";
-import { collectionText, phoneAppText, projectText, type Language } from "../i18n";
+import { phoneAppText, type Language } from "../i18n";
+import { GITHUB_USER } from "../data/links";
 
 /**
  * Palette for the study. Kept deliberately narrow: warm neutrals for the room,
@@ -59,56 +59,38 @@ function roundRect(
   ctx.fill();
 }
 
-/** A compact, literal preview of the public Work entries on the laptop. */
-export const makeSiteScreen = (language: Language) =>
-  makeTexture(1024, 640, (ctx, w, h) => {
-    const work = entriesFor("work").slice(0, 2);
-    ctx.fillStyle = "#f5f2ed";
-    ctx.fillRect(0, 0, w, h);
+/** The idle laptop screen mirrors the wallpaper shown by its interactive desktop. */
+export const makeSiteScreen = (_language: Language) => {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1024;
+  canvas.height = 640;
+  const context = canvas.getContext("2d")!;
+  context.fillStyle = "#f2f0df";
+  context.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = "#e9e5de";
-    ctx.fillRect(0, 0, w, 43);
-    ctx.fillStyle = "#aaa69f";
-    [28, 50, 72].forEach((x) => {
-      ctx.beginPath();
-      ctx.arc(x, 21, 5, 0, Math.PI * 2);
-      ctx.fill();
-    });
-    ctx.fillStyle = "#faf8f4";
-    roundRect(ctx, 116, 9, w - 194, 25, 7);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 8;
 
-    ctx.fillStyle = "#817b72";
-    ctx.font = "500 16px Segoe UI, PingFang SC, Microsoft YaHei, sans-serif";
-    ctx.fillText(language === "zh" ? "王心蕊  /  作品" : "OLIVIA WONG  /  WORK", 52, 91);
-    ctx.fillStyle = "#222321";
-    ctx.font = "500 48px Segoe UI, sans-serif";
-    ctx.fillText(language === "zh" ? "精选作品" : "Selected work", 52, 154);
-    ctx.fillStyle = "#77746f";
-    ctx.font = "400 22px Segoe UI, sans-serif";
-    ctx.fillText(language === "zh" ? "让界面、系统与工具真正可用" : "Interfaces, systems and tools for real use", 52, 190);
-
-    const cardW = (w - 104 - 22) / 2;
-    work.forEach((entry, i) => {
-      const x = 52 + i * (cardW + 22);
-      ctx.fillStyle = i === 0 ? "#cad7d5" : "#dad2bd";
-      roundRect(ctx, x, 227, cardW, 282, 9);
-      ctx.fillStyle = i === 0 ? "#476966" : "#9a8a67";
-      roundRect(ctx, x + 22, 250, cardW - 44, 158, 4);
-      ctx.fillStyle = i === 0 ? "#dbe7e2" : "#eee5cd";
-      roundRect(ctx, x + 45, 271, cardW - 90, 111, 3);
-      ctx.fillStyle = "#252a28";
-      ctx.font = "500 27px Segoe UI, PingFang SC, Microsoft YaHei, sans-serif";
-      ctx.fillText(projectText(entry, language).title, x + 22, 455, cardW - 44);
-      ctx.fillStyle = "#5d6460";
-      ctx.font = "400 17px Segoe UI, sans-serif";
-      ctx.fillText(`${collectionText(entry.collection, language)}  ·  ${entry.year}`, x + 22, 484);
-    });
-    ctx.fillStyle = "#bcb8b0";
-    ctx.fillRect(52, 547, w - 104, 1);
-    ctx.fillStyle = "#5f5c56";
-    ctx.font = "400 17px Segoe UI, sans-serif";
-    ctx.fillText(language === "zh" ? "作品 / 研究 / 创作 / 手记" : "Work  /  Research  /  Make  /  Journal", 52, 585);
-  });
+  const cover = new Image();
+  cover.onload = () => {
+    const scale = Math.max(canvas.width / cover.naturalWidth, canvas.height / cover.naturalHeight);
+    const width = cover.naturalWidth * scale;
+    const height = cover.naturalHeight * scale;
+    context.drawImage(cover, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
+    const footer = context.createLinearGradient(0, canvas.height - 116, 0, canvas.height);
+    footer.addColorStop(0, "rgba(10,12,14,0)");
+    footer.addColorStop(1, "rgba(10,12,14,.72)");
+    context.fillStyle = footer;
+    context.fillRect(0, canvas.height - 116, canvas.width, 116);
+    context.fillStyle = "rgba(255,255,255,.94)";
+    context.font = "500 22px ui-monospace, SFMono-Regular, Consolas, monospace";
+    context.fillText(`GITHUB.COM/${GITHUB_USER.toUpperCase()}`, 48, canvas.height - 34);
+    texture.needsUpdate = true;
+  };
+  cover.src = "/images/steve-jobs-macintosh.png";
+  return texture;
+};
 
 /**
  * The phone's home screen: the apps you actually publish to.

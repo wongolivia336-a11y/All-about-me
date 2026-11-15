@@ -79,7 +79,6 @@ export function SpeechCodeLoader({ active, progress = null, error = null, onRetr
       </div>
       <footer className="speech-loader__footer">
         <div>
-          <span className="speech-loader__eyebrow">{language === "zh" ? "一段转场 / 不是等待室" : "AN INTERLUDE / NOT A WAITING ROOM"}</span>
           <p>{copy.loaderTitle}</p>
           <small>{copy.loaderSubtitle}</small>
         </div>

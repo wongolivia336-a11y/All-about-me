@@ -1,3 +1,5 @@
+import { HEART_PATH } from "../../brand/heartPath";
+
 export interface FourHeartsEngine {
   setProgress: (progress: number | null) => void;
   burst: () => void;
@@ -49,21 +51,14 @@ export function createFourHeartsEngine(
   const random = mulberry32(250106);
   const glyphs = ["·", "·", "·", "+", "+", "×", "x", "*", ":", "◦", "/", "⌁", "◇"];
   const colors = ["#526fbd", "#648983", "#213c70"];
-  const shape = new Path2D();
-  shape.moveTo(0, -9);
-  shape.bezierCurveTo(-13, -28, -49, -38, -61, -67);
-  shape.bezierCurveTo(-75, -94, -67, -127, -42, -140);
-  shape.bezierCurveTo(-15, -154, 18, -135, 32, -113);
-  shape.bezierCurveTo(45, -94, 45, -71, 25, -47);
-  shape.bezierCurveTo(11, -26, 4, -15, 0, -9);
-  shape.closePath();
+  const shape = new Path2D(HEART_PATH);
 
   const particles: Particle[] = [];
   for (let leaf = 0; leaf < 4; leaf += 1) {
     let accepted = 0;
     while (accepted < 118) {
-      const x = random() * 135 - 75;
-      const y = -157 + random() * 149;
+      const x = random() * 150 - 75;
+      const y = -157 + random() * 157;
       if (!context.isPointInPath(shape, x, y)) continue;
       const distance = Math.hypot(x, y);
       const angle = Math.atan2(y, x);

@@ -124,6 +124,8 @@ export interface Copy {
   openExperience: string;
   openEducation: string;
   browseSelectedWork: string;
+  quickReadBack: string;
+  shuffleCards: string;
   cinemaBody: string;
   cinemaTitle: string;
   posterFallback: string;
@@ -255,11 +257,13 @@ const translations: Record<Language, Copy> = {
     experienceBody: "Internship practice across product UI, agent workflow prototypes and reviewable systems.",
     educationTitle: "Tongji University · AI & Data Design",
     educationBody: "Graduate research in AI & Data Design. Background in Industrial Design, with a minor in Chinese Language and Literature.",
-    selectedWorkTitle: "BioAZ · KNOCK KNOCK · 侨批",
-    selectedWorkBody: "Three representative starting points across product, interaction and research.",
-    openExperience: "Open BUILD",
-    openEducation: "Open QUESTION",
+    selectedWorkTitle: "A small index of my work",
+    selectedWorkBody: "A few starting points across product, interaction and research. The full archive is just below.",
+    openExperience: "View experience",
+    openEducation: "Open research notes",
     browseSelectedWork: "Browse selected work",
+    quickReadBack: "Back to quick read",
+    shuffleCards: "Shuffle the cards",
     cinemaBody: "Nine films on the wall, by three directors watched most often.",
     cinemaTitle: "Film shelf",
     posterFallback: "Typeset placeholders are shown until the poster assets are added.",
@@ -389,11 +393,13 @@ const translations: Record<Language, Copy> = {
     experienceBody: "实习实践覆盖产品界面、Agent workflow 原型与可审阅的系统设计。",
     educationTitle: "同济大学 · 人工智能与数据设计",
     educationBody: "同济大学设计创意学院研究生。本科主修工业设计，辅修汉语言文学。",
-    selectedWorkTitle: "BioAZ · KNOCK KNOCK · 侨批",
-    selectedWorkBody: "从产品、交互与研究开始了解我的三组代表性工作。",
-    openExperience: "打开 BUILD",
-    openEducation: "打开 QUESTION",
-    browseSelectedWork: "查看精选作品",
+    selectedWorkTitle: "一份轻量作品索引",
+    selectedWorkBody: "从产品、交互与研究切入，完整作品档案就在下方。",
+    openExperience: "查看实习经历",
+    openEducation: "展开研究资料",
+    browseSelectedWork: "浏览精选作品",
+    quickReadBack: "返回快速了解",
+    shuffleCards: "拨动作品卡片",
     cinemaBody: "墙上的九部电影，来自最常观看的三位导演。",
     cinemaTitle: "片单",
     posterFallback: "目前显示的是排版占位图，添加海报素材后会替换。",
@@ -538,7 +544,7 @@ const englishSections: Partial<Record<HotspotId, Section>> = {
 };
 
 const englishHotspots: Record<HotspotId, { label: string; blurb: string }> = {
-  laptop: { label: "Work", blurb: "Projects and systems" },
+  laptop: { label: "Macintosh", blurb: "Projects and systems" },
   phone: { label: "Apps", blurb: "Mobile products and prototypes" },
   portfolio: { label: "Portfolio", blurb: "Portfolio PDF" },
   shelf: { label: "Reading", blurb: "Books and reading notes" },

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from "react";
 import type { ThemeId } from "../data/library";
 import { themeConfig, themeOrder } from "../data/themeConfig";
 import { themeText, useLanguage } from "../i18n";
@@ -83,6 +83,16 @@ export function Heartwheel({
   const animationRef = useRef<SettleAnimation | null>(null);
   const lastFrameAt = useRef<number | null>(null);
   const angularVelocity = useRef(0);
+  const wheelSnapTimer = useRef<number | null>(null);
+  const wheelScrubbing = useRef(false);
+
+  const cancelWheelSnap = () => {
+    if (wheelSnapTimer.current !== null) {
+      window.clearTimeout(wheelSnapTimer.current);
+      wheelSnapTimer.current = null;
+    }
+    wheelScrubbing.current = false;
+  };
 
   const cancelSettle = (resetVelocity = true) => {
     if (animationFrame.current !== null) {
@@ -153,7 +163,7 @@ export function Heartwheel({
   };
 
   useEffect(() => {
-    if (gesture.current?.dragging) return;
+    if (gesture.current?.dragging || wheelScrubbing.current) return;
     if (selectionPending.current) return;
     const targetTheme = focused ? activeTheme : hoveredTheme;
     const next = targetTheme ? nearestTarget(rotationRef.current, targetTheme) : 0;
@@ -178,6 +188,7 @@ export function Heartwheel({
   };
 
   const chooseTheme = (theme: ThemeId, origin?: ThemeZoomOrigin) => {
+    cancelWheelSnap();
     selectionPending.current = theme;
     hoverLock.current = null;
     setHoveredTheme(null);
@@ -239,6 +250,7 @@ export function Heartwheel({
     if (!event.isPrimary || event.button !== 0) return;
     if ((event.target as HTMLElement).closest("button")) return;
     if (gesture.current) return;
+    cancelWheelSnap();
     cancelSettle();
     selectionPending.current = null;
     targetRotation.current = rotationRef.current;
@@ -305,6 +317,34 @@ export function Heartwheel({
     cancelGesture(event.pointerId);
   };
 
+  const handleWheel = (event: ReactWheelEvent<HTMLDivElement>) => {
+    if (focused || selectionPending.current || gesture.current) return;
+    const rawDelta = event.deltaY || event.deltaX;
+    if (rawDelta === 0) return;
+
+    // Scroll can still move the page; the wheel responds only while the pointer is over it.
+    const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1;
+    const turn = Math.max(-72, Math.min(72, rawDelta * unit * 0.28));
+    if (Math.abs(turn) < 0.15) return;
+
+    cancelSettle();
+    wheelScrubbing.current = true;
+    hoverLock.current = null;
+    setHoveredTheme(null);
+    onThemeHover?.(null);
+    applyRotation(rotationRef.current + turn);
+    targetRotation.current = rotationRef.current;
+
+    if (wheelSnapTimer.current !== null) window.clearTimeout(wheelSnapTimer.current);
+    wheelSnapTimer.current = window.setTimeout(() => {
+      wheelScrubbing.current = false;
+      wheelSnapTimer.current = null;
+      const target = nearestTarget(rotationRef.current, themeForRotation(rotationRef.current));
+      targetRotation.current = target;
+      animateToRotation(target);
+    }, 150);
+  };
+
   const wheelStyle = {
     "--heartwheel-rotation": `${rotationRef.current}deg`,
   } as CSSProperties;
@@ -317,7 +357,10 @@ export function Heartwheel({
     chooseTheme(theme, origin);
   };
 
-  useEffect(() => () => cancelSettle(), []);
+  useEffect(() => () => {
+    cancelWheelSnap();
+    cancelSettle();
+  }, []);
 
   return (
     <div className="heartwheel" role="group" aria-label={copy.themeNavigation}>
@@ -329,6 +372,7 @@ export function Heartwheel({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
+        onWheel={handleWheel}
         onPointerLeave={() => {
           if (gesture.current) return;
           hoverLock.current = null;

@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import { library } from "../data/library";
+import { GITHUB_USER } from "../data/links";
 import { projectText, type Language } from "../i18n";
 import "./LaptopDesktop.css";
 
@@ -8,6 +9,7 @@ const SCREEN_HEIGHT = 352;
 const DESKTOP_VIEWPORT = 1024;
 const NOTE_KEY = "four-hearts-desktop-note";
 const SKIN_KEY = "four-hearts-desktop-skin";
+const ICON_POSITION_KEY = "four-hearts-desktop-icon-positions";
 
 const websites = library.flatMap((entry) => {
   const website = entry.links.find((link) => /^https:\/\//.test(link.url) && !link.url.includes("github.com"))?.url;
@@ -45,6 +47,8 @@ type Gesture = {
   width: number;
   height: number;
 };
+type IconPosition = { x: number; y: number };
+type IconGesture = { id: string; pointerId: number; x: number; y: number; left: number; top: number; moved: boolean };
 
 const appGlyphs: Record<AppKind, string> = {
   browser: "▣",
@@ -56,6 +60,18 @@ const appGlyphs: Record<AppKind, string> = {
 
 function readStored(key: string, fallback: string) {
   try { return window.localStorage.getItem(key) ?? fallback; } catch { return fallback; }
+}
+
+function readIconPositions(): Record<string, IconPosition> {
+  try {
+    const parsed: unknown = JSON.parse(window.localStorage.getItem(ICON_POSITION_KEY) ?? "{}");
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+    return Object.fromEntries(Object.entries(parsed).flatMap(([id, value]) => {
+      if (!value || typeof value !== "object") return [];
+      const { x, y } = value as Partial<IconPosition>;
+      return Number.isFinite(x) && Number.isFinite(y) ? [[id, { x: x!, y: y! }]] : [];
+    }));
+  } catch { return {}; }
 }
 
 /**
@@ -132,8 +148,16 @@ export function LaptopDesktop({ language }: { language: Language }) {
   const [finderQuery, setFinderQuery] = useState("");
   const [webMode, setWebMode] = useState<"desktop" | "fluid">("desktop");
   const [clock, setClock] = useState(() => new Date());
+  const [iconPositions, setIconPositions] = useState<Record<string, IconPosition>>(readIconPositions);
+  const [draggingIcon, setDraggingIcon] = useState<string | null>(null);
+  const [windowGesture, setWindowGesture] = useState<{ id: string; mode: Gesture["mode"] } | null>(null);
+  const [easterEgg, setEasterEgg] = useState("");
   const highestZ = useRef(5);
   const gesture = useRef<Gesture | null>(null);
+  const iconGesture = useRef<IconGesture | null>(null);
+  const suppressIconClick = useRef(false);
+  const logoClicks = useRef<number[]>([]);
+  const easterTimer = useRef<number | null>(null);
 
   useEffect(() => {
     const timer = window.setInterval(() => setClock(new Date()), 30000);
@@ -141,6 +165,7 @@ export function LaptopDesktop({ language }: { language: Language }) {
   }, []);
   useEffect(() => { try { window.localStorage.setItem(SKIN_KEY, skin); } catch { /* optional preference */ } }, [skin]);
   useEffect(() => { try { window.localStorage.setItem(NOTE_KEY, note); } catch { /* ephemeral note */ } }, [note]);
+  useEffect(() => { try { window.localStorage.setItem(ICON_POSITION_KEY, JSON.stringify(iconPositions)); } catch { /* optional preference */ } }, [iconPositions]);
 
   const active = useMemo(() => [...windows].filter((item) => !item.minimized).sort((a, b) => b.z - a.z)[0], [windows]);
   const sorted = useMemo(() => [...windows].sort((a, b) => a.z - b.z), [windows]);
@@ -182,6 +207,58 @@ export function LaptopDesktop({ language }: { language: Language }) {
     setStartOpen(false);
   };
 
+  const showEasterEgg = (message: string) => {
+    setEasterEgg(message);
+    if (easterTimer.current !== null) window.clearTimeout(easterTimer.current);
+    easterTimer.current = window.setTimeout(() => setEasterEgg(""), 2800);
+  };
+  const handleBrandClick = () => {
+    setStartOpen((open) => !open);
+    const now = Date.now();
+    logoClicks.current = [...logoClicks.current.filter((time) => now - time < 1400), now];
+    if (logoClicks.current.length >= 4) {
+      logoClicks.current = [];
+      showEasterEgg(zh ? "Hello，从这台小小的 Macintosh 发来问候。" : "Hello from this little Macintosh.");
+    }
+  };
+  const beginIconDrag = (event: PointerEvent<HTMLButtonElement>, id: string, index: number) => {
+    if (event.button !== 0) return;
+    const position = iconPositions[id] ?? { x: 15 + (index % 2) * 98, y: Math.floor(index / 2) * 68 };
+    iconGesture.current = { id, pointerId: event.pointerId, x: event.clientX, y: event.clientY, left: position.x, top: position.y, moved: false };
+    event.currentTarget.setPointerCapture(event.pointerId);
+    event.stopPropagation();
+  };
+  const moveIconDrag = (event: PointerEvent<HTMLButtonElement>) => {
+    const current = iconGesture.current;
+    if (!current || current.pointerId !== event.pointerId) return;
+    const dx = event.clientX - current.x;
+    const dy = event.clientY - current.y;
+    if (Math.hypot(dx, dy) > 4) {
+      current.moved = true;
+      setDraggingIcon(current.id);
+      setIconPositions((items) => ({
+        ...items,
+        [current.id]: {
+          x: Math.max(3, Math.min(SCREEN_WIDTH - 95, current.left + dx)),
+          y: Math.max(2, Math.min(SCREEN_HEIGHT - 131, current.top + dy)),
+        },
+      }));
+    }
+    event.stopPropagation();
+  };
+  const endIconDrag = (event: PointerEvent<HTMLButtonElement>) => {
+    const current = iconGesture.current;
+    if (!current || current.pointerId !== event.pointerId) return;
+    if (current.moved) {
+      suppressIconClick.current = true;
+      window.setTimeout(() => { suppressIconClick.current = false; }, 300);
+    }
+    iconGesture.current = null;
+    setDraggingIcon(null);
+    try { event.currentTarget.releasePointerCapture(event.pointerId); } catch { /* capture already released */ }
+    event.stopPropagation();
+  };
+
   const closeWindow = (id: string) => setWindows((items) => items.filter((item) => item.id !== id));
   const beginGesture = (event: PointerEvent<HTMLDivElement>, item: WindowState, mode: Gesture["mode"]) => {
     if (event.button !== 0 || (event.target as HTMLElement).closest("button") || item.maximized) return;
@@ -191,6 +268,7 @@ export function LaptopDesktop({ language }: { language: Language }) {
       x: event.clientX, y: event.clientY,
       left: item.x, top: item.y, width: item.width, height: item.height,
     };
+    setWindowGesture({ id: item.id, mode });
     event.currentTarget.setPointerCapture(event.pointerId);
     event.stopPropagation();
   };
@@ -215,6 +293,7 @@ export function LaptopDesktop({ language }: { language: Language }) {
   const endGesture = (event: PointerEvent<HTMLDivElement>) => {
     if (gesture.current?.pointerId !== event.pointerId) return;
     gesture.current = null;
+    setWindowGesture(null);
     try { event.currentTarget.releasePointerCapture(event.pointerId); } catch { /* capture already lost */ }
     event.stopPropagation();
   };
@@ -226,7 +305,7 @@ export function LaptopDesktop({ language }: { language: Language }) {
       className="laptop-os"
       data-skin={skin}
       role="application"
-      aria-label={zh ? "3D 电脑中的 FOUR HEARTS 桌面" : "FOUR HEARTS desktop inside the 3D laptop"}
+      aria-label={zh ? "3D Macintosh 中的 FOUR HEARTS 桌面" : "FOUR HEARTS desktop inside the 3D Macintosh"}
       onPointerDown={(event) => event.stopPropagation()}
       onPointerUp={(event) => event.stopPropagation()}
       onClick={(event) => event.stopPropagation()}
@@ -239,8 +318,17 @@ export function LaptopDesktop({ language }: { language: Language }) {
       }}
     >
       <div className="laptop-os__wallpaper" aria-hidden="true" />
+      <a
+        className="laptop-os__github-link"
+        href={`https://github.com/${GITHUB_USER}`}
+        target="_blank"
+        rel="noreferrer"
+        aria-label={`Open GitHub profile ${GITHUB_USER} in a new tab`}
+      >
+        github.com/{GITHUB_USER} <span aria-hidden="true">↗</span>
+      </a>
       <header className="laptop-os__menubar">
-        <button type="button" className="laptop-os__brand" onClick={() => setStartOpen((open) => !open)} aria-expanded={startOpen}>✿ <strong>FOUR HEARTS</strong></button>
+        <button type="button" className="laptop-os__brand" onClick={handleBrandClick} aria-expanded={startOpen} title={zh ? "快速点四下，听听机器的问候" : "Tap four times for a little hello"}>✿ <strong>FOUR HEARTS</strong></button>
         <button type="button" onClick={() => openApp("finder")}>{zh ? "文件" : "File"}</button>
         <button type="button" onClick={() => openApp("settings")}>{zh ? "视图" : "View"}</button>
         <button type="button" onClick={() => openApp("about")}>{zh ? "帮助" : "Help"}</button>
@@ -248,12 +336,28 @@ export function LaptopDesktop({ language }: { language: Language }) {
       </header>
 
       <div className="laptop-os__shortcuts">
-        {websites.map(({ entry }, index) => (
-          <button key={entry.id} type="button" className="laptop-os__shortcut" onClick={() => openApp("browser", entry.id)} title={projectText(entry, language).title}>
+        {websites.map(({ entry }, index) => {
+          const position = iconPositions[entry.id] ?? { x: 15 + (index % 2) * 98, y: Math.floor(index / 2) * 68 };
+          return <button
+            key={entry.id}
+            type="button"
+            className="laptop-os__shortcut"
+            data-dragging={draggingIcon === entry.id || undefined}
+            style={{ left: position.x, top: position.y }}
+            onPointerDown={(event) => beginIconDrag(event, entry.id, index)}
+            onPointerMove={moveIconDrag}
+            onPointerUp={endIconDrag}
+            onPointerCancel={endIconDrag}
+            onClick={(event) => {
+              if (suppressIconClick.current) { suppressIconClick.current = false; event.preventDefault(); return; }
+              openApp("browser", entry.id);
+            }}
+            title={zh ? `${projectText(entry, language).title} · 拖动图标，点击打开` : `${projectText(entry, language).title} · Drag to move, click to open`}
+          >
             <span className="laptop-os__project-icon" style={{ "--icon-tone": ["#9cc3bd", "#c8b8a6", "#a2b9ce", "#d6b9ba", "#b2baa5", "#a8b5b7", "#d7c6a6"][index] } as CSSProperties} aria-hidden="true"><span>✳</span></span>
             <span>{projectText(entry, language).title}</span>
-          </button>
-        ))}
+          </button>;
+        })}
       </div>
       <div className="laptop-os__utilities">
         {(["finder", "notes", "settings"] as const).map((app) => (
@@ -263,26 +367,33 @@ export function LaptopDesktop({ language }: { language: Language }) {
           </button>
         ))}
       </div>
-      <div className="laptop-os__wallpaper-signature" aria-hidden="true"><strong>four hearts.</strong><span>an archive of little things</span></div>
-
       {sorted.map((item) => {
-        if (item.minimized) return null;
         const project = selectedProject(item.projectId);
         return (
           <section
             key={item.id}
-            className={["laptop-os__window", item.maximized && "laptop-os__window--max", active?.id === item.id && "laptop-os__window--active"].filter(Boolean).join(" ")}
+            className={["laptop-os__window", item.maximized && "laptop-os__window--max", item.minimized && "laptop-os__window--minimized", active?.id === item.id && "laptop-os__window--active", windowGesture?.id === item.id && `laptop-os__window--${windowGesture.mode}`].filter(Boolean).join(" ")}
             style={item.maximized ? { zIndex: item.z } : { zIndex: item.z, left: item.x, top: item.y, width: item.width, height: item.height }}
             aria-label={item.title}
+            aria-hidden={item.minimized}
+            inert={item.minimized}
             onPointerDown={() => { if (active?.id !== item.id) raiseWindow(item.id); }}
           >
             <div className="laptop-os__titlebar" onPointerDown={(event) => beginGesture(event, item, "move")} onPointerMove={moveGesture} onPointerUp={endGesture} onPointerCancel={endGesture} onDoubleClick={(event) => { if (!(event.target as HTMLElement).closest("button")) updateWindow(item.id, { maximized: !item.maximized }); }}>
               <span className="laptop-os__title-icon" aria-hidden="true">{appGlyphs[item.app]}</span>
               <strong>{item.title}</strong>
               <div className="laptop-os__window-actions">
-                <button type="button" onClick={() => updateWindow(item.id, { minimized: true })} aria-label={zh ? "最小化" : "Minimize"} title={zh ? "最小化" : "Minimize"}>_</button>
-                <button type="button" onClick={() => updateWindow(item.id, { maximized: !item.maximized })} aria-label={zh ? "放大或还原窗口" : "Maximize or restore"} title={zh ? "放大或还原" : "Maximize or restore"}>{item.maximized ? "◱" : "□"}</button>
-                <button type="button" onClick={() => closeWindow(item.id)} aria-label={zh ? "关闭窗口" : "Close window"} title={zh ? "关闭" : "Close"}>×</button>
+                <button type="button" onClick={() => updateWindow(item.id, { minimized: true })} aria-label={zh ? "最小化" : "Minimize"} title={zh ? "最小化" : "Minimize"}>
+                  <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 8.5h8" /></svg>
+                </button>
+                <button type="button" onClick={() => updateWindow(item.id, { maximized: !item.maximized })} aria-label={zh ? "放大或还原窗口" : "Maximize or restore"} title={zh ? "放大或还原" : "Maximize or restore"}>
+                  <svg viewBox="0 0 12 12" aria-hidden="true">
+                    {item.maximized ? <><path d="M4.5 2.5h5v5" /><path d="M7.5 4.5v5h-5v-5z" /></> : <rect x="2.5" y="2.5" width="7" height="7" />}
+                  </svg>
+                </button>
+                <button type="button" onClick={() => closeWindow(item.id)} aria-label={zh ? "关闭窗口" : "Close window"} title={zh ? "关闭" : "Close"}>
+                  <svg viewBox="0 0 12 12" aria-hidden="true"><path d="m3 3 6 6m0-6-6 6" /></svg>
+                </button>
               </div>
             </div>
 
@@ -314,11 +425,11 @@ export function LaptopDesktop({ language }: { language: Language }) {
               <div className="laptop-os__finder-main"><label><span>⌕</span><input value={finderQuery} onChange={(event) => setFinderQuery(event.target.value)} placeholder={zh ? "搜索项目" : "Find a project"} /></label><div className="laptop-os__finder-list">{projectList.map(({ entry }) => <button type="button" key={entry.id} onClick={() => openApp("browser", entry.id)}><span className="laptop-os__file-icon">▣</span><span><strong>{projectText(entry, language).title}</strong><small>{entry.year} · {entry.collection}</small></span><span>↗</span></button>)}</div></div>
             </div>}
 
-            {item.app === "notes" && <div className="laptop-os__app-content laptop-os__notes"><div className="laptop-os__notes-heading">{zh ? "一张留在桌上的便签" : "A note left on the desktop"}<span>● {zh ? "已自动保存" : "Auto-saved"}</span></div><textarea aria-label={zh ? "编辑桌面便签" : "Edit desktop note"} spellCheck={false} value={note} onChange={(event) => setNote(event.target.value)} /><span className="laptop-os__notes-foot">OLIVIA WONG · FOUR HEARTS</span></div>}
+            {item.app === "notes" && <div className="laptop-os__app-content laptop-os__notes"><div className="laptop-os__notes-heading">{zh ? "一张留在桌上的便签" : "A note left on the desktop"}<span>● {zh ? "已自动保存" : "Auto-saved"}</span></div><textarea aria-label={zh ? "编辑桌面便签" : "Edit desktop note"} spellCheck={false} value={note} onChange={(event) => setNote(event.target.value)} /><img className="laptop-os__notes-art" src="/visuals/quick-read/studio/studio-notes-collage.png" alt="" aria-hidden="true" decoding="async" /><span className="laptop-os__notes-foot">OLIVIA WONG · FOUR HEARTS</span></div>}
 
             {item.app === "settings" && <div className="laptop-os__app-content laptop-os__settings"><p>{zh ? "桌面外观" : "Desktop appearance"}</p><div className="laptop-os__skin-options">{(["win98", "system7", "aqua"] as const).map((option) => <button key={option} type="button" onClick={() => setSkin(option)} aria-pressed={skin === option}><span className={`laptop-os__skin-swatch laptop-os__skin-swatch--${option}`} /><strong>{option === "win98" ? "Windows 98" : option === "system7" ? "System 7" : "Aqua"}</strong></button>)}</div><p>{zh ? "网页显示" : "Web preview"}</p><div className="laptop-os__view-options"><button type="button" aria-pressed={webMode === "desktop"} onClick={() => setWebMode("desktop")}>{zh ? "桌面布局 · 1024" : "Desktop · 1024"}</button><button type="button" aria-pressed={webMode === "fluid"} onClick={() => setWebMode("fluid")}>{zh ? "自适应布局" : "Responsive"}</button></div></div>}
 
-            {item.app === "about" && <div className="laptop-os__app-content laptop-os__about"><span className="laptop-os__about-mark">✿</span><div><span className="laptop-os__eyebrow">DESKTOP EDITION · 2026</span><h3>FOUR HEARTS OS</h3><p>{zh ? "王心蕊的迷你数字工作室。浏览作品、留下便签、切换外观。" : "Olivia Wong's little digital studio. Open projects, leave a note, change the atmosphere."}</p><small>{zh ? "这是一个存在于 3D Room 的可交互桌面。" : "An interactive computer living inside the 3D Room."}</small></div></div>}
+            {item.app === "about" && <div className="laptop-os__app-content laptop-os__about"><button type="button" className="laptop-os__about-mark" aria-label={zh ? "发现一个 Macintosh 小彩蛋" : "Find a Macintosh Easter egg"} onClick={() => showEasterEgg(zh ? "这台小机器里，装着一个更大的世界。" : "A bigger world lives inside this little machine.")}>✿</button><div><span className="laptop-os__eyebrow">MACINTOSH DESK EDITION · 2026</span><h3>FOUR HEARTS OS</h3><p>{zh ? "王心蕊的迷你数字工作室。浏览作品、留下便签、切换外观。" : "Olivia Wong's little digital studio. Open projects, leave a note, change the atmosphere."}</p><small>{zh ? "这是一个存在于 3D Room 的可交互桌面。" : "An interactive computer living inside the 3D Room."}</small></div></div>}
 
             {!item.maximized && <div className="laptop-os__resize-handle" role="separator" aria-label={zh ? "拖动调整窗口大小" : "Drag to resize window"} onPointerDown={(event) => beginGesture(event, item, "resize")} onPointerMove={moveGesture} onPointerUp={endGesture} onPointerCancel={endGesture} />}
           </section>
@@ -330,6 +441,8 @@ export function LaptopDesktop({ language }: { language: Language }) {
         {(["finder", "notes", "settings", "about"] as const).map((app) => <button key={app} type="button" role="menuitem" onClick={() => openApp(app)}><span>{appGlyphs[app]}</span>{app === "finder" ? (zh ? "项目文件夹" : "Projects") : app === "notes" ? (zh ? "工作室便签" : "Studio Notes") : app === "settings" ? (zh ? "控制面板" : "Control Panel") : (zh ? "关于这台电脑" : "About this computer")}</button>)}
         <div className="laptop-os__menu-caption">{zh ? "留在房间里，去别的世界看看。" : "A room with a window to other worlds."}</div>
       </div>}
+
+      {easterEgg && <div className="laptop-os__easter-egg" role="status" aria-live="polite"><span aria-hidden="true">✿</span>{easterEgg}</div>}
 
       <footer className="laptop-os__taskbar">
         <button type="button" className="laptop-os__start" onClick={() => setStartOpen((open) => !open)} aria-expanded={startOpen}>✿ <span>{zh ? "开始" : "START"}</span></button>

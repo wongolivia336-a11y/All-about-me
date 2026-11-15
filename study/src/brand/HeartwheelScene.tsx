@@ -3,6 +3,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import type { ThemeId } from "../data/library";
 import { themeConfig, themeOrder } from "../data/themeConfig";
+import { HEART_CURVES } from "./heartPath";
 import { HeartwheelFallback } from "./HeartwheelFallback";
 
 function canUseWebGL() {
@@ -21,10 +22,9 @@ function canUseWebGL() {
 function makeLeafShape() {
   const shape = new THREE.Shape();
   shape.moveTo(0, 0);
-  shape.bezierCurveTo(-8, 18, -58, 46, -66, 88);
-  shape.bezierCurveTo(-73, 126, -28, 150, 0, 116);
-  shape.bezierCurveTo(28, 150, 73, 126, 66, 88);
-  shape.bezierCurveTo(58, 46, 8, 18, 0, 0);
+  for (const [x1, y1, x2, y2, x, y] of HEART_CURVES) {
+    shape.bezierCurveTo(x1, -y1, x2, -y2, x, -y);
+  }
   shape.closePath();
   return shape;
 }
@@ -198,9 +198,8 @@ export function HeartwheelScene({
           fallback={<HeartwheelFallback />}
           gl={{ alpha: true, antialias: true, powerPreference: "low-power" }}
         >
-          <ambientLight intensity={0.72} />
-          <directionalLight position={[-120, 28, 38]} intensity={2.4} />
-          <directionalLight position={[55, -85, 90]} intensity={0.58} />
+          <ambientLight intensity={0.82} />
+          <directionalLight position={[0, 0, 180]} intensity={1.45} />
           {themeOrder.map((theme) => (
             <LeafMesh
               key={theme}
