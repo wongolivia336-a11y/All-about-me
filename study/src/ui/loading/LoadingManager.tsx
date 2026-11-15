@@ -136,4 +136,3 @@ export function GlobalLoadingProvider({
     </LoadingContext.Provider>
   );
 }
-

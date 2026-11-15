@@ -35,6 +35,8 @@ interface StudyState {
   musicPlaying: boolean;
   /** set when playback was refused — usually because no audio file is present */
   musicUnavailable: boolean;
+  /** disables the quiet mechanical audio and vibration feedback globally */
+  tactileMuted: boolean;
   /** 0..1, shared by the speaker and by the cat */
   volume: number;
 }
@@ -50,6 +52,7 @@ let state: StudyState = {
   lampInteracting: false,
   musicPlaying: false,
   musicUnavailable: false,
+  tactileMuted: false,
   volume: 0.6,
 };
 const listeners = new Set<() => void>();
@@ -123,6 +126,9 @@ export const setMusicPlaying = (playing: boolean) =>
 export const reportMusicUnavailable = () =>
   setState({ musicPlaying: false, musicUnavailable: true });
 
+export const setTactileMuted = (tactileMuted: boolean) => setState({ tactileMuted });
+export const currentTactileMuted = () => state.tactileMuted;
+
 export const setVolume = (volume: number) =>
   setState({ volume: clampLampBrightness(volume) });
 
@@ -189,6 +195,7 @@ export function useStudy() {
     setLampInteracting,
     setMusicPlaying,
     setVolume,
+    setTactileMuted,
     effectiveLampBrightness: effectiveLampBrightness(snapshot.lampPower, snapshot.lampBrightness),
   };
 }

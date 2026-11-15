@@ -14,7 +14,7 @@ import { RoomExitButton } from "./ui/RoomExitButton";
 import { RoomRevealSurface } from "./ui/RoomRevealTransition";
 import { Surface } from "./ui/Surface";
 import { useLoading, type LoadingTaskController } from "./ui/loading/LoadingContext";
-import { useRoomReveal } from "./ui/useRoomReveal";
+import { ARCHIVE_ROOM_REVEAL_DURATION, useRoomReveal } from "./ui/useRoomReveal";
 import type { RoomAssetProgress } from "./scene/RoomScene";
 import { useLanguage } from "./i18n";
 import "./PageTurn.css";
@@ -192,7 +192,7 @@ export default function App() {
 
       if (roomReadyRef.current) {
         setTransitionPhase("opening");
-        animateReveal(1, { onComplete: finishOpening });
+        animateReveal(1, { duration: ARCHIVE_ROOM_REVEAL_DURATION, onComplete: finishOpening });
       } else {
         setTransitionPhase("preparing");
         animateReveal(0.14, {
@@ -200,7 +200,7 @@ export default function App() {
           onComplete: () => {
             if (roomReadyRef.current) {
               setTransitionPhase("opening");
-              animateReveal(1, { onComplete: finishOpening });
+              animateReveal(1, { duration: ARCHIVE_ROOM_REVEAL_DURATION, onComplete: finishOpening });
             }
           },
         });
@@ -214,7 +214,7 @@ export default function App() {
     const indexHash = hashForIndex(indexRouteRef.current);
     if (pushHistory && window.location.hash !== indexHash) window.history.pushState(null, "", indexHash);
     setTransitionPhase("closing");
-    animateReveal(0, { onComplete: finishClosing });
+    animateReveal(0, { duration: ARCHIVE_ROOM_REVEAL_DURATION, onComplete: finishClosing });
   }, [animateReveal, beginRoomLoading, finishClosing, finishOpening, roomMounted, setTransitionPhase, settleRoomLoading]);
 
   const applyIndexRoute = useCallback((next: IndexRoute, push = true) => {

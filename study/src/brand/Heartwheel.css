@@ -23,6 +23,7 @@
   transform: rotate(var(--heartwheel-rotation));
   transition: none;
   will-change: transform;
+  isolation: isolate;
 }
 
 .heartwheel__stage--dragging .heartwheel__orbit {
@@ -30,10 +31,34 @@
 }
 
 .heartwheel__svg {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
   overflow: visible;
+}
+
+.heartwheel__scene {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+}
+
+.heartwheel__scene > div,
+.heartwheel__scene canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+}
+
+.heartwheel__scene-fallback {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .heartwheel__leaf {
@@ -48,9 +73,7 @@
 }
 
 .heartwheel__leaf-fill {
-  fill: color-mix(in srgb, var(--leaf-accent) 6%, var(--color-paper, var(--archive-paper)));
-  opacity: 0.72;
-  transition: fill 180ms ease, opacity 180ms ease, transform 180ms ease;
+  fill: transparent;
 }
 
 .heartwheel__leaf-hit {
@@ -58,8 +81,7 @@
 }
 
 .heartwheel__leaf--hovered .heartwheel__leaf-fill {
-  fill: color-mix(in srgb, var(--leaf-accent) 24%, var(--color-paper, var(--archive-paper)));
-  opacity: 0.82;
+  fill: transparent;
 }
 
 .heartwheel__leaf--hovered .heartwheel__leaf-visual {
@@ -67,8 +89,7 @@
 }
 
 .heartwheel__leaf--active .heartwheel__leaf-fill {
-  fill: color-mix(in srgb, var(--leaf-accent) 58%, var(--color-paper, var(--archive-paper)));
-  opacity: 0.9;
+  fill: transparent;
 }
 
 .heartwheel__leaf--active .heartwheel__leaf-visual {
@@ -78,7 +99,7 @@
 .heartwheel__texture {
   font: 500 3.3px/1 var(--font-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
   letter-spacing: 0.1px;
-  opacity: 0.24;
+  opacity: 0.12;
 }
 
 .heartwheel__hub {
@@ -90,6 +111,8 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
+  transform: rotate(var(--heartwheel-rotation));
+  transform-origin: center;
 }
 
 .heartwheel__label {
@@ -102,8 +125,9 @@
   place-content: center;
   gap: 5px;
   padding: 8px 5px;
+  appearance: none;
   border: 0;
-  border-radius: 2px;
+  border-radius: 999px;
   background: transparent;
   color: var(--label-ink);
   font: inherit;
@@ -112,7 +136,8 @@
   transform-origin: center;
   pointer-events: auto;
   cursor: pointer;
-  transition: background 180ms ease, color 180ms ease;
+  box-shadow: none;
+  transition: background 280ms ease, color 220ms ease, text-shadow 280ms ease;
 }
 
 .heartwheel__label:nth-child(2) {
@@ -148,12 +173,16 @@
 .heartwheel__label:hover,
 .heartwheel__label:focus-visible,
 .heartwheel__label--selected {
-  background: color-mix(in srgb, var(--label-accent) 24%, transparent);
+  background: radial-gradient(ellipse at center,
+    color-mix(in srgb, var(--label-accent) 25%, transparent) 0%,
+    color-mix(in srgb, var(--label-accent) 13%, transparent) 48%,
+    transparent 78%);
+  text-shadow: 0 1px 12px color-mix(in srgb, var(--label-accent) 32%, transparent);
 }
 
 .heartwheel__label:focus-visible {
-  outline: 2px solid var(--label-ink);
-  outline-offset: 4px;
+  outline: 2px solid color-mix(in srgb, var(--label-ink) 84%, white);
+  outline-offset: 3px;
 }
 
 @media (max-width: 620px) {
