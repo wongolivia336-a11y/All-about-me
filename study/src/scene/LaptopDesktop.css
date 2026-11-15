@@ -1,169 +1,294 @@
+/* A small, fully interactive desktop rendered on the physical Three.js screen. */
 .laptop-os {
+  --os-chrome: #dfe4df;
+  --os-paper: #f8f8f4;
+  --os-ink: #293a40;
+  --os-muted: #53666d;
+  --os-line: #81949a;
+  --os-title: #365f72;
+  --os-wall-a: #8baeb6;
+  --os-wall-b: #638f9b;
   position: relative;
+  isolation: isolate;
   width: 548px;
   height: 352px;
   overflow: hidden;
-  border: 2px solid #29343b;
-  background: #7295a3;
-  color: #17252d;
-  font: 13px/1.2 "Segoe UI", Tahoma, Arial, sans-serif;
-  box-shadow: inset 0 0 0 1px #c1ced3;
+  border: 2px solid #293740;
+  background: var(--os-wall-b);
+  color: var(--os-ink);
+  font: 12px/1.3 "Segoe UI", Tahoma, Arial, sans-serif;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 72%);
   user-select: none;
   pointer-events: auto;
 }
 
-.laptop-os button { font: inherit; cursor: pointer; }
-.laptop-os button:focus-visible,
-.laptop-os a:focus-visible { outline: 2px solid #f4df9c; outline-offset: 2px; }
-
-.laptop-os__desktop {
-  position: absolute;
-  inset: 0 0 30px;
-  background: radial-gradient(ellipse at 80% 15%, #b2c6c5 0%, transparent 53%), linear-gradient(135deg, #6c98a9, #477685);
+.laptop-os[data-skin="system7"] {
+  --os-chrome: #eeeae5;
+  --os-paper: #fffefa;
+  --os-ink: #242424;
+  --os-muted: #555;
+  --os-line: #717171;
+  --os-title: #393939;
+  --os-wall-a: #d7ded5;
+  --os-wall-b: #aebdb2;
+  font-family: Geneva, "Helvetica Neue", Arial, sans-serif;
 }
-.laptop-os__system-mark {
+
+.laptop-os[data-skin="aqua"] {
+  --os-chrome: #e5ecf0;
+  --os-paper: #fbfcfd;
+  --os-ink: #233643;
+  --os-muted: #536879;
+  --os-line: #a3b6c1;
+  --os-title: #557c96;
+  --os-wall-a: #b8d9dc;
+  --os-wall-b: #749eb8;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+}
+
+.laptop-os button,
+.laptop-os input,
+.laptop-os textarea { font: inherit; }
+.laptop-os button { color: inherit; cursor: pointer; }
+.laptop-os button:focus-visible,
+.laptop-os a:focus-visible,
+.laptop-os input:focus-visible,
+.laptop-os textarea:focus-visible { outline: 2px solid #cc8740; outline-offset: 1px; }
+
+.laptop-os__wallpaper {
   position: absolute;
-  right: 20px;
-  bottom: 21px;
-  color: rgb(242 247 244 / 42%);
-  font: 600 32px/1 Georgia, serif;
-  letter-spacing: -.07em;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 65% 85% at 78% 17%, rgb(255 255 255 / 26%), transparent 75%),
+    radial-gradient(ellipse 60% 65% at 20% 95%, rgb(27 79 97 / 22%), transparent 78%),
+    linear-gradient(132deg, var(--os-wall-a), var(--os-wall-b));
+}
+.laptop-os__wallpaper::after {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(0deg, rgb(255 255 255 / 3%) 0 1px, transparent 1px 4px);
+  content: "";
   pointer-events: none;
 }
-.laptop-os__system-mark span { font-size: 15px; vertical-align: super; }
+.laptop-os__menubar {
+  position: absolute;
+  z-index: 50;
+  inset: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 25px;
+  padding: 0 7px;
+  border-bottom: 1px solid rgb(54 72 78 / 37%);
+  background: color-mix(in srgb, var(--os-chrome) 94%, white);
+  box-shadow: inset 0 1px 0 #fff;
+  color: var(--os-ink);
+}
+.laptop-os__menubar button {
+  flex: 0 0 auto;
+  height: 21px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  font-size: 10.5px;
+}
+.laptop-os__menubar button:hover,
+.laptop-os__menubar button[aria-expanded="true"] { background: rgb(54 78 89 / 14%); color: #1b3039; }
+.laptop-os__menubar .laptop-os__brand { display: flex; gap: 5px; align-items: center; padding-left: 4px; }
+.laptop-os__brand strong { font: 700 10px/1 Arial, sans-serif; letter-spacing: .035em; }
+.laptop-os__menubar time { margin-left: auto; padding-right: 7px; color: var(--os-muted); font: 10px/1 ui-monospace, monospace; }
+
 .laptop-os__shortcuts {
+  position: absolute;
+  top: 36px;
+  left: 13px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  justify-items: start;
-  gap: 11px 7px;
-  width: 335px;
-  padding: 16px;
+  grid-template-columns: repeat(2, 89px);
+  grid-auto-rows: 66px;
+  gap: 2px 8px;
 }
 .laptop-os__shortcut {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
-  width: 100px;
-  min-height: 88px;
+  justify-content: center;
+  gap: 3px;
+  width: 89px;
+  height: 65px;
   padding: 3px 4px;
   border: 1px solid transparent;
+  border-radius: 3px;
   background: transparent;
-  color: #fff;
-  text-shadow: 0 1px 1px rgb(20 41 48 / 50%);
+  color: #fbfdfb !important;
   text-align: center;
+  text-shadow: 0 1px 3px rgb(18 44 58 / 65%);
 }
+.laptop-os__shortcut:hover,
+.laptop-os__shortcut:focus-visible { border-color: rgb(255 255 255 / 42%); background: rgb(29 58 69 / 37%); }
 .laptop-os__shortcut > span:last-child {
   display: -webkit-box;
-  max-width: 95px;
+  max-width: 85px;
   overflow: hidden;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow-wrap: anywhere;
-  font-size: 11px;
+  font-size: 10px;
+  line-height: 1.1;
 }
-.laptop-os__shortcut:hover,
-.laptop-os__shortcut--selected { background: rgb(255 255 255 / 16%); border-color: rgb(255 255 255 / 35%); }
-.laptop-os__shortcut-icon {
-  display: grid;
-  width: 38px;
-  height: 33px;
-  place-items: center;
-  filter: drop-shadow(2px 3px 0 rgb(30 50 59 / 35%));
-}
-.laptop-os__shortcut-screen {
+.laptop-os__project-icon {
   position: relative;
-  display: block;
-  width: 33px;
-  height: 25px;
-  border: 3px solid #e6e8d9;
-  border-bottom-width: 6px;
+  display: grid;
+  width: 31px;
+  height: 27px;
+  place-items: center;
+  border: 2px solid #f0f1e9;
+  border-bottom-width: 4px;
   border-radius: 2px;
-  background: linear-gradient(145deg, color-mix(in srgb, var(--shortcut-color) 64%, white), var(--shortcut-color));
-  box-shadow: inset 0 0 0 2px #263943, 1px 1px 0 #2d424d;
+  background: var(--icon-tone);
+  color: #405c67;
+  box-shadow: inset 0 0 0 2px rgb(54 68 70 / 48%), 2px 3px 1px rgb(30 47 52 / 30%);
+  text-shadow: none;
 }
-.laptop-os__shortcut-screen::after {
-  position: absolute;
-  bottom: -10px;
-  left: 9px;
-  width: 10px;
-  height: 4px;
-  background: #e6e8d9;
-  content: "";
-}
-.laptop-os__hint { position: absolute; right: 15px; bottom: 4px; color: rgb(255 255 255 / 80%); font-size: 10px; }
+.laptop-os__project-icon::after { position: absolute; bottom: -8px; left: 9px; width: 10px; height: 3px; background: #f0f1e9; content: ""; }
+.laptop-os__project-icon span { font-size: 12px; }
 
-.laptop-os__taskbar {
-  position: absolute;
-  z-index: 4;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  height: 30px;
-  padding: 3px 5px;
-  border-top: 2px solid #fafaf2;
-  background: #c5c9c2;
-  box-shadow: inset 0 1px 0 #fff;
-}
-.laptop-os__start, .laptop-os__task {
-  height: 23px;
-  padding: 0 8px;
-  border: 1px solid #697575;
-  border-top-color: #fff;
-  border-left-color: #fff;
-  background: #dce0d9;
-  color: #243139;
-  font-size: 11px !important;
-  font-weight: 700 !important;
-}
-.laptop-os__start { display: flex; align-items: center; gap: 5px; }
-.laptop-os__start > span { letter-spacing: .03em; }
-.laptop-os__task { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400 !important; }
-.laptop-os__clock { margin-left: auto; padding: 0 8px; color: #5d6667; font: 10px/1 ui-monospace, monospace; }
+.laptop-os__utilities { position: absolute; top: 42px; right: 15px; display: flex; flex-direction: column; gap: 8px; }
+.laptop-os__utility { display: grid; place-items: center; gap: 3px; width: 64px; min-height: 53px; padding: 2px; border: 1px solid transparent; border-radius: 3px; background: transparent; color: #fff !important; text-shadow: 0 1px 3px rgb(18 44 58 / 65%); }
+.laptop-os__utility:hover { background: rgb(29 58 69 / 37%); border-color: rgb(255 255 255 / 45%); }
+.laptop-os__utility > span { display: grid; width: 26px; height: 25px; place-items: center; border: 2px solid #e4e9e6; border-radius: 3px; background: #c0d2d1; color: #3c5963; font-size: 16px; text-shadow: none; box-shadow: 2px 3px 0 rgb(30 47 52 / 22%); }
+.laptop-os__utility small { font-size: 10px; }
+.laptop-os__wallpaper-signature { position: absolute; right: 95px; bottom: 60px; display: flex; flex-direction: column; align-items: flex-end; color: rgb(244 251 248 / 58%); text-align: right; pointer-events: none; }
+.laptop-os__wallpaper-signature strong { font: italic 37px/.95 Georgia, serif; letter-spacing: -.055em; }
+.laptop-os__wallpaper-signature span { margin-top: 4px; font: 10px/1 ui-monospace, monospace; letter-spacing: .03em; }
 
 .laptop-os__window {
   position: absolute;
-  z-index: 2;
-  top: 13px;
-  right: 12px;
-  bottom: 40px;
-  left: 12px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   min-width: 0;
-  border: 2px solid #e7e8e0;
-  border-right-color: #536069;
-  border-bottom-color: #536069;
-  background: #e8eae5;
-  box-shadow: 3px 5px 0 rgb(25 43 51 / 35%);
+  min-height: 0;
+  border: 2px solid var(--os-chrome);
+  border-right-color: #697e85;
+  border-bottom-color: #697e85;
+  border-radius: 2px;
+  background: var(--os-paper);
+  box-shadow: 4px 6px 0 rgb(27 47 54 / 26%), 0 0 0 1px rgb(17 37 45 / 30%);
 }
+.laptop-os__window--max { inset: 28px 6px 30px; width: auto; height: auto; }
+.laptop-os__window--active { box-shadow: 4px 7px 0 rgb(27 47 54 / 29%), 0 0 0 1px rgb(17 37 45 / 42%); }
+.laptop-os[data-skin="aqua"] .laptop-os__window { border-radius: 8px 8px 6px 6px; border-color: rgb(228 235 242 / 85%); box-shadow: 0 9px 22px rgb(34 55 77 / 26%); }
+.laptop-os[data-skin="system7"] .laptop-os__window { border: 2px solid #2d2d2d; border-radius: 0; box-shadow: 3px 4px 0 rgb(0 0 0 / 27%); }
 .laptop-os__titlebar {
   display: flex;
-  flex: 0 0 28px;
+  flex: 0 0 27px;
   align-items: center;
-  gap: 7px;
-  padding: 0 5px 0 9px;
-  background: linear-gradient(90deg, #22455d, #5f8294);
+  gap: 6px;
+  padding: 0 5px 0 8px;
+  background: linear-gradient(90deg, var(--os-title), color-mix(in srgb, var(--os-title) 54%, #adc6cc));
   color: #fff;
+  cursor: grab;
 }
-.laptop-os__titlebar strong { flex: 1; overflow: hidden; font-size: 12px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
-.laptop-os__title-icon { color: #e5ddd0; }
-.laptop-os__window-close { width: 24px; height: 21px; padding: 0; border: 1px solid #333; border-top-color: #fff; border-left-color: #fff; background: #d6d9d4; color: #202c34; font-size: 18px !important; font-weight: 700 !important; line-height: 1; }
-.laptop-os__browser-bar { display: flex; flex: 0 0 32px; align-items: center; gap: 4px; padding: 3px 5px; border-bottom: 1px solid #a9b3b3; }
-.laptop-os__browser-bar button { padding: 4px 8px; border: 1px solid transparent; background: transparent; color: #4b5c66; font-size: 10px; }
-.laptop-os__browser-bar button[aria-pressed="true"] { border-color: #adbbc2; background: #fff; color: #253f4f; }
-.laptop-os__browser-bar > span { min-width: 0; overflow: hidden; margin-left: auto; color: #5b6971; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
-.laptop-os__window-body { position: relative; flex: 1; min-height: 0; overflow: hidden; background: #fafbf8; }
-.laptop-os__window-body iframe { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
-.laptop-os__loading { position: absolute; z-index: 1; top: 16px; left: 16px; padding: 7px 12px; background: #f4f4ee; color: #45575f; font-size: 11px; pointer-events: none; }
-.laptop-os__project-info { height: 100%; overflow-y: auto; padding: 11px 15px; }
-.laptop-os__project-info img { float: right; width: 36%; max-height: 130px; margin: 0 0 8px 12px; object-fit: contain; background: #f5f6f2; }
-.laptop-os__project-info strong { display: block; margin-bottom: 9px; font-size: 18px; font-weight: 600; }
-.laptop-os__project-info p { max-width: 47ch; color: #53636b; font-size: 13px; line-height: 1.45; }
-.laptop-os__project-links { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 12px; }
-.laptop-os__project-links a { color: #275977; font-size: 12px; text-decoration: none; }
-.laptop-os__project-links a:hover { text-decoration: underline; }
-.laptop-os__statusbar { display: flex; flex: 0 0 20px; align-items: center; justify-content: space-between; padding: 0 7px; color: #556267; font: 10px/1 ui-monospace, monospace; }
+.laptop-os__titlebar:active { cursor: grabbing; }
+.laptop-os__titlebar strong { flex: 1; min-width: 0; overflow: hidden; font-size: 11.5px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.laptop-os__title-icon { font-size: 13px; color: rgb(255 255 255 / 90%); }
+.laptop-os__window-actions { display: flex; gap: 3px; }
+.laptop-os__window-actions button { display: grid; width: 21px; height: 19px; place-items: center; padding: 0; border: 1px solid #657779; border-top-color: #fff; border-left-color: #fff; background: #e1e6e1; color: #263c45; font-size: 14px; font-weight: 700; line-height: 1; }
+.laptop-os__window-actions button:hover { background: #fff; color: #1b3039; }
+.laptop-os[data-skin="system7"] .laptop-os__titlebar { background: repeating-linear-gradient(0deg, #efefec 0 2px, #aaa 2px 3px); color: #222; }
+.laptop-os[data-skin="system7"] .laptop-os__titlebar strong { padding: 2px 5px; background: #f6f6f4; }
+.laptop-os[data-skin="aqua"] .laptop-os__titlebar { background: linear-gradient(#f8fcff, #b8cad7); color: #2a4757; }
+.laptop-os[data-skin="aqua"] .laptop-os__window-actions button { border-radius: 50%; border-color: rgb(78 113 137 / 25%); background: #dceaf1; }
+.laptop-os__resize-handle { position: absolute; z-index: 3; right: 0; bottom: 0; width: 17px; height: 17px; cursor: nwse-resize; background: repeating-linear-gradient(135deg, transparent 0 4px, rgb(72 91 97 / 40%) 4px 5px, transparent 5px 7px); clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+
+.laptop-os__browser-bar { display: flex; flex: 0 0 30px; align-items: center; gap: 4px; padding: 3px 6px; border-bottom: 1px solid rgb(90 106 110 / 28%); background: color-mix(in srgb, var(--os-chrome) 60%, white); }
+.laptop-os__browser-bar > button { flex: 0 0 auto; min-width: 29px; height: 23px; padding: 0 5px; border: 1px solid transparent; border-radius: 2px; background: transparent; color: #344e5c; font-size: 10px; }
+.laptop-os__browser-bar > button:hover { border-color: #a5b5bb; background: #fff; color: #203744; }
+.laptop-os__browser-bar .laptop-os__browser-tab[aria-pressed="true"] { border-color: #aebec4; background: #fff; color: #223f4e; font-weight: 700; }
+.laptop-os__browser-bar .laptop-os__viewport-toggle { min-width: 39px; border-color: #acb9bd; background: #f6f8f6; font: 9px/1 ui-monospace, monospace; }
+.laptop-os__address { flex: 1; min-width: 0; overflow: hidden; padding: 4px 5px; border: 1px solid rgb(91 112 120 / 22%); background: #fff; color: #536973; font: 10px/1.1 ui-monospace, monospace; text-overflow: ellipsis; white-space: nowrap; }
+.laptop-os__window-body { position: relative; flex: 1; min-height: 0; overflow: hidden; background: #fff; }
+.laptop-os__web-viewport { position: relative; width: 100%; height: 100%; overflow: hidden; background: #f8f9f7; }
+.laptop-os__web-viewport iframe { position: absolute; inset: 0 auto auto 0; display: block; max-width: none; border: 0; background: #fff; }
+.laptop-os__loading { position: absolute; z-index: 1; top: 12px; left: 12px; padding: 6px 10px; border: 1px solid #d4ddda; background: #f7faf7; color: #365b67; font-size: 10px; pointer-events: none; box-shadow: 2px 3px 7px rgb(30 48 50 / 8%); }
+.laptop-os__statusbar { display: flex; flex: 0 0 18px; align-items: center; justify-content: space-between; gap: 6px; padding: 0 7px; border-top: 1px solid rgb(90 106 110 / 22%); background: var(--os-chrome); color: #465c65; font: 9px/1 ui-monospace, monospace; }
+.laptop-os__project-info { height: 100%; overflow-y: auto; padding: 12px 16px; background: var(--os-paper); }
+.laptop-os__project-info img { float: right; width: 36%; max-height: 125px; margin: 0 0 8px 14px; object-fit: contain; }
+.laptop-os__eyebrow { color: var(--os-muted); font: 9px/1.3 ui-monospace, monospace; letter-spacing: .07em; }
+.laptop-os__project-info h3 { margin: 7px 0 8px; font-size: 18px; font-weight: 600; }
+.laptop-os__project-info p { max-width: 45ch; color: #405b63; font-size: 12px; line-height: 1.5; }
+.laptop-os__project-links { display: flex; gap: 8px 15px; flex-wrap: wrap; margin: 12px 0; }
+.laptop-os__project-links a { color: #2f617b; font-size: 11px; text-underline-offset: 3px; }
+.laptop-os__project-info small { display: block; clear: both; color: #6e7b7a; font-size: 10px; }
+
+.laptop-os__app-content { position: relative; flex: 1; min-height: 0; overflow: auto; background: var(--os-paper); }
+.laptop-os__finder { display: grid; grid-template-columns: 112px 1fr; }
+.laptop-os__finder-sidebar { display: flex; flex-direction: column; gap: 8px; padding: 15px 12px; border-right: 1px solid #c7d2d3; background: color-mix(in srgb, var(--os-chrome) 62%, white); }
+.laptop-os__finder-sidebar > span { font-size: 24px; color: #526f77; }
+.laptop-os__finder-sidebar strong { font-size: 14px; }
+.laptop-os__finder-sidebar small { color: var(--os-muted); font-size: 10px; }
+.laptop-os__finder-main { display: flex; flex-direction: column; min-width: 0; overflow: hidden; padding: 9px 10px; }
+.laptop-os__finder-main label { display: flex; align-items: center; gap: 6px; padding: 2px 7px; border: 1px solid #bac7c9; background: #fff; color: #55717b; }
+.laptop-os__finder-main input { min-width: 0; width: 100%; height: 23px; border: 0; outline: 0; background: transparent; color: #243b44; font-size: 11px; }
+.laptop-os__finder-list { overflow-y: auto; margin-top: 7px; }
+.laptop-os__finder-list button { display: flex; align-items: center; gap: 9px; width: 100%; min-height: 38px; padding: 5px 7px; border: 0; border-bottom: 1px solid #e3e9e7; background: transparent; color: #283d47; text-align: left; }
+.laptop-os__finder-list button:hover { background: #e5eef0; color: #203a47; }
+.laptop-os__finder-list button > span:nth-child(2) { flex: 1; display: grid; gap: 3px; min-width: 0; }
+.laptop-os__finder-list strong { overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.laptop-os__finder-list small { color: #68797c; font-size: 9px; }
+.laptop-os__file-icon { color: #587e89; font-size: 20px; }
+
+.laptop-os__notes { display: flex; flex-direction: column; padding: 11px 16px 9px; background: #fff8df; }
+.laptop-os__notes-heading { display: flex; justify-content: space-between; gap: 8px; align-items: center; color: #695d42; font-size: 10px; }
+.laptop-os__notes-heading span { color: #617865; font-size: 9px; }
+.laptop-os__notes textarea { flex: 1; width: 100%; min-height: 0; margin-top: 10px; border: 0; outline: none; resize: none; background: transparent; color: #3a4137; font: 14px/1.65 Georgia, "Noto Serif", serif; }
+.laptop-os__notes-foot { margin-top: 8px; color: #968d75; font: 9px/1 ui-monospace, monospace; }
+.laptop-os__settings { padding: 13px 15px; }
+.laptop-os__settings p { margin: 0 0 8px; color: #425b63; font: 600 11px/1.3 ui-monospace, monospace; }
+.laptop-os__settings p:not(:first-child) { margin-top: 15px; }
+.laptop-os__skin-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.laptop-os__skin-options button { display: grid; gap: 6px; min-width: 0; padding: 6px; border: 1px solid #bdcbcc; background: #fff; color: #354b52; font-size: 10px; }
+.laptop-os__skin-options button:hover,
+.laptop-os__skin-options button[aria-pressed="true"] { border-color: #497a8c; background: #e8f1f3; color: #284657; }
+.laptop-os__skin-swatch { height: 30px; border: 2px solid #dfe4e1; background: linear-gradient(135deg,#81a6b3,#4d8191); }
+.laptop-os__skin-swatch--system7 { background: repeating-linear-gradient(0deg,#f8f8f5 0 5px,#c8cdc8 5px 7px); border-color: #565b59; }
+.laptop-os__skin-swatch--aqua { background: linear-gradient(140deg,#c7e2e8,#7daed0); border-color: #b4d3e5; }
+.laptop-os__view-options { display: flex; gap: 8px; }
+.laptop-os__view-options button { padding: 5px 8px; border: 1px solid #bdcbcc; background: #fff; color: #354b52; font-size: 10px; }
+.laptop-os__view-options button:hover,
+.laptop-os__view-options button[aria-pressed="true"] { background: #e8f1f3; border-color: #497a8c; color: #284657; }
+.laptop-os__about { display: flex; align-items: center; gap: 18px; padding: 18px 20px; }
+.laptop-os__about-mark { font-size: 62px; color: #557f84; }
+.laptop-os__about h3 { margin: 5px 0 8px; font-size: 20px; letter-spacing: -.035em; }
+.laptop-os__about p { margin: 0 0 9px; color: #48616a; font-size: 12px; line-height: 1.5; }
+.laptop-os__about small { color: #738186; font-size: 10px; }
+
+.laptop-os__start-menu { position: absolute; z-index: 90; bottom: 31px; left: 5px; width: 230px; padding: 6px; border: 2px solid #e5e8df; border-right-color: #667881; border-bottom-color: #667881; background: #f0f2ec; box-shadow: 4px 5px 0 rgb(32 52 57 / 26%); }
+.laptop-os__start-heading { padding: 10px 9px; background: #365c6d; color: #fdfdf9; font: 700 12px/1 Arial,sans-serif; letter-spacing: .04em; }
+.laptop-os__start-heading span { margin-left: 4px; opacity: .7; font-weight: 400; }
+.laptop-os__start-menu > button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 34px; padding: 5px 9px; border: 0; background: transparent; color: #2f4147; text-align: left; font-size: 11px; }
+.laptop-os__start-menu > button span { width: 22px; color: #486f7d; font-size: 17px; text-align: center; }
+.laptop-os__start-menu > button:hover { background: #dbe7e9; color: #214457; }
+.laptop-os__menu-caption { padding: 8px 9px 3px; border-top: 1px solid #cbd4d2; color: #6b7976; font: 9px/1.3 ui-monospace, monospace; }
+.laptop-os__taskbar { position: absolute; z-index: 80; inset: auto 0 0; display: flex; align-items: center; gap: 6px; height: 30px; padding: 3px 5px; border-top: 2px solid #f9faf5; background: var(--os-chrome); box-shadow: inset 0 1px #fff; }
+.laptop-os__start,
+.laptop-os__task { flex: none; display: inline-flex; align-items: center; gap: 5px; height: 23px; padding: 0 8px; border: 1px solid #73858a; border-top-color: #fff; border-left-color: #fff; background: color-mix(in srgb, var(--os-chrome) 65%, white); color: #263d44; font-size: 10px !important; }
+.laptop-os__start { font-weight: 700 !important; }
+.laptop-os__start:hover,
+.laptop-os__task:hover { background: #fff; color: #244454; }
+.laptop-os__tasks { display: flex; flex: 1; gap: 5px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.laptop-os__tasks::-webkit-scrollbar { display: none; }
+.laptop-os__task { max-width: 125px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.laptop-os__task--active { border-color: #7c8f95; border-top-color: #a6b5b8; border-left-color: #a6b5b8; background: #cad5d4; }
+.laptop-os__clock { flex: none; padding: 0 5px; color: #50676b; font: 10px/1 ui-monospace, monospace; }
+
+.laptop-os[data-skin="system7"] .laptop-os__menubar,
+.laptop-os[data-skin="system7"] .laptop-os__taskbar { border-color: #3c3c3c; }
+.laptop-os[data-skin="aqua"] .laptop-os__menubar,
+.laptop-os[data-skin="aqua"] .laptop-os__taskbar { background: rgb(232 241 246 / 88%); backdrop-filter: blur(8px); }
+.laptop-os[data-skin="aqua"] .laptop-os__start-menu { border-radius: 7px; border-color: #bed0d8; box-shadow: 0 8px 22px rgb(32 52 57 / 24%); }
+
+@media (prefers-reduced-motion: reduce) {
+  .laptop-os * { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}

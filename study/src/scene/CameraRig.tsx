@@ -53,6 +53,13 @@ export function CameraRig() {
       cx += (7.9 - cx) * portrait;
       cy += (3.1 - cy) * portrait;
       cz += (8.1 - cz) * portrait;
+    } else if (spot.id === "laptop") {
+      // On wide screens the laptop fills the reading view; on a portrait
+      // phone, pull back just enough to keep the physical screen in frame.
+      const fit = Math.max(1, 1.12 / Math.max(aspect, 0.45));
+      cx = tx + (cx - tx) * fit;
+      cy = ty + (cy - ty) * fit;
+      cz = tz + (cz - tz) * fit;
     }
 
     controls.current?.setLookAt(cx, cy, cz, tx, ty, tz, true);

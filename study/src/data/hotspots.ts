@@ -70,7 +70,7 @@ export const hotspots: Hotspot[] = [
     path: "/work",
     // A reading distance for the live desktop on the physical laptop display.
     ...at([layout.laptop.pos[0], 0.8, layout.laptop.pos[2] - 0.02], 0.08, [
-      0, 0.085, 0.46,
+      0, 0.07, 0.365,
     ]),
   },
   {

@@ -132,8 +132,8 @@ function LeafMesh({
   }, [geometry]);
 
   useFrame((_, delta) => {
-    const target = hovered ? 1.055 : active ? 1.025 : 1;
-    const targetLift = hovered ? 2.6 : active ? 1.2 : 0;
+    const target = hovered ? 1.085 : active ? 1.025 : 1;
+    const targetLift = hovered ? 3.2 : active ? 1.2 : 0;
     const item = group.current;
     if (!item) return;
 
@@ -157,10 +157,10 @@ function LeafMesh({
   return (
     <group ref={group} rotation={[0, 0, angle]}>
       <mesh geometry={geometry.shell} castShadow={false} receiveShadow={false}>
-        <meshPhysicalMaterial color={themeConfig[theme].leafColor} roughness={0.72} metalness={0.01} clearcoat={0.08} clearcoatRoughness={0.86} />
+        <meshPhysicalMaterial color={themeConfig[theme].leafColor} emissive={themeConfig[theme].leafColor} emissiveIntensity={0.13} roughness={0.84} metalness={0.0} clearcoat={0.035} clearcoatRoughness={0.92} />
       </mesh>
       <mesh geometry={geometry.surface} castShadow={false} receiveShadow={false}>
-        <meshStandardMaterial color={themeConfig[theme].leafColor} roughness={0.62} metalness={0.01} side={THREE.DoubleSide} />
+        <meshStandardMaterial color={themeConfig[theme].leafColor} emissive={themeConfig[theme].leafColor} emissiveIntensity={0.1} roughness={0.8} metalness={0} side={THREE.DoubleSide} />
       </mesh>
       <mesh geometry={geometry.vein} castShadow={false} receiveShadow={false}>
         <meshStandardMaterial color={themeConfig[theme].accent} roughness={0.78} transparent opacity={0.48} />

@@ -166,20 +166,21 @@
 }
 
 .heartwheel__label small {
-  color: color-mix(in srgb, var(--label-ink) 72%, transparent);
+  color: var(--label-ink);
   font-size: 10px;
   line-height: 1.1;
+  opacity: .89;
 }
 
 .heartwheel__label:hover,
 .heartwheel__label:focus-visible,
 .heartwheel__label--selected {
-  background: rgba(255,255,255,.36);
+  background: transparent;
   text-shadow: none;
 }
 
 .heartwheel__label:hover span,
-.heartwheel__label:focus-visible span { color: #253b47; }
+.heartwheel__label:focus-visible span { color: var(--label-ink); }
 
 .heartwheel__label:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--label-ink) 84%, white);

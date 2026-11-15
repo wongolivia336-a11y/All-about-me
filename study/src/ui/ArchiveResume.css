@@ -687,7 +687,7 @@
   transition: color 220ms var(--motion-standard), background-color 220ms var(--motion-standard), transform 220ms var(--motion-standard);
 }
 
-.leaf-world__world-nav button > span { color: #7d857f; font-size: 9px; }
+.leaf-world__world-nav button > span { color: #51646a; font-size: 9px; }
 .leaf-world__world-nav button:hover { color: #304c59; background: transparent; transform: translateY(-1px); }
 .leaf-world__world-nav button[aria-current="page"] { color: #263f4b; font-weight: 600; }
 .leaf-world__world-nav button:focus-visible { outline: 2px solid #6c8792; outline-offset: 4px; border-radius: 3px; }
@@ -1510,9 +1510,16 @@
   transform: translateY(-1px);
 }
 .archive__nav button:hover,
-.archive__nav button:focus-visible { text-decoration: none; color: #315367; }
-.archive__nav button { border-radius: 999px; transition: color 220ms ease, background 220ms ease; }
-.archive__nav button:hover { background: rgb(222 235 241 / 45%); }
+.archive__nav button:focus-visible {
+  text-decoration: none;
+  color: #234657;
+  background: rgb(219 236 244 / 88%);
+}
+.archive__nav button {
+  border-radius: 999px;
+  padding-inline: 12px;
+  transition: color 220ms ease, background 220ms ease;
+}
 .archive__resume-grid button { margin-top: auto; }
 .archive__project-links { display: flex; flex-wrap: wrap; gap: 10px; }
 .archive__contact-link { margin-left: 2px; }
