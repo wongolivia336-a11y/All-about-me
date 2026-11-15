@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
 import { library, type ArchiveEntry } from "../data/library";
-import { projectText, useLanguage } from "../i18n";
+import { projectText, type Language } from "../i18n";
 import "./LaptopDesktop.css";
 
 const desktopProjects = library
@@ -15,8 +15,7 @@ const desktopProjects = library
 const iconColors = ["#467d90", "#ab765a", "#678c73", "#7589ad", "#b59660", "#8a7d9c"];
 
 /** The screen is physically parented to the laptop lid, not a full-screen modal. */
-export function LaptopDesktop() {
-  const { language } = useLanguage();
+export function LaptopDesktop({ language }: { language: Language }) {
   const zh = language === "zh";
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [view, setView] = useState<"web" | "info">("web");

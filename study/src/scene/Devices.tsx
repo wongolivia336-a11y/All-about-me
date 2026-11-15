@@ -139,7 +139,7 @@ function Laptop() {
               scale={0.0005}
               zIndexRange={[8, 2]}
             >
-              <LaptopDesktop />
+              <LaptopDesktop language={language} />
             </Html>
           )}
           <mesh position={[0, 0.205, 0.00385]}>

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { Component, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { Collection, ThemeId } from "./data/library";
 import { themes } from "./data/library";
 import {
@@ -64,6 +64,30 @@ const isNightNow = () => {
 
 const RoomScene = lazy(() => import("./scene/RoomScene"));
 const preloadRoomScene = () => { void import("./scene/RoomScene"); };
+
+// A cached Index can outlive a Vercel deployment that replaced its lazy
+// RoomScene chunk. Preserve navigation and offer an explicit cache-busting
+// recovery rather than allowing React's root to collapse into a blank page.
+class RoomSceneBoundary extends Component<{ children: ReactNode; retryLabel: string; backLabel: string; onBack: () => void }, { failed: boolean }> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() { return { failed: true }; }
+
+  render() {
+    if (!this.state.failed) return this.props.children;
+    return (
+      <div className="room-loading-error" role="alert">
+        <span>Room couldn't finish loading.</span>
+        <button type="button" onClick={() => {
+          const url = new URL(window.location.href);
+          url.searchParams.set("refresh", String(Date.now()));
+          window.location.replace(url);
+        }}>{this.props.retryLabel}</button>
+        <button type="button" onClick={this.props.onBack}>{this.props.backLabel}</button>
+      </div>
+    );
+  }
+}
 
 export default function App() {
   const { begin } = useLoading();
@@ -352,6 +376,7 @@ export default function App() {
   return (
     <div className={["app", isNight && "app--evening"].filter(Boolean).join(" ")}>
       {roomMounted && (
+        <RoomSceneBoundary retryLabel={copy.retry} backLabel={copy.returnToIndex} onBack={() => openIndex()}>
         <RoomRevealSurface progress={revealProgress} interactive={roomInteractive} sceneReady={roomReady}>
             <Suspense fallback={<div className="room-loading" role="status" aria-label={copy.loadingRoom} />}>
               {roomScene}
@@ -399,6 +424,7 @@ export default function App() {
           <Surface />
           {roomInteractive && <RoomExitButton ref={roomExitRef} onClick={() => openIndex()} />}
         </RoomRevealSurface>
+        </RoomSceneBoundary>
       )}
 
       {roomError && (
