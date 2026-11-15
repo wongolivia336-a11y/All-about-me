@@ -69,7 +69,7 @@
 .heartwheel__leaf-visual {
   transform-box: fill-box;
   transform-origin: center;
-  transition: transform 220ms var(--motion-standard);
+  transition: transform 420ms cubic-bezier(.18,.78,.23,1);
 }
 
 .heartwheel__leaf-fill {
@@ -85,7 +85,7 @@
 }
 
 .heartwheel__leaf--hovered .heartwheel__leaf-visual {
-  transform: scale(1.075);
+  transform: scale(1.045);
 }
 
 .heartwheel__leaf--active .heartwheel__leaf-fill {
@@ -93,7 +93,7 @@
 }
 
 .heartwheel__leaf--active .heartwheel__leaf-visual {
-  transform: scale(1.04);
+  transform: scale(1.025);
 }
 
 .heartwheel__texture {
@@ -173,12 +173,12 @@
 .heartwheel__label:hover,
 .heartwheel__label:focus-visible,
 .heartwheel__label--selected {
-  background: radial-gradient(ellipse at center,
-    color-mix(in srgb, var(--label-accent) 25%, transparent) 0%,
-    color-mix(in srgb, var(--label-accent) 13%, transparent) 48%,
-    transparent 78%);
-  text-shadow: 0 1px 12px color-mix(in srgb, var(--label-accent) 32%, transparent);
+  background: rgba(255,255,255,.36);
+  text-shadow: none;
 }
+
+.heartwheel__label:hover span,
+.heartwheel__label:focus-visible span { color: #253b47; }
 
 .heartwheel__label:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--label-ink) 84%, white);

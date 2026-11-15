@@ -84,7 +84,7 @@ export const PaperCorner = forwardRef<HTMLButtonElement, PaperCornerProps>(funct
       title={title}
       disabled={disabled}
     >
-      <span className="paper-corner__label">{label}</span>
+      <span className="sr-only">{label}</span>
       <span className="paper-corner__leaf" aria-hidden="true">
         <canvas ref={canvasRef} className="paper-corner__grain" />
         <span className="paper-corner__crease" />

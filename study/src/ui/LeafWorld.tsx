@@ -19,8 +19,8 @@ interface LeafWorldProps {
 const visibleEntries = library.filter(
   (entry) => entry.status === "published" || entry.status === "prototype",
 );
-const PORTAL_OPEN_DURATION_MS = 2480;
-const PORTAL_CLOSE_DURATION_MS = 2000;
+const PORTAL_OPEN_DURATION_MS = 850;
+const PORTAL_CLOSE_DURATION_MS = 700;
 
 function WorldCard({ entry, primary, onOpen }: { entry: ArchiveEntry; primary?: boolean; onOpen: (origin: ThemeZoomOrigin) => void }) {
   const { language, copy } = useLanguage();
@@ -151,16 +151,7 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
     >
       <div className="leaf-world-shell__control" aria-hidden={worldLayerVisible} inert={worldLayerVisible}>
         <div className="leaf-world-shell__heading">
-          <button
-            className="leaf-world-shell__overview"
-            type="button"
-            onClick={() => focused && changeTheme(activeTheme, "select")}
-            disabled={!focused}
-            aria-label={copy.overviewAria}
-          >
-            {focused ? copy.overview : copy.overviewAll}
-          </button>
-          <span>{focused ? `0${themeOrder.indexOf(activeTheme) + 1} / 04` : "01 — 04"}</span>
+          <span className="sr-only">{copy.overviewAll}</span>
         </div>
         <Heartwheel
           activeTheme={activeTheme}
@@ -173,13 +164,6 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
             if (!focused) setPreviewTheme(theme);
           }}
         />
-        <p className="leaf-world-shell__selected-label">
-          {focused
-            ? `${activeDefinition.label} / ${activeDefinition.shortLabel}`
-            : previewTheme
-              ? `${previewDefinition.label} / ${previewDefinition.shortLabel}`
-              : copy.portfolioMapAria}
-        </p>
       </div>
 
       {worldLayerVisible ? (
@@ -207,8 +191,8 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
                 ) : null}
                 <div className="leaf-world__overlay-actions">
                   <LanguageSwitch />
-                  <button type="button" onClick={() => changeTheme(activeTheme, "select")}>
-                    {copy.overview}
+                  <button className="leaf-world__back" type="button" onClick={() => changeTheme(activeTheme, "select")}>
+                    <span aria-hidden="true">←</span><span>{copy.overview.replace(/^←\s*/, "")}</span>
                   </button>
                 </div>
               </div>

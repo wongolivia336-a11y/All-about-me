@@ -41,14 +41,13 @@ export function ContactLinks() {
     <div className="archive__social-note">
       <p>{copy.socialLinkLead}</p>
       <div className="archive__social-links" role="group" aria-label={copy.socialLinksLabel}>
-        {channels.map(({ id, label, href }) => (
-          href ? (
+        {channels.filter((channel) => Boolean(channel.href)).map(({ id, label, href }) => (
             <a
               className="archive__social-link"
               key={id}
-              href={href}
-              target={href.startsWith("https://") ? "_blank" : undefined}
-              rel={href.startsWith("https://") ? "noreferrer" : undefined}
+              href={href!}
+              target={href!.startsWith("https://") ? "_blank" : undefined}
+              rel={href!.startsWith("https://") ? "noreferrer" : undefined}
               aria-label={label}
               title={label}
             >
@@ -56,20 +55,6 @@ export function ContactLinks() {
                 <ChannelIcon id={id} />
               </svg>
             </a>
-          ) : (
-            <button
-              className="archive__social-link archive__social-link--pending"
-              key={id}
-              type="button"
-              disabled
-              aria-label={`${label}. ${copy.contactLinkPending}`}
-              title={copy.contactLinkPending}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                <ChannelIcon id={id} />
-              </svg>
-            </button>
-          )
         ))}
       </div>
     </div>

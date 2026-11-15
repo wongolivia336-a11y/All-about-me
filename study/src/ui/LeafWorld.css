@@ -13,7 +13,7 @@
 }
 
 .leaf-world-shell__heading {
-  display: flex;
+  display: none;
   justify-content: space-between;
   align-items: baseline;
   min-height: 26px;
@@ -66,7 +66,7 @@
   overflow: hidden;
   clip-path: none;
   will-change: clip-path, opacity;
-  transition: clip-path 2480ms cubic-bezier(.22,.72,.18,1), opacity 320ms ease;
+  transition: clip-path 850ms cubic-bezier(.2,.72,.25,1), opacity 240ms ease;
 }
 
 .leaf-world-shell[data-transition="entering"] .leaf-world-shell__dock {
@@ -82,7 +82,7 @@
 .leaf-world-shell[data-transition="exiting"] .leaf-world-shell__dock {
   opacity: .96;
   clip-path: circle(var(--zoom-size, 34px) at var(--zoom-x, 50vw) var(--zoom-y, 50vh));
-  transition-duration: 2000ms, 320ms;
+  transition-duration: 700ms, 180ms;
 }
 
 .leaf-world-shell__resting,
@@ -160,6 +160,7 @@
 }
 
 .leaf-world-shell__portal-effect {
+  display: none;
   position: absolute;
   z-index: 2;
   inset: 0;
@@ -363,16 +364,16 @@
 .leaf-world-shell[data-mode="focused"] .leaf-world__world-nav,
 .leaf-world-shell[data-mode="focused"] .leaf-world__card,
 .leaf-world-shell[data-mode="focused"] .leaf-world__empty {
-  animation: leaf-world-ink-in 680ms cubic-bezier(.17,.86,.25,1) both;
+  animation: leaf-world-ink-in 440ms cubic-bezier(.17,.86,.25,1) both;
 }
 
-.leaf-world-shell[data-mode="focused"] .leaf-world__header h2 { animation-delay: 100ms; }
-.leaf-world-shell[data-mode="focused"] .leaf-world__header > p { animation-delay: 180ms; }
-.leaf-world-shell[data-mode="focused"] .leaf-world__world-nav { animation-delay: 250ms; }
-.leaf-world-shell[data-mode="focused"] .leaf-world__card:nth-child(1) { animation-delay: 260ms; }
-.leaf-world-shell[data-mode="focused"] .leaf-world__card:nth-child(2) { animation-delay: 340ms; }
-.leaf-world-shell[data-mode="focused"] .leaf-world__card:nth-child(3) { animation-delay: 420ms; }
-.leaf-world-shell[data-mode="focused"] .leaf-world__card:nth-child(4) { animation-delay: 500ms; }
+.leaf-world-shell[data-mode="focused"] .leaf-world__header h2 { animation-delay: 40ms; }
+.leaf-world-shell[data-mode="focused"] .leaf-world__header > p { animation-delay: 80ms; }
+.leaf-world-shell[data-mode="focused"] .leaf-world__world-nav { animation-delay: 120ms; }
+.leaf-world-shell[data-mode="focused"] .leaf-world__card:nth-child(1) { animation-delay: 150ms; }
+.leaf-world-shell[data-mode="focused"] .leaf-world__card:nth-child(2) { animation-delay: 200ms; }
+.leaf-world-shell[data-mode="focused"] .leaf-world__card:nth-child(3) { animation-delay: 250ms; }
+.leaf-world-shell[data-mode="focused"] .leaf-world__card:nth-child(4) { animation-delay: 300ms; }
 
 .leaf-world__card {
   min-width: 0;

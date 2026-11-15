@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties, type P
 import type { ThemeId } from "../data/library";
 import { themeConfig, themeOrder } from "../data/themeConfig";
 import { themeText, useLanguage } from "../i18n";
-import { HEART_PATH, HeartTextTexture } from "./HeartTextTexture";
+import { HEART_PATH } from "./HeartTextTexture";
 import { HeartwheelFallback } from "./HeartwheelFallback";
 import "./Heartwheel.css";
 
@@ -153,7 +153,9 @@ export function Heartwheel({
 
   useEffect(() => {
     if (gesture.current?.dragging) return;
-    const targetTheme = previewTheme ?? (focused ? activeTheme : null);
+    // Hover previews the content without spinning the entire wheel under the pointer.
+    // Rotation remains a deliberate click/drag action.
+    const targetTheme = focused ? activeTheme : null;
     const next = targetTheme ? nearestTarget(rotationRef.current, targetTheme) : 0;
     if (Math.abs(next - targetRotation.current) < 0.01) return;
     animateToRotation(next);
@@ -313,6 +315,12 @@ export function Heartwheel({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
+        onPointerLeave={() => {
+          if (gesture.current) return;
+          hoverLock.current = null;
+          setHoveredTheme(null);
+          onThemeHover?.(null);
+        }}
         onLostPointerCapture={() => {
           if (gesture.current) cancelGesture(gesture.current.pointerId);
         }}
@@ -324,13 +332,6 @@ export function Heartwheel({
             </Suspense>
           </div>
           <svg className="heartwheel__svg" viewBox="-170 -170 340 340" role="presentation">
-            <defs>
-              {themeOrder.map((theme) => (
-                <clipPath key={theme} id={`heart-clip-${theme}`} clipPathUnits="userSpaceOnUse">
-                  <path d={HEART_PATH} />
-                </clipPath>
-              ))}
-            </defs>
             {themeOrder.map((theme) => {
               const active = focused && activeTheme === theme;
               const hovered = hoveredTheme === theme;
@@ -342,8 +343,8 @@ export function Heartwheel({
                   style={{ "--leaf-accent": themeConfig[theme].accent, "--leaf-ink": themeConfig[theme].ink } as CSSProperties}
                   transform={`rotate(${themeConfig[theme].leafAngle} 0 0)`}
                 >
-                  <g className="heartwheel__leaf-visual">
-                    <HeartTextTexture theme={theme} clipId={`heart-clip-${theme}`} />
+                  <g className="heartwheel__leaf-visual" aria-hidden="true">
+                    <path d={HEART_PATH} className="heartwheel__leaf-fill" />
                   </g>
                   <path
                     className="heartwheel__leaf-hit"
@@ -385,6 +386,11 @@ export function Heartwheel({
                   aria-label={copy.selectTheme + themeText(theme, language).label}
                   onMouseEnter={(event) => {
                     applyPointerHover(theme, event.clientX, event.clientY);
+                  }}
+                  onMouseLeave={() => {
+                    hoverLock.current = null;
+                    setHoveredTheme(null);
+                    onThemeHover?.(null);
                   }}
                   onFocus={() => {
                     hoverLock.current = null;

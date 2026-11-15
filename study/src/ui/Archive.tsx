@@ -78,6 +78,7 @@ function ProjectCard({
             </span>
           )}
           <span className="project-card__number">{String(entry.featuredOrder ?? 0).padStart(2, "0")}</span>
+          <span className="project-card__reveal" aria-hidden="true">{copy.exploreProject}</span>
         </span>
         <span className="project-card__body">
           <span className="project-card__meta">
@@ -154,7 +155,7 @@ function ProjectDetail({
       <div className="archive__project-toolbar">
         <LanguageSwitch className="archive__language" />
         <button className="archive__back" type="button" onClick={onBack}>
-          {copy.backToWorld}
+          <span aria-hidden="true">←</span><span>{copy.backToWorld}</span>
         </button>
       </div>
       <div className="archive__project-grid">
@@ -186,9 +187,6 @@ function ProjectDetail({
               width="1600"
               height="1000"
             />
-            {entry.coverKind === "conceptual" && (
-              <figcaption>{copy.conceptualCaption}</figcaption>
-            )}
           </figure>
         ) : (
           <div className="archive__project-cover archive__project-cover--empty" aria-label={copy.noPublicCover}>
@@ -239,10 +237,17 @@ export function Archive({
   }, [initialFocused, initialTheme]);
   const scrollToSection = useCallback((id: string) => {
     setMenuOpen(false);
-    const target = archiveRef.current?.querySelector<HTMLElement>(`#${id}`);
-    target?.scrollIntoView({
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
-      block: id === "top" ? "start" : "start",
+    const container = archiveRef.current;
+    const target = container?.querySelector<HTMLElement>(`#${id}`);
+    if (!container || !target) return;
+    // The archive is the scroll root; window.scrollTo/scrollIntoView can leave
+    // this nested scroll position unchanged after fixed overlay transitions.
+    const destination = id === "top"
+      ? 0
+      : container.scrollTop + target.getBoundingClientRect().top - container.getBoundingClientRect().top - 96;
+    container.scrollTo({
+      top: Math.max(0, destination),
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
     });
   }, []);
 
@@ -461,10 +466,6 @@ export function Archive({
                   </button>
                   <a href={`mailto:${CONTACT_EMAIL}`}>{copy.startConversation}</a>
                 </div>
-                <p className="archive__hero-note">
-                  <span>2026</span><span aria-hidden="true">/</span><span>FOUR HEARTS</span>
-                  <span className="archive__hero-note-copy">{copy.portfolioMapAria}</span>
-                </p>
               </div>
             </section>
 

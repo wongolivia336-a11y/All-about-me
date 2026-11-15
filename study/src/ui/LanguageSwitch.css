@@ -2,52 +2,66 @@
   display: inline-flex;
   flex: none;
   align-items: center;
-  gap: 12px;
-  color: var(--color-muted, #64645d);
-  font: 11px/1 var(--font-mono, ui-monospace, monospace);
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid rgba(142, 153, 162, 0.28);
+  border-radius: 999px;
+  background: linear-gradient(145deg, rgba(255,255,255,.76), rgba(224,231,235,.56));
+  box-shadow: inset 0 1px rgba(255,255,255,.9), 0 3px 14px rgba(52,65,73,.06);
+  backdrop-filter: blur(20px) saturate(1.22);
+  -webkit-backdrop-filter: blur(20px) saturate(1.22);
+  color: #626d73;
+  font: 11px/1 var(--font-sans, system-ui, sans-serif);
 }
 
 .language-switch button {
-  min-height: 30px;
-  padding: 0 1px;
+  min-width: 40px;
+  min-height: 32px;
+  padding: 0 11px;
   border: 0;
-  border-bottom: 1px solid transparent;
+  border-radius: 999px;
   background: transparent;
   color: inherit;
   font: inherit;
   cursor: pointer;
-  transition: color 140ms ease, border-color 140ms ease;
+  transition: color 220ms ease, background 240ms ease, box-shadow 240ms ease, transform 240ms cubic-bezier(.2,.85,.25,1);
 }
 
 .language-switch button[aria-pressed="true"] {
-  border-bottom-color: currentColor;
-  color: var(--color-ink, #282923);
+  background: rgba(255, 255, 255, .93);
+  box-shadow: 0 1px 4px rgba(44,56,64,.12), inset 0 1px 0 #fff;
+  color: #25333b;
   font-weight: 600;
 }
 
 .language-switch button:hover {
-  color: var(--color-ink, #282923);
+  color: #25333b;
+  transform: translateY(-1px);
 }
 
 .language-switch button:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 3px;
+  outline: 2px solid #4e6776;
+  outline-offset: 2px;
 }
 
 .app--evening .hud .language-switch {
-  color: rgba(247, 247, 245, 0.72);
+  border-color: rgba(255,255,255,.25);
+  background: rgba(245,247,248,.16);
+  color: rgba(247, 247, 245, .82);
 }
 
 .app--evening .hud .language-switch button[aria-pressed="true"] {
-  color: #f7f7f5;
+  color: #28333a;
 }
 
 @media (max-width: 620px) {
   .language-switch {
-    gap: 9px;
+    gap: 2px;
+    padding: 3px;
   }
 
   .language-switch button {
+    min-width: 42px;
     min-height: 44px;
   }
 }
