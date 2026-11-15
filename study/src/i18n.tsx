@@ -335,7 +335,7 @@ const translations: Record<Language, Copy> = {
     worldNavigation: "切换四个世界",
     viewAllTheme: "查看全部 ",
     selectLeafHint: "选择一片叶片，进入它的世界。",
-    overviewTitle: "四颗心，四种观看方式。",
+    overviewTitle: "四颗心，四个世界。",
     overviewDescription: "一些真实项目、问题、实验，以及值得留下的事物。",
     currentTheme: "当前主题：",
     focusAnnouncement: " 已展开。再次选择该叶片可返回概览。",

@@ -18,7 +18,6 @@ export interface ThemeZoomOrigin {
 interface HeartwheelProps {
   activeTheme: ThemeId;
   focused?: boolean;
-  previewTheme?: ThemeId | null;
   onThemeChange: (theme: ThemeId, source?: "select" | "drag", origin?: ThemeZoomOrigin) => void;
   onThemeHover?: (theme: ThemeId | null) => void;
 }
@@ -65,7 +64,6 @@ const themeForRotation = (rotation: number) => {
 export function Heartwheel({
   activeTheme,
   focused = true,
-  previewTheme = null,
   onThemeChange,
   onThemeHover,
 }: HeartwheelProps) {
@@ -159,14 +157,7 @@ export function Heartwheel({
     const next = targetTheme ? nearestTarget(rotationRef.current, targetTheme) : 0;
     if (Math.abs(next - targetRotation.current) < 0.01) return;
     animateToRotation(next);
-  }, [activeTheme, focused, previewTheme]);
-
-  useEffect(() => {
-    if (!focused && !previewTheme) {
-      setHoveredTheme(null);
-      onThemeHover?.(null);
-    }
-  }, [focused, onThemeHover, previewTheme]);
+  }, [activeTheme, focused]);
 
   const originFromElement = (element: Element): ThemeZoomOrigin => {
     const bounds = element.getBoundingClientRect();
@@ -185,6 +176,9 @@ export function Heartwheel({
   };
 
   const chooseTheme = (theme: ThemeId, origin?: ThemeZoomOrigin) => {
+    hoverLock.current = null;
+    setHoveredTheme(null);
+    onThemeHover?.(null);
     const next = nearestTarget(rotationRef.current, theme);
     animateToRotation(next, () => onThemeChange(theme, "select", originFromTheme(theme) ?? origin));
   };

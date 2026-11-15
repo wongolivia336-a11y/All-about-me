@@ -156,7 +156,6 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
         <Heartwheel
           activeTheme={activeTheme}
           focused={focused}
-          previewTheme={previewTheme}
           onThemeChange={(theme, source, origin) => {
             changeTheme(theme, source, origin);
           }}
@@ -236,16 +235,10 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
           aria-labelledby="leaf-resting-title"
           style={{ "--intro-accent": previewDefinition.accent, "--intro-ink": previewDefinition.ink } as CSSProperties}
         >
-          <p className="leaf-world-shell__eyebrow">
-            {previewTheme ? previewDefinition.descriptor : copy.fourThemeIndex}
-          </p>
           <h2 id="leaf-resting-title">
             {previewTheme ? previewDefinition.shortLabel : copy.overviewTitle}
           </h2>
           <p>{previewTheme ? previewDefinition.description : copy.overviewDescription}</p>
-          <span className="leaf-world-shell__hint">
-            {previewTheme ? copy.enterWorld : copy.selectLeafHint}
-          </span>
         </section>
       )}
     </div>
