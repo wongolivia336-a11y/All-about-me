@@ -6,10 +6,13 @@ import {
 } from "../data/library";
 import { CONTACT_EMAIL, GITHUB_USER } from "../data/links";
 import type { ThemeZoomOrigin } from "../brand/Heartwheel";
+import type { QuickReadPageId } from "../data/quickRead";
 import { projectText, themeText, useLanguage } from "../i18n";
 import { ContactLinks } from "./ContactLinks";
 import { LeafWorld as LeafCanvas, type ThemeSelectionSource } from "./LeafWorld";
 import { LanguageSwitch } from "./LanguageSwitch";
+import { QuickRead } from "./QuickRead";
+import { QuickReadPage } from "./QuickReadPage";
 
 interface ArchiveProps {
   active: boolean;
@@ -17,10 +20,13 @@ interface ArchiveProps {
   initialFocused: boolean;
   showThemeArchive: boolean;
   projectId?: string;
+  quickReadId?: QuickReadPageId;
   onClose: () => void;
   onThemeChange: (theme: ThemeId, showAll?: boolean, focused?: boolean, origin?: ThemeZoomOrigin) => void;
   onProjectOpen: (entry: ArchiveEntry, origin?: ThemeZoomOrigin) => void;
   onProjectClose: (theme: ThemeId) => void;
+  onQuickReadOpen: (pageId: QuickReadPageId) => void;
+  onQuickReadClose: () => void;
 }
 const visibleEntries = library.filter(
   (entry) => entry.status === "published" || entry.status === "prototype",
@@ -205,10 +211,13 @@ export function Archive({
   initialFocused,
   showThemeArchive,
   projectId,
+  quickReadId,
   onClose,
   onThemeChange,
   onProjectOpen,
   onProjectClose,
+  onQuickReadOpen,
+  onQuickReadClose,
 }: ArchiveProps) {
   const { language, copy } = useLanguage();
   const heroNameParts = copy.heroTitle.replace(/\.$/, "").split(" ");
@@ -399,8 +408,8 @@ export function Archive({
         className="archive"
         data-zoom={selectedProject ? "project" : worldFocused ? "world" : "index"}
         aria-label={copy.archiveAria}
-        aria-hidden={Boolean(selectedProject)}
-        inert={Boolean(selectedProject)}
+        aria-hidden={Boolean(selectedProject || quickReadId)}
+        inert={Boolean(selectedProject || quickReadId)}
       >
         <div className="archive__shell">
           <header className="archive__bar" id="top" aria-hidden={worldFocused} inert={worldFocused}>
@@ -485,34 +494,10 @@ export function Archive({
             </section>
           </div>
 
-          <section id="resume" className="archive__resume" aria-labelledby="resume-title" aria-hidden={worldFocused} inert={worldFocused}>
-            <div className="archive__resume-heading">
-              <p className="archive__eyebrow">{copy.resumeEyebrow}</p>
-              <h2 id="resume-title">{copy.resumeTitle}</h2>
-            </div>
-            <div className="archive__resume-grid">
-              <article>
-                <p className="archive__eyebrow">{copy.experienceLabel}</p>
-                <h3>{copy.experienceTitle}</h3>
-                <p>{copy.experienceBody}</p>
-                <button type="button" onClick={() => selectTheme("build")}>{copy.openExperience} <span aria-hidden="true">↗</span></button>
-              </article>
-              <article>
-                <p className="archive__eyebrow">{copy.educationLabel}</p>
-                <h3>{copy.educationTitle}</h3>
-                <p>{copy.educationBody}</p>
-                <button type="button" onClick={() => selectTheme("question")}>{copy.openEducation} <span aria-hidden="true">↗</span></button>
-              </article>
-              <article>
-                <p className="archive__eyebrow">{copy.selectedWorkLabel}</p>
-                <h3>{copy.selectedWorkTitle}</h3>
-                <p>{copy.selectedWorkBody}</p>
-                <button type="button" onClick={() => scrollToSection("selected-works")}>
-                  {copy.browseSelectedWork} <span aria-hidden="true">↗</span>
-                </button>
-              </article>
-            </div>
-          </section>
+          <QuickRead
+            active={!worldFocused}
+            onOpenPage={onQuickReadOpen}
+          />
 
           <section id="selected-works" className="archive__selected" aria-labelledby="selected-title" aria-hidden={worldFocused} inert={worldFocused}>
             <div className="archive__section-heading">
@@ -558,6 +543,15 @@ export function Archive({
           </footer>
         </div>
       </main>
+      {quickReadId && (
+        <QuickReadPage
+          pageId={quickReadId}
+          entries={featuredEntries}
+          onBack={onQuickReadClose}
+          onNavigate={onQuickReadOpen}
+          onProjectOpen={openProject}
+        />
+      )}
       {selectedProject && (
         <ProjectDetail
           entry={selectedProject}

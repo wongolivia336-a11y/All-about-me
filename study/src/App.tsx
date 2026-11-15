@@ -1,6 +1,7 @@
 import { Component, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { Collection, ThemeId } from "./data/library";
 import { themes } from "./data/library";
+import { isQuickReadPageId, type QuickReadPageId } from "./data/quickRead";
 import {
   focus,
   reportMusicUnavailable,
@@ -27,6 +28,7 @@ interface IndexRoute {
   archive?: boolean;
   projectId?: string;
   focused?: boolean;
+  quickReadId?: QuickReadPageId;
 }
 
 type Route = IndexRoute | { view: "room" };
@@ -45,6 +47,9 @@ const routeFromHash = (): Route => {
   if (hash === "room") return { view: "room" };
 
   const [, themeCandidate, projectId] = hash.split("/");
+  if (themeCandidate === "quick" && isQuickReadPageId(projectId)) {
+    return { view: "index", theme: "build", quickReadId: projectId };
+  }
   const hasTheme = isTheme(themeCandidate);
   return {
     view: "index",
@@ -54,8 +59,10 @@ const routeFromHash = (): Route => {
   };
 };
 
-const hashForIndex = ({ theme, archive, projectId, focused }: IndexRoute) =>
-  archive || focused || projectId ? `#index/${theme}${projectId ? `/${projectId}` : ""}` : "#index";
+const hashForIndex = ({ theme, archive, projectId, focused, quickReadId }: IndexRoute) =>
+  quickReadId
+    ? `#index/quick/${quickReadId}`
+    : archive || focused || projectId ? `#index/${theme}${projectId ? `/${projectId}` : ""}` : "#index";
 
 const isNightNow = () => {
   const hour = new Date().getHours();
@@ -114,6 +121,7 @@ export default function App() {
   const viewRef = useRef<View>(initialRoute.view);
   const indexRouteRef = useRef(indexRoute);
   const projectOriginRoute = useRef<IndexRoute | null>(null);
+  const quickReadOriginRoute = useRef<IndexRoute | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const indexTrigger = useRef<HTMLButtonElement>(null);
   const roomExitRef = useRef<HTMLButtonElement>(null);
@@ -299,6 +307,24 @@ export default function App() {
     applyIndexRoute({ view: "index", theme, archive: showAll, focused });
   }, [applyIndexRoute]);
 
+  const handleQuickReadOpen = useCallback((quickReadId: QuickReadPageId) => {
+    const current = indexRouteRef.current;
+    if (!current.quickReadId) quickReadOriginRoute.current = { ...current };
+    // Switching between the three subpages replaces the current quick-read
+    // entry, so its Back button returns to the index instead of stepping back
+    // through every tab the visitor opened.
+    applyIndexRoute({ view: "index", theme: current.theme, quickReadId }, !current.quickReadId);
+  }, [applyIndexRoute]);
+
+  const handleQuickReadClose = useCallback(() => {
+    if (quickReadOriginRoute.current) {
+      quickReadOriginRoute.current = null;
+      window.history.back();
+      return;
+    }
+    applyIndexRoute({ view: "index", theme: "build" }, false);
+  }, [applyIndexRoute]);
+
   const handleProjectOpen = useCallback((entry: { id: string; primaryTheme: ThemeId }) => {
     projectOriginRoute.current = indexRouteRef.current;
     applyIndexRoute({ view: "index", theme: entry.primaryTheme, focused: true, projectId: entry.id });
@@ -322,6 +348,10 @@ export default function App() {
           handleProjectClose(current.theme);
           return;
         }
+        if (current.quickReadId) {
+          handleQuickReadClose();
+          return;
+        }
         if (current.focused) {
           focus(null);
           applyIndexRoute({ view: "index", theme: current.theme, focused: false }, false);
@@ -337,7 +367,7 @@ export default function App() {
 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [applyIndexRoute, focused, handleProjectClose, openIndex]);
+  }, [applyIndexRoute, focused, handleProjectClose, handleQuickReadClose, openIndex]);
 
   const brightnessPercent = Math.round(lampBrightness * 100);
   const markRoomReady = useCallback(() => {
@@ -435,7 +465,7 @@ export default function App() {
         </div>
       )}
 
-      {route.view === "index" && viewTransition === "idle" && !indexRoute.focused && !indexRoute.projectId && (
+      {route.view === "index" && viewTransition === "idle" && !indexRoute.focused && !indexRoute.projectId && !indexRoute.quickReadId && (
         <PaperCorner
           ref={indexTrigger}
           label="Room"
@@ -463,10 +493,13 @@ export default function App() {
             initialFocused={Boolean(indexRoute.focused || indexRoute.projectId)}
             showThemeArchive={Boolean(indexRoute.archive || indexRoute.projectId)}
             projectId={indexRoute.projectId}
+            quickReadId={indexRoute.quickReadId}
             onClose={enterRoom}
             onThemeChange={handleThemeChange}
             onProjectOpen={handleProjectOpen}
             onProjectClose={handleProjectClose}
+            onQuickReadOpen={handleQuickReadOpen}
+            onQuickReadClose={handleQuickReadClose}
           />
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useRef } from "react";
+import { forwardRef } from "react";
 
 interface PaperCornerProps {
   label: string;
@@ -10,78 +10,11 @@ interface PaperCornerProps {
   className?: string;
 }
 
-/** The fold has a deterministic, procedural paper-fibre overlay. */
+/** A paper corner folded over the existing Room entry control. */
 export const PaperCorner = forwardRef<HTMLButtonElement, PaperCornerProps>(function PaperCorner(
-  {
-    label,
-    ariaLabel,
-    title,
-    onClick,
-    onPreload,
-    disabled = false,
-    className,
-  },
+  { label, ariaLabel, title, onClick, onPreload, disabled = false, className },
   forwardedRef,
 ) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    // Keep texture features close to CSS-pixel scale, otherwise the browser
-    // averages the fibres away when the corner is drawn at ~76px.
-    const size = 128;
-    canvas.width = size;
-    canvas.height = size;
-
-    const context = canvas.getContext("2d");
-    if (!context) return;
-    let seed = 9137;
-    const random = () => {
-      seed = (seed * 1664525 + 1013904223) % 4294967296;
-      return seed / 4294967296;
-    };
-
-    // Pixel-level tooth: both warm fibres and tiny translucent pinholes.
-    // A transparent overlay leaves the directional lighting to the CSS leaf.
-    const grain = context.createImageData(size, size);
-    for (let index = 0; index < grain.data.length; index += 4) {
-      const dark = random() > .47;
-      const shade = dark ? 91 : 255;
-      grain.data[index] = shade;
-      grain.data[index + 1] = dark ? 83 : 255;
-      grain.data[index + 2] = dark ? 69 : 249;
-      grain.data[index + 3] = Math.round(random() * (dark ? 65 : 25));
-    }
-    context.putImageData(grain, 0, 0);
-
-    // Uncoated stock contains directional, irregular cellulose strands.
-    for (let index = 0; index < 530; index += 1) {
-      const x = random() * size;
-      const y = random() * size;
-      const length = 1 + random() * 13;
-      const alpha = .055 + random() * .19;
-      context.strokeStyle = `rgba(80, 69, 53, ${alpha})`;
-      context.lineWidth = .35 + random() * .85;
-      context.beginPath();
-      context.moveTo(x, y);
-      context.quadraticCurveTo(x + length * .5, y + (random() - .5) * 3, x + length, y + (random() - .5) * 4);
-      context.stroke();
-    }
-
-    // Sparse, larger pulp flecks provide the irregular scale of real stock.
-    for (let index = 0; index < 85; index += 1) {
-      const x = random() * size;
-      const y = random() * size;
-      const radius = .4 + random() * 2.6;
-      context.fillStyle = `rgba(92, 87, 74, ${.025 + random() * .075})`;
-      context.beginPath();
-      context.arc(x, y, radius, 0, Math.PI * 2);
-      context.fill();
-    }
-  }, []);
-
   return (
     <button
       ref={forwardedRef}
@@ -95,12 +28,85 @@ export const PaperCorner = forwardRef<HTMLButtonElement, PaperCornerProps>(funct
       disabled={disabled}
     >
       <span className="sr-only">{label}</span>
-      <span className="paper-corner__leaf" aria-hidden="true">
-        <canvas ref={canvasRef} className="paper-corner__grain" />
-        <span className="paper-corner__light" />
-        <span className="paper-corner__crease" />
-        <span className="paper-corner__edge" />
+      <span className="paper-corner__underpage" aria-hidden="true">
+        <svg viewBox="0 0 124 124" focusable="false">
+          <defs>
+            <linearGradient id="paper-under" x1="18" y1="7" x2="117" y2="118" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#f9fbfa" />
+              <stop offset=".44" stopColor="#edf1ef" />
+              <stop offset=".78" stopColor="#d5dddb" />
+              <stop offset="1" stopColor="#b7c2c2" />
+            </linearGradient>
+            <filter id="paper-under-shadow" x="-30%" y="-20%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="3.5" />
+            </filter>
+          </defs>
+          <path d="M8 3H121V118C112 113 104 107 97 100 86 90 79 80 69 69 51 49 31 25 8 3Z" fill="#39454a" opacity=".24" filter="url(#paper-under-shadow)" transform="translate(-2 3)" />
+          <path d="M8 3H121V118C112 113 104 107 97 100 86 90 79 80 69 69 51 49 31 25 8 3Z" fill="url(#paper-under)" />
+          <path d="M83 35c3.5-4.8 10.5-4.8 14 0-3.5 4.8-10.5 4.8-14 0Z" fill="#59717a" opacity=".78" />
+          <circle cx="90" cy="35" r="2.1" fill="#f9fbfa" />
+          <text x="76" y="56" fill="#596b70" fontSize="6.7" fontFamily="ui-monospace, monospace" letterSpacing=".9">ROOM</text>
+        </svg>
       </span>
+      <span className="paper-corner__flap" aria-hidden="true">
+        <svg viewBox="0 0 124 124" focusable="false">
+          <defs>
+            <linearGradient id="paper-face" x1="10" y1="0" x2="120" y2="122" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#fff" />
+              <stop offset=".3" stopColor="#fcfdfc" />
+              <stop offset=".58" stopColor="#f1f4f2" />
+              <stop offset=".8" stopColor="#e1e6e4" />
+              <stop offset="1" stopColor="#c8d1d0" />
+            </linearGradient>
+            <linearGradient id="paper-roll" x1="24" y1="13" x2="111" y2="110" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#fff" stopOpacity=".96" />
+              <stop offset=".22" stopColor="#fff" stopOpacity=".26" />
+              <stop offset=".53" stopColor="#879390" stopOpacity=".08" />
+              <stop offset=".78" stopColor="#566468" stopOpacity=".34" />
+              <stop offset="1" stopColor="#fff" stopOpacity=".88" />
+            </linearGradient>
+            <linearGradient id="paper-ridge" x1="52" y1="48" x2="113" y2="112" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#fff" stopOpacity=".08" />
+              <stop offset=".26" stopColor="#fff" stopOpacity=".86" />
+              <stop offset=".54" stopColor="#aeb8b5" stopOpacity=".28" />
+              <stop offset=".76" stopColor="#5b696e" stopOpacity=".27" />
+              <stop offset="1" stopColor="#fff" stopOpacity=".78" />
+            </linearGradient>
+            <linearGradient id="paper-crease" x1="25" y1="21" x2="112" y2="108" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#fff" stopOpacity=".9" />
+              <stop offset=".5" stopColor="#8d9996" stopOpacity=".16" />
+              <stop offset=".86" stopColor="#46565d" stopOpacity=".48" />
+              <stop offset="1" stopColor="#fff" stopOpacity=".94" />
+            </linearGradient>
+            <linearGradient id="paper-edge" x1="36" y1="34" x2="109" y2="106" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#fff" stopOpacity=".06" />
+              <stop offset=".56" stopColor="#fff" stopOpacity=".56" />
+              <stop offset="1" stopColor="#718080" stopOpacity=".18" />
+            </linearGradient>
+            <filter id="paper-fibre" x="-10%" y="-10%" width="120%" height="120%">
+              <feTurbulence type="fractalNoise" baseFrequency=".78" numOctaves="2" seed="14" stitchTiles="stitch" result="grain" />
+              <feColorMatrix in="grain" type="saturate" values="0" result="mono" />
+              <feComponentTransfer in="mono" result="soft-grain">
+                <feFuncA type="table" tableValues="0 .13" />
+              </feComponentTransfer>
+              <feBlend in="SourceGraphic" in2="soft-grain" mode="multiply" />
+            </filter>
+            <filter id="paper-edge-shadow" x="-30%" y="-20%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="1.6" />
+            </filter>
+          </defs>
+          <path d="M7 1H123V121C115 117 107 112 101 106 92 98 87 90 79 81 73 74 68 67 61 59 44 40 26 17 7 1Z" fill="#59666a" opacity=".25" filter="url(#paper-edge-shadow)" transform="translate(-1 4)" />
+          <path d="M7 1H123V121C115 117 107 112 101 106 92 98 87 90 79 81 73 74 68 67 61 59 44 40 26 17 7 1Z" fill="url(#paper-face)" filter="url(#paper-fibre)" />
+          <path d="M7 1C27 13 44 32 61 51 69 60 75 68 82 76 91 87 98 96 106 103 111 108 117 113 123 117" fill="none" stroke="#788482" strokeOpacity=".42" strokeWidth="5" filter="url(#paper-edge-shadow)" />
+          <path d="M48 42C60 54 69 65 80 77 91 89 103 102 123 117 112 114 101 106 92 98 81 88 72 77 63 67 56 59 51 51 48 42Z" fill="url(#paper-ridge)" opacity=".82" />
+          <path d="M7 1C27 13 44 32 61 51 69 60 75 68 82 76 91 87 98 96 106 103 111 108 117 113 123 117" fill="none" stroke="url(#paper-roll)" strokeWidth="3.6" />
+          <path d="M8 1C29 14 46 33 63 52 71 61 77 69 84 77 93 88 100 97 108 104 113 109 118 113 123 117" fill="none" stroke="url(#paper-crease)" strokeWidth="1.2" />
+          <path d="M11 4C32 18 48 36 65 54 73 63 79 71 86 79 95 89 102 98 110 105 115 110 119 114 122 116" fill="none" stroke="#fff" strokeOpacity=".78" strokeWidth=".65" />
+          <path d="M17 7C38 23 54 41 71 59 79 67 86 76 93 84" fill="none" stroke="url(#paper-edge)" strokeWidth="8" strokeLinecap="round" opacity=".62" />
+          <path d="M24 10C46 27 63 46 80 64 91 76 99 87 108 96" fill="none" stroke="#75817f" strokeOpacity=".12" strokeWidth=".8" />
+        </svg>
+      </span>
+      <span className="paper-corner__label" aria-hidden="true">{label.toUpperCase()} <i>↗</i></span>
     </button>
   );
 });

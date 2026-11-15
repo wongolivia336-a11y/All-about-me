@@ -32,6 +32,16 @@
   white-space: nowrap;
 }
 
+.leaf-world-shell__overview {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height-standard, 40px);
+  padding: 0 8px;
+  border-radius: var(--control-radius-standard, 8px);
+  font: var(--control-font-weight, 500) var(--control-font-size, 13px)/var(--control-line-height, 1.2) var(--font-sans, system-ui, sans-serif);
+  transition: color var(--control-transition, 180ms ease), background var(--control-transition, 180ms ease);
+}
+
 .leaf-world-shell__overview:not(:disabled) { cursor: pointer; }
 .leaf-world-shell__overview:not(:disabled):hover,
 .leaf-world-shell__overview:not(:disabled):focus-visible {

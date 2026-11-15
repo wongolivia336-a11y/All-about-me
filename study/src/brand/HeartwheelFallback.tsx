@@ -1,5 +1,5 @@
 import { themeConfig, themeOrder } from "../data/themeConfig";
-import { HEART_PATH } from "./HeartTextTexture";
+import { HEART_PATH } from "./heartPath";
 
 export function HeartwheelFallback() {
   return (

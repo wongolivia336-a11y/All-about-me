@@ -14,6 +14,20 @@
     "PingFang SC", "Microsoft YaHei", Inter, system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --motion-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --control-height-compact: 32px;
+  --control-height-standard: 40px;
+  --control-hit-target: 44px;
+  --control-radius-compact: 6px;
+  --control-radius-standard: 8px;
+  --control-radius-pill: 999px;
+  --control-font-size: 13px;
+  --control-font-weight: 500;
+  --control-line-height: 1.2;
+  --control-padding-inline: 14px;
+  --control-focus-color: #526c79;
+  --control-focus-width: 2px;
+  --control-focus-offset: 3px;
+  --control-transition: 180ms var(--motion-standard);
 
   --ink: var(--color-ink);
   --ink-soft: var(--color-muted);
@@ -31,6 +45,11 @@
 
 * {
   box-sizing: border-box;
+}
+
+button {
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
 }
 
 html,
@@ -156,17 +175,23 @@ body {
 
 .hud__btn {
   appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-height-standard);
   border: 1px solid var(--line);
   background: var(--glass);
   backdrop-filter: blur(16px) saturate(1.4);
   -webkit-backdrop-filter: blur(16px) saturate(1.4);
   color: var(--ink);
   font: inherit;
-  font-size: 12.5px;
-  padding: 8px 14px;
-  border-radius: 999px;
+  font-size: var(--control-font-size);
+  font-weight: var(--control-font-weight);
+  line-height: var(--control-line-height);
+  padding: 0 var(--control-padding-inline);
+  border-radius: var(--control-radius-standard);
   cursor: pointer;
-  transition: transform 140ms ease, background 200ms ease;
+  transition: transform var(--control-transition), background var(--control-transition), border-color var(--control-transition), box-shadow var(--control-transition);
 }
 
 .hud__btn:hover {
@@ -283,14 +308,16 @@ body {
   position: absolute;
   top: 16px;
   right: 16px;
-  width: 28px;
-  height: 28px;
+  display: grid;
+  place-items: center;
+  width: var(--control-hit-target);
+  height: var(--control-hit-target);
   border: none;
   border-radius: 50%;
   background: rgba(128, 128, 128, 0.16);
   color: var(--ink);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 16px;
   line-height: 1;
 }
 
@@ -343,13 +370,18 @@ body {
 }
 
 .panel__cta {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-height-standard);
   margin-top: 22px;
-  padding: 11px 20px;
-  border-radius: 999px;
+  padding: 0 var(--control-padding-inline);
+  border-radius: var(--control-radius-standard);
   background: var(--ink);
   color: var(--paper);
-  font-size: 13px;
+  font-size: var(--control-font-size);
+  font-weight: var(--control-font-weight);
+  line-height: var(--control-line-height);
   text-decoration: none;
 }
 
@@ -409,7 +441,7 @@ body {
   border: none;
   cursor: pointer;
   font: inherit;
-  font-size: 13px;
+  font-size: var(--control-font-size);
 }
 
 .gh__head {
@@ -672,7 +704,7 @@ body {
 }
 
 .viewer__tools .language-switch button {
-  min-height: 32px;
+  min-height: var(--control-height-compact);
 }
 
 .viewer__download,
@@ -681,14 +713,16 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 42px;
+  min-height: var(--control-height-standard);
   border: 1px solid rgb(127 139 140 / 22%);
   background: linear-gradient(145deg, rgb(255 255 255 / 88%), rgb(227 233 234 / 58%));
   color: #24322f;
   font: inherit;
-  font-size: 12.5px;
-  padding: 0 17px;
-  border-radius: 999px;
+  font-size: var(--control-font-size);
+  font-weight: var(--control-font-weight);
+  line-height: var(--control-line-height);
+  padding: 0 var(--control-padding-inline);
+  border-radius: var(--control-radius-standard);
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
@@ -749,8 +783,9 @@ body {
   z-index: 1;
   top: 50%;
   transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
+  width: var(--control-hit-target);
+  height: var(--control-hit-target);
+  padding: 0;
   border: 1px solid rgb(127 139 140 / 23%);
   border-radius: 50%;
   background: rgb(255 255 255 / 83%);
@@ -807,7 +842,7 @@ body {
   flex: 0 0 auto;
   padding: 0;
   border: 1px solid transparent;
-  border-radius: 2px;
+  border-radius: var(--control-radius-compact);
   background: none;
   cursor: pointer;
   opacity: 0.58;
@@ -825,7 +860,7 @@ body {
   display: block;
   height: 52px;
   width: auto;
-  border-radius: 2px;
+  border-radius: var(--control-radius-compact);
 }
 
 @media (max-width: 720px) {
@@ -841,9 +876,9 @@ body {
 
   .viewer__download,
   .viewer__close {
-    min-height: 38px;
-    padding: 0 11px;
-    font-size: 11px;
+    min-height: var(--control-hit-target);
+    padding: 0 12px;
+    font-size: var(--control-font-size);
   }
 
   .viewer__stage {
@@ -857,8 +892,8 @@ body {
   }
 
   .viewer__nav {
-    width: 32px;
-    height: 32px;
+    width: var(--control-hit-target);
+    height: var(--control-hit-target);
     font-size: 18px;
   }
 
@@ -1012,17 +1047,19 @@ body {
 .hud__btn--icon {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: var(--control-hit-target);
+  min-width: var(--control-hit-target);
+  height: var(--control-hit-target);
   padding: 0;
   font-size: 16px;
+  border-radius: 50%;
 }
 
 button:focus-visible,
 a:focus-visible,
 input:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 3px;
+  outline: var(--control-focus-width) solid var(--control-focus-color);
+  outline-offset: var(--control-focus-offset);
 }
 
 .archive {
@@ -1080,12 +1117,13 @@ input:focus-visible {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 0;
+  min-height: var(--control-hit-target);
+  padding: 0 8px;
   border: none;
   background: transparent;
   color: inherit;
   font: inherit;
-  font-size: 13px;
+  font-size: var(--control-font-size);
   cursor: pointer;
 }
 
@@ -1103,6 +1141,7 @@ input:focus-visible {
 
 .archive__tab {
   flex: 0 0 auto;
+  min-height: var(--control-hit-target);
   padding: 0 0 15px;
   border: none;
   border-bottom: 2px solid transparent;

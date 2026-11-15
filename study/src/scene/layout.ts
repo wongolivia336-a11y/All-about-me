@@ -5,7 +5,7 @@
  * here, so nudging a prop on the desk moves its close-up with it instead of
  * silently drifting out of frame.
  *
- * Units are metres and the scale is real: a 1.7m desk, a 0.31m laptop. Keeping
+ * Units are metres and the scale is real: a 1.7m desk and a compact 0.34m Macintosh. Keeping
  * it physical is what makes the lighting behave.
  */
 export const DESK_TOP_Y = 0.75;
@@ -39,7 +39,7 @@ export const WINDOW_OPENING = {
 /**
  * Usable desk surface: x from -0.85 to 0.85, z from -1.41 to -0.69.
  *
- * Laid out in three bands — a back row against the wall, the laptop in the
+ * Laid out in three bands — a back row against the wall, the Macintosh in the
  * middle, and a front row at the near edge — so nothing overlaps and the
  * surface still reads as used rather than arranged.
  */
