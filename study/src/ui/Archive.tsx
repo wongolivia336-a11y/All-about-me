@@ -35,6 +35,9 @@ const visibleEntries = library.filter(
 const featuredEntries = visibleEntries
   .filter((entry) => entry.featured)
   .sort((a, b) => (a.featuredOrder ?? 99) - (b.featuredOrder ?? 99));
+const allProjectEntries = visibleEntries
+  .filter((entry) => entry.portfolioOrder !== undefined)
+  .sort((a, b) => (a.portfolioOrder ?? 99) - (b.portfolioOrder ?? 99));
 
 function ProjectCard({
   entry,
@@ -102,6 +105,52 @@ function ProjectCard({
     </article>
   );
 }
+
+function ProjectIndexItem({
+  entry,
+  onOpen,
+}: {
+  entry: ArchiveEntry;
+  onOpen: (origin: ThemeZoomOrigin) => void;
+}) {
+  const { language, copy } = useLanguage();
+  const definition = themeText(entry.primaryTheme, language);
+  const localized = projectText(entry, language);
+  return (
+    <li className="project-index__item" style={{ "--card-accent": definition.accent, "--card-ink": definition.ink } as CSSProperties}>
+      <button
+        className="project-index__open"
+        type="button"
+        data-project-entry={entry.id}
+        data-project-context="all-projects"
+        onClick={(event) => {
+          const bounds = event.currentTarget.getBoundingClientRect();
+          onOpen({ x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 });
+        }}
+      >
+        <span className="project-index__meta">
+          <span className="project-index__number">{String(entry.portfolioOrder ?? 0).padStart(2, "0")}</span>
+          <span>{definition.label} / {localized.type}</span>
+          {entry.status === "prototype" && <span>{localized.status}</span>}
+        </span>
+        <strong>{localized.title}</strong>
+        <span className="project-index__summary">{localized.summary}</span>
+        <span className="project-index__tags">{localized.tags.slice(0, 2).map((tag) => <i key={tag}>{tag}</i>)}</span>
+        <span className="project-index__action">{copy.exploreProject} <span aria-hidden="true">↗</span></span>
+      </button>
+      {entry.links.length > 0 && (
+        <div className="project-index__links">
+          {entry.links.map((link, index) => (
+            <a key={link.url} href={link.url} target="_blank" rel="noreferrer">
+              {localized.links[index]} <span aria-hidden="true">↗</span>
+            </a>
+          ))}
+        </div>
+      )}
+    </li>
+  );
+}
+
 function ProjectDetail({
   entry,
   detailRef,
@@ -512,6 +561,22 @@ export function Archive({
                 <ProjectCard key={entry.id} entry={entry} onOpen={(origin) => openProject(entry, origin)} />
               ))}
             </div>
+            <a className="archive__all-projects-link" href="#all-projects">{copy.viewAllProjects}<span aria-hidden="true">↘</span></a>
+          </section>
+
+          <section id="all-projects" className="archive__project-index" aria-labelledby="all-projects-title" aria-hidden={worldFocused} inert={worldFocused}>
+            <div className="archive__section-heading">
+              <div>
+                <p className="archive__eyebrow">{copy.allProjectsEyebrow} / {String(allProjectEntries.length).padStart(2, "0")}</p>
+                <h2 id="all-projects-title">{copy.allProjects}</h2>
+              </div>
+              <p>{copy.allProjectsDescription}</p>
+            </div>
+            <ol className="project-index">
+              {allProjectEntries.map((entry) => (
+                <ProjectIndexItem key={entry.id} entry={entry} onOpen={(origin) => openProject(entry, origin)} />
+              ))}
+            </ol>
           </section>
 
           <section id="about" className="archive__about" aria-labelledby="about-title" aria-hidden={worldFocused} inert={worldFocused}>
@@ -565,3 +630,4 @@ export function Archive({
   );
 }
 // End of archive view.
+
