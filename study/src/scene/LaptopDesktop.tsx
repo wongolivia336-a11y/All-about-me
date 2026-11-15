@@ -34,6 +34,9 @@ export function LaptopDesktop({ language }: { language: Language }) {
       role="application"
       aria-label={zh ? "3D 电脑中的作品桌面" : "Project desktop on the 3D laptop"}
       onPointerDown={(event) => event.stopPropagation()}
+      onPointerUp={(event) => event.stopPropagation()}
+      onClick={(event) => event.stopPropagation()}
+      onDoubleClick={(event) => event.stopPropagation()}
       onWheel={(event) => event.stopPropagation()}
     >
       <div className="laptop-os__desktop">
