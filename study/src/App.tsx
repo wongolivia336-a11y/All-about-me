@@ -381,7 +381,7 @@ export default function App() {
             <Suspense fallback={<div className="room-loading" role="status" aria-label={copy.loadingRoom} />}>
               {roomScene}
           </Suspense>
-          {roomInteractive && (
+          {roomInteractive && focused !== "portfolio" && (
             <header className="hud">
               <div className="hud__identity">
                 <span className="hud__name">{language === "zh" ? "王心蕊" : "Olivia Wong"}</span>
@@ -422,7 +422,7 @@ export default function App() {
           )}
 
           <Surface />
-          {roomInteractive && <RoomExitButton ref={roomExitRef} onClick={() => openIndex()} />}
+          {roomInteractive && focused !== "portfolio" && <RoomExitButton ref={roomExitRef} onClick={() => openIndex()} />}
         </RoomRevealSurface>
         </RoomSceneBoundary>
       )}

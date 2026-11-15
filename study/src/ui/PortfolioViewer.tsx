@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { focus } from "../interaction/studyStore";
 import { useLanguage } from "../i18n";
+import { LanguageSwitch } from "./LanguageSwitch";
 
 interface Page {
   index: number;
@@ -20,7 +21,7 @@ interface Page {
  * spreads to WebP and rebuilds a light PDF for download.
  */
 export function PortfolioViewer() {
-  const { copy } = useLanguage();
+  const { copy, language } = useLanguage();
   const [pages, setPages] = useState<Page[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [current, setCurrent] = useState(0);
@@ -70,16 +71,17 @@ export function PortfolioViewer() {
   return (
     <div className="viewer">
       <header className="viewer__bar">
-        <div>
+        <div className="viewer__identity">
           <p className="viewer__kicker">{copy.portfolioKicker}</p>
           <h2 className="viewer__title">{copy.portfolioTitle}</h2>
         </div>
         <div className="viewer__tools">
+          <LanguageSwitch />
           <a className="viewer__download" href="/portfolio/portfolio.pdf" download>
-            下载 PDF
+            {language === "zh" ? "下载 PDF ↗" : "Download PDF ↗"}
           </a>
           <button className="viewer__close" onClick={() => focus(null)} aria-label={copy.closePanel} title={copy.closePanel}>
-            返回房间
+            {language === "zh" ? "← 返回房间" : "← Back to room"}
           </button>
         </div>
       </header>
@@ -105,7 +107,7 @@ export function PortfolioViewer() {
               src={page.image}
               width={page.width}
               height={page.height}
-              alt={`作品集第 ${page.index} 页`}
+              alt={language === "zh" ? `作品集第 ${page.index} 页` : `Portfolio spread ${page.index}`}
               decoding="async"
             />
 

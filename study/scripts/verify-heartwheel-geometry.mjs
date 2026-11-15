@@ -24,11 +24,12 @@ assert.equal(leafAngles[2] - leafAngles[1], 90);
 assert.equal(leafAngles[3] - leafAngles[2], 90);
 
 assert.match(pageTurn, /position: fixed;/);
-assert.match(pageTurn, /top: max\(12px, env\(safe-area-inset-top\)\);/);
-assert.match(pageTurn, /right: max\(12px, env\(safe-area-inset-right\)\);/);
-assert.match(pageTurn, /width: 72px;/);
-assert.match(pageTurn, /height: 72px;/);
-assert.match(pageTurn, /width: 52px;/);
-assert.match(pageTurn, /height: 52px;/);
+assert.match(pageTurn, /\.paper-corner\s*\{[\s\S]*?top: max\(0px, env\(safe-area-inset-top\)\);/);
+assert.match(pageTurn, /right: max\(0px, env\(safe-area-inset-right\)\);/);
+assert.match(pageTurn, /width: 76px;/);
+assert.match(pageTurn, /height: 76px;/);
+assert.match(pageTurn, /width: 60px;/);
+assert.match(pageTurn, /height: 60px;/);
+assert.match(pageTurn, /paper-corner__grain/);
 
 console.log("Heartwheel geometry and Paper Corner assertions passed.");
