@@ -32,6 +32,7 @@ export interface ArchiveEntry {
   tags: readonly string[];
   /** Stable order for the complete project index and Macintosh desktop. */
   portfolioOrder?: number;
+  desktopIcon?: string;
   featured?: boolean;
   featuredOrder?: number;
 }
@@ -63,6 +64,7 @@ export const library: readonly ArchiveEntry[] = [
     coverKind: "conceptual",
     tags: ["AI products", "Agent workflow", "Prototype"],
     portfolioOrder: 1,
+    desktopIcon: "/images/projects/icons/bioaz-agent-workbench.png",
     featured: true,
     featuredOrder: 1,
     links: [
@@ -88,6 +90,7 @@ export const library: readonly ArchiveEntry[] = [
     coverKind: "conceptual",
     tags: ["Health", "Local-first", "Product system"],
     portfolioOrder: 12,
+    desktopIcon: "/images/projects/icons/healther.png",
     links: [{ label: "GitHub", url: "https://github.com/wongolivia336-a11y/healther" }],
   },
   {
@@ -105,6 +108,7 @@ export const library: readonly ArchiveEntry[] = [
     coverKind: "conceptual",
     tags: ["Creative technology", "Sound", "Personal experiment"],
     portfolioOrder: 11,
+    desktopIcon: "/images/projects/icons/meow-gallery.png",
     links: [
       { label: "打开作品", url: "https://domi-meow-gallery.vercel.app" },
       {
@@ -128,6 +132,7 @@ export const library: readonly ArchiveEntry[] = [
     coverKind: "conceptual",
     tags: ["Interaction", "Light", "Companion robot"],
     portfolioOrder: 2,
+    desktopIcon: "/images/projects/icons/knock-knock.png",
     featured: true,
     featuredOrder: 2,
     links: [
@@ -150,6 +155,7 @@ export const library: readonly ArchiveEntry[] = [
     coverKind: "conceptual",
     tags: ["Research", "Text visualization", "Culture"],
     portfolioOrder: 10,
+    desktopIcon: "/images/projects/icons/zhang-zao.png",
     links: [{ label: "打开研究", url: "https://zhangzao.vercel.app" }],
   },
   {
@@ -167,6 +173,7 @@ export const library: readonly ArchiveEntry[] = [
     coverKind: "conceptual",
     tags: ["Data story", "Archive", "Geography"],
     portfolioOrder: 3,
+    desktopIcon: "/images/projects/icons/qiaopi.png",
     featured: true,
     featuredOrder: 3,
     links: [
@@ -186,6 +193,7 @@ export const library: readonly ArchiveEntry[] = [
     summary: "将袁哲生小说《寂寞的游戏》转译为一部影像作品。",
     tags: ["Film", "Literary adaptation", "Moving image"],
     portfolioOrder: 4,
+    desktopIcon: "/images/projects/icons/peekaboo.png",
     links: [{ label: "GitHub", url: "https://github.com/wongolivia336-a11y/peekaboo" }],
   },
   {
@@ -200,6 +208,7 @@ export const library: readonly ArchiveEntry[] = [
     summary: "真如寺的 3D 建模与可交互空间概念，探索寺院空间如何延展为可进入的数字世界。",
     tags: ["3D modeling", "Interactive space", "Digital world"],
     portfolioOrder: 5,
+    desktopIcon: "/images/projects/icons/zhenru-temple.png",
     links: [{ label: "GitHub", url: "https://github.com/wongolivia336-a11y/zhenru-temple" }],
   },
   {
@@ -214,6 +223,7 @@ export const library: readonly ArchiveEntry[] = [
     summary: "一个正在构思中的独立站，把产品、品牌与线上购物体验放进同一个小世界。",
     tags: ["Independent store", "Brand", "E-commerce"],
     portfolioOrder: 6,
+    desktopIcon: "/images/projects/icons/so-shaped.png",
     links: [{ label: "GitHub", url: "https://github.com/wongolivia336-a11y/Sown-Shaped" }],
   },
   {
@@ -228,6 +238,7 @@ export const library: readonly ArchiveEntry[] = [
     summary: "以大学路为场域，结合 Grasshopper 与街道智能体，研究街道环境和城市生活。",
     tags: ["University Road", "Grasshopper", "Street agents"],
     portfolioOrder: 7,
+    desktopIcon: "/images/projects/icons/gama-qgis.png",
     links: [{ label: "GitHub", url: "https://github.com/wongolivia336-a11y/gama-QGIS" }],
   },
   {
@@ -242,6 +253,7 @@ export const library: readonly ArchiveEntry[] = [
     summary: "围绕雾面玻璃视觉展开的一组前端实验，研究透明、模糊与层次如何回应交互。",
     tags: ["Frontend", "Frosted glass", "Visual experiment"],
     portfolioOrder: 8,
+    desktopIcon: "/images/projects/icons/glassaha.png",
     links: [{ label: "GitHub", url: "https://github.com/wongolivia336-a11y/glass-aha" }],
   },
   {
@@ -256,6 +268,7 @@ export const library: readonly ArchiveEntry[] = [
     summary: "以存在主义为主题的咖啡馆概念，把关于自由、选择与日常的思考放进空间体验。",
     tags: ["Existentialism", "Cafe concept", "Space"],
     portfolioOrder: 9,
+    desktopIcon: "/images/projects/icons/psychologist-cafe.png",
     links: [{ label: "GitHub", url: "https://github.com/wongolivia336-a11y/Psychologist-Cafe" }],
   },
   {

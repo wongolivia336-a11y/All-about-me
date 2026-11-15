@@ -385,7 +385,7 @@ export function LaptopDesktop({ language }: { language: Language }) {
             }}
             title={zh ? `${projectText(entry, language).title} · 拖动图标，点击打开` : `${projectText(entry, language).title} · Drag to move, click to open`}
           >
-            <span className="laptop-os__project-icon" style={{ "--icon-tone": ["#9cc3bd", "#c8b8a6", "#a2b9ce", "#d6b9ba", "#b2baa5", "#a8b5b7", "#d7c6a6"][index % 7] } as CSSProperties} aria-hidden="true"><span>✳</span></span>
+            <img className="laptop-os__project-icon" src={entry.desktopIcon} alt="" aria-hidden="true" draggable={false} />
             <span>{projectText(entry, language).title}</span>
           </button>;
         })}

@@ -157,21 +157,18 @@
   line-height: 1.1;
 }
 .laptop-os__project-icon {
-  position: relative;
-  display: grid;
-  width: 31px;
-  height: 27px;
-  place-items: center;
-  border: 2px solid #f0f1e9;
-  border-bottom-width: 4px;
-  border-radius: 2px;
-  background: var(--icon-tone);
-  color: #405c67;
-  box-shadow: inset 0 0 0 2px rgb(54 68 70 / 48%), 2px 3px 1px rgb(30 47 52 / 30%);
-  text-shadow: none;
+  display: block;
+  width: 40px;
+  height: 34px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 2px rgb(16 31 37 / 36%));
+  transform-origin: center bottom;
+  transition: transform 180ms cubic-bezier(.2, 1.45, .4, 1), filter 180ms ease;
+  pointer-events: none;
+  user-select: none;
 }
-.laptop-os__project-icon::after { position: absolute; bottom: -8px; left: 9px; width: 10px; height: 3px; background: #f0f1e9; content: ""; }
-.laptop-os__project-icon span { font-size: 12px; }
+.laptop-os__shortcut:hover .laptop-os__project-icon,
+.laptop-os__shortcut:focus-visible .laptop-os__project-icon { transform: translateY(-2px) rotate(-3deg) scale(1.06); filter: drop-shadow(0 4px 3px rgb(16 31 37 / 46%)); }
 
 .laptop-os__utilities { position: absolute; top: 42px; right: 15px; display: flex; flex-direction: column; gap: 8px; }
 .laptop-os__utility { display: grid; place-items: center; gap: 3px; width: 64px; min-height: 53px; padding: 2px; border: 1px solid transparent; border-radius: 3px; background: transparent; color: #fff !important; text-shadow: 0 1px 3px rgb(18 44 58 / 65%); }
