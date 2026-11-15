@@ -78,7 +78,6 @@ export default function App() {
     setNightMode,
     toggleLampPower,
     tactileMuted,
-    setTactileMuted,
     musicPlaying,
     volume,
   } = useStudy();
@@ -393,16 +392,6 @@ export default function App() {
                   title={lampPower ? copy.turnLampOff : copy.turnLampOn}
                 >
                   <span aria-hidden="true">{lampPower ? "◉" : "○"}</span>
-                </button>
-                <button
-                  className="hud__btn hud__btn--icon"
-                  type="button"
-                  onClick={() => setTactileMuted(!tactileMuted)}
-                  aria-label={tactileMuted ? copy.tactileOn : copy.tactileOff}
-                  aria-pressed={!tactileMuted}
-                  title={tactileMuted ? copy.tactileOn : copy.tactileOff}
-                >
-                  <span aria-hidden="true">{tactileMuted ? "○" : "⌁"}</span>
                 </button>
               </div>
             </header>

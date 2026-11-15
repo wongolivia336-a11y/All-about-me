@@ -74,6 +74,9 @@ export function Heartwheel({
   const rotationRef = useRef(0);
   const gesture = useRef<Gesture | null>(null);
   const suppressClick = useRef(false);
+  // A committed selection owns the spring until it settles. Hover changes
+  // must not cancel its callback when the rotating leaf leaves the pointer.
+  const selectionPending = useRef<ThemeId | null>(null);
   const targetRotation = useRef(0);
   const hoverLock = useRef<{ theme: ThemeId; x: number; y: number } | null>(null);
   const animationFrame = useRef<number | null>(null);
@@ -151,13 +154,12 @@ export function Heartwheel({
 
   useEffect(() => {
     if (gesture.current?.dragging) return;
-    // Hover previews the content without spinning the entire wheel under the pointer.
-    // Rotation remains a deliberate click/drag action.
-    const targetTheme = focused ? activeTheme : null;
+    if (selectionPending.current) return;
+    const targetTheme = focused ? activeTheme : hoveredTheme;
     const next = targetTheme ? nearestTarget(rotationRef.current, targetTheme) : 0;
     if (Math.abs(next - targetRotation.current) < 0.01) return;
     animateToRotation(next);
-  }, [activeTheme, focused]);
+  }, [activeTheme, focused, hoveredTheme]);
 
   const originFromElement = (element: Element): ThemeZoomOrigin => {
     const bounds = element.getBoundingClientRect();
@@ -176,18 +178,26 @@ export function Heartwheel({
   };
 
   const chooseTheme = (theme: ThemeId, origin?: ThemeZoomOrigin) => {
+    selectionPending.current = theme;
     hoverLock.current = null;
     setHoveredTheme(null);
     onThemeHover?.(null);
     const next = nearestTarget(rotationRef.current, theme);
-    animateToRotation(next, () => onThemeChange(theme, "select", originFromTheme(theme) ?? origin));
+    animateToRotation(next, () => {
+      selectionPending.current = null;
+      onThemeChange(theme, "select", originFromTheme(theme) ?? origin);
+    });
   };
 
   const commitGesture = () => {
     const current = rotationRef.current;
     const snapped = Math.round(current / SNAP_ANGLE) * SNAP_ANGLE;
     const theme = themeForRotation(snapped);
-    animateToRotation(snapped, () => onThemeChange(theme, "drag", originFromTheme(theme)));
+    selectionPending.current = theme;
+    animateToRotation(snapped, () => {
+      selectionPending.current = null;
+      onThemeChange(theme, "drag", originFromTheme(theme));
+    });
   };
 
   const finishGesture = (pointerId: number) => {
@@ -217,8 +227,9 @@ export function Heartwheel({
   };
 
   const applyPointerHover = (theme: ThemeId, x: number, y: number) => {
+    if (selectionPending.current || focused) return;
     const locked = hoverLock.current;
-    if (locked && locked.theme !== theme && Math.hypot(locked.x - x, locked.y - y) < 2) return;
+    if (locked && locked.theme !== theme && Math.hypot(locked.x - x, locked.y - y) < 22) return;
     hoverLock.current = { theme, x, y };
     setHoveredTheme(theme);
     onThemeHover?.(theme);
@@ -229,6 +240,7 @@ export function Heartwheel({
     if ((event.target as HTMLElement).closest("button")) return;
     if (gesture.current) return;
     cancelSettle();
+    selectionPending.current = null;
     targetRotation.current = rotationRef.current;
     hoverLock.current = null;
     setHoveredTheme(null);
@@ -260,7 +272,15 @@ export function Heartwheel({
     if (dragging) return;
     const hitLeaf = (event.target as Element).closest<SVGGElement>("[data-heart-leaf]");
     const theme = hitLeaf?.dataset.heartLeaf as ThemeId | undefined;
-    if (!theme) return;
+    if (!theme) {
+      if (!(event.target as Element).closest("button") && hoverLock.current &&
+          Math.hypot(event.clientX - hoverLock.current.x, event.clientY - hoverLock.current.y) > 22) {
+        hoverLock.current = null;
+        setHoveredTheme(null);
+        onThemeHover?.(null);
+      }
+      return;
+    }
     applyPointerHover(theme, event.clientX, event.clientY);
   };
 
@@ -380,11 +400,6 @@ export function Heartwheel({
                   aria-label={copy.selectTheme + themeText(theme, language).label}
                   onMouseEnter={(event) => {
                     applyPointerHover(theme, event.clientX, event.clientY);
-                  }}
-                  onMouseLeave={() => {
-                    hoverLock.current = null;
-                    setHoveredTheme(null);
-                    onThemeHover?.(null);
                   }}
                   onFocus={() => {
                     hoverLock.current = null;

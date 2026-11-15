@@ -19,8 +19,8 @@ interface LeafWorldProps {
 const visibleEntries = library.filter(
   (entry) => entry.status === "published" || entry.status === "prototype",
 );
-const PORTAL_OPEN_DURATION_MS = 850;
-const PORTAL_CLOSE_DURATION_MS = 700;
+const PORTAL_OPEN_DURATION_MS = 1650;
+const PORTAL_CLOSE_DURATION_MS = 1380;
 
 function WorldCard({ entry, primary, onOpen }: { entry: ArchiveEntry; primary?: boolean; onOpen: (origin: ThemeZoomOrigin) => void }) {
   const { language, copy } = useLanguage();
@@ -167,16 +167,16 @@ export function LeafWorld({ activeTheme, focused, onThemeChange, onProjectOpen }
 
       {worldLayerVisible ? (
         <div className="leaf-world-shell__dock" aria-live="polite">
-          <div className="leaf-world-shell__portal-effect" aria-hidden="true">
-            <span className="leaf-world-shell__portal-film" />
-            {zoomOrigin ? (
+          {zoomOrigin ? (
+            <div className="leaf-world-shell__portal-effect" aria-hidden="true">
+              <span className="leaf-world-shell__portal-film" />
               <span className="leaf-world-shell__portal-leaf">
                 <svg viewBox="-80 -155 160 160" aria-hidden="true">
                   <path d={HEART_PATH} />
                 </svg>
               </span>
-            ) : null}
-          </div>
+            </div>
+          ) : null}
           <section
             ref={worldRef}
             className={isQuestionPage ? "leaf-world leaf-world--question" : "leaf-world"}

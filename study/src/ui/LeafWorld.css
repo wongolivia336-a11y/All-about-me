@@ -66,7 +66,7 @@
   overflow: hidden;
   clip-path: none;
   will-change: clip-path, opacity;
-  transition: clip-path 850ms cubic-bezier(.2,.72,.25,1), opacity 240ms ease;
+  transition: clip-path 1650ms cubic-bezier(.2,.72,.25,1), opacity 300ms ease;
 }
 
 .leaf-world-shell[data-transition="entering"] .leaf-world-shell__dock {
@@ -82,7 +82,7 @@
 .leaf-world-shell[data-transition="exiting"] .leaf-world-shell__dock {
   opacity: .96;
   clip-path: circle(var(--zoom-size, 34px) at var(--zoom-x, 50vw) var(--zoom-y, 50vh));
-  transition-duration: 700ms, 180ms;
+  transition-duration: 1380ms, 240ms;
 }
 
 .leaf-world-shell__resting,
@@ -160,7 +160,6 @@
 }
 
 .leaf-world-shell__portal-effect {
-  display: none;
   position: absolute;
   z-index: 2;
   inset: 0;
@@ -264,51 +263,51 @@
 }
 
 .leaf-world-shell[data-mode="focused"] .leaf-world-shell__portal-effect::before {
-  animation: leaf-pigment-in 2480ms cubic-bezier(.22,.62,.25,1) both;
+  animation: leaf-pigment-in 1650ms cubic-bezier(.22,.62,.25,1) both;
 }
 
 .leaf-world-shell[data-mode="focused"] .leaf-world-shell__portal-effect::after {
-  animation: leaf-membrane-in 1920ms cubic-bezier(.16,.64,.3,1) both;
+  animation: leaf-membrane-in 1470ms cubic-bezier(.16,.64,.3,1) both;
 }
 
 .leaf-world-shell[data-mode="focused"] .leaf-world-shell__portal-film {
-  animation: leaf-membrane-film-in 2480ms cubic-bezier(.22,.62,.25,1) both;
+  animation: leaf-membrane-film-in 1650ms cubic-bezier(.22,.62,.25,1) both;
 }
 
 .leaf-world-shell[data-mode="focused"] .leaf-world-shell__portal-leaf {
-  animation: leaf-shape-inflate 1980ms cubic-bezier(.18,.72,.22,1) both;
+  animation: leaf-shape-inflate 1520ms cubic-bezier(.18,.72,.22,1) both;
 }
 
 .leaf-world-shell[data-mode="focused"] .leaf-world-shell__portal-leaf::before {
-  animation: leaf-bubble-core-in 1320ms 360ms cubic-bezier(.18,.72,.22,1) both;
+  animation: leaf-bubble-core-in 1050ms 240ms cubic-bezier(.18,.72,.22,1) both;
 }
 
 .leaf-world-shell[data-mode="focused"] .leaf-world-shell__portal-leaf::after {
-  animation: leaf-bubble-pop-in 1680ms 240ms cubic-bezier(.18,.72,.22,1) both;
+  animation: leaf-bubble-pop-in 1280ms 180ms cubic-bezier(.18,.72,.22,1) both;
 }
 
 .leaf-world-shell[data-transition="exiting"] .leaf-world-shell__portal-effect::before {
-  animation: leaf-pigment-out 2000ms cubic-bezier(.57,0,.22,1) both;
+  animation: leaf-pigment-out 1380ms cubic-bezier(.57,0,.22,1) both;
 }
 
 .leaf-world-shell[data-transition="exiting"] .leaf-world-shell__portal-effect::after {
-  animation: leaf-membrane-out 1760ms cubic-bezier(.57,0,.22,1) both;
+  animation: leaf-membrane-out 1250ms cubic-bezier(.57,0,.22,1) both;
 }
 
 .leaf-world-shell[data-transition="exiting"] .leaf-world-shell__portal-film {
-  animation: leaf-membrane-film-out 2000ms cubic-bezier(.57,0,.22,1) both;
+  animation: leaf-membrane-film-out 1380ms cubic-bezier(.57,0,.22,1) both;
 }
 
 .leaf-world-shell[data-transition="exiting"] .leaf-world-shell__portal-leaf {
-  animation: leaf-shape-condense 1900ms cubic-bezier(.57,0,.22,1) both;
+  animation: leaf-shape-condense 1320ms cubic-bezier(.57,0,.22,1) both;
 }
 
 .leaf-world-shell[data-transition="exiting"] .leaf-world-shell__portal-leaf::before {
-  animation: leaf-bubble-core-out 1600ms cubic-bezier(.57,0,.22,1) both;
+  animation: leaf-bubble-core-out 1160ms cubic-bezier(.57,0,.22,1) both;
 }
 
 .leaf-world-shell[data-transition="exiting"] .leaf-world-shell__portal-leaf::after {
-  animation: leaf-bubble-pop-out 1740ms cubic-bezier(.57,0,.22,1) both;
+  animation: leaf-bubble-pop-out 1260ms cubic-bezier(.57,0,.22,1) both;
 }
 
 .leaf-world {

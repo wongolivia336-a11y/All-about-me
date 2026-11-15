@@ -432,7 +432,7 @@
   background: transparent;
   clip-path: none;
   will-change: clip-path, opacity;
-  transition: clip-path 850ms cubic-bezier(.2,.72,.25,1), opacity 220ms ease;
+  transition: clip-path 1650ms cubic-bezier(.2,.72,.25,1), opacity 300ms ease;
 }
 
 .leaf-world-shell__dock::before { display: none; }
@@ -455,7 +455,7 @@
 
 .leaf-world-shell[data-transition="entering"] .leaf-world-shell__dock {
   opacity: .98;
-  clip-path: circle(0 at var(--zoom-x) var(--zoom-y));
+  clip-path: circle(var(--zoom-size, 34px) at var(--zoom-x) var(--zoom-y));
 }
 
 .leaf-world-shell[data-transition="focused"] .leaf-world-shell__dock {
@@ -466,7 +466,7 @@
 .leaf-world-shell[data-transition="exiting"] .leaf-world-shell__dock {
   opacity: .98;
   clip-path: circle(var(--zoom-size, 34px) at var(--zoom-x) var(--zoom-y));
-  transition-duration: 700ms, 180ms;
+  transition-duration: 1380ms, 240ms;
 }
 
 .leaf-world-shell__resting,
@@ -667,8 +667,8 @@
   grid-column: 1 / -1;
   align-items: center;
   flex-wrap: wrap;
-  gap: 4px;
-  padding-top: 12px;
+  gap: clamp(12px, 2vw, 30px);
+  padding-top: 10px;
   border-top: 0;
 }
 
@@ -677,9 +677,9 @@
   align-items: baseline;
   gap: 8px;
   min-height: 38px;
-  padding: 0 12px;
-  border: 1px solid transparent;
-  border-radius: 999px;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 0;
   background: transparent;
   color: var(--color-muted);
   font: 11px/1.2 var(--font-mono);
@@ -688,8 +688,9 @@
 }
 
 .leaf-world__world-nav button > span { color: #7d857f; font-size: 9px; }
-.leaf-world__world-nav button:hover { color: #3f5968; background: #eef2f4; transform: translateY(-1px); }
-.leaf-world__world-nav button[aria-current="page"] { border-color: transparent; background: #e9eff2; color: #2d4653; }
+.leaf-world__world-nav button:hover { color: #304c59; background: transparent; transform: translateY(-1px); }
+.leaf-world__world-nav button[aria-current="page"] { color: #263f4b; font-weight: 600; }
+.leaf-world__world-nav button:focus-visible { outline: 2px solid #6c8792; outline-offset: 4px; border-radius: 3px; }
 
 .leaf-world__cards {
   display: grid;
@@ -703,15 +704,14 @@
   grid-column: span 5;
   min-width: 0;
   border: 0;
-  border-top: 1px solid var(--color-line);
-  background: #fff;
-  transition: border-color 160ms var(--motion-standard);
+  background: transparent;
+  transition: transform 350ms var(--motion-standard);
 }
 
 .leaf-world__card--primary { grid-column: span 7; }
 .leaf-world__card:only-child { grid-column: span 8; }
 .leaf-world__card:hover,
-.leaf-world__card:focus-within { border-color: #657d89; }
+.leaf-world__card:focus-within { transform: translateY(-3px); }
 
 .leaf-world__card button {
   display: block;
@@ -728,7 +728,7 @@
   display: block;
   aspect-ratio: 1.75;
   overflow: hidden;
-  background: color-mix(in srgb, var(--card-accent) 13%, #fff);
+  background: color-mix(in srgb, var(--card-accent) 10%, #fff);
 }
 
 .leaf-world__card--primary .leaf-world__card-visual { aspect-ratio: 1.58; }
@@ -1149,8 +1149,9 @@
   z-index: 2;
   top: 0;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
+  gap: clamp(22px, 2.6vw, 42px);
   min-height: 64px;
   margin: 0 calc(clamp(24px, 5vw, 76px) * -1) 36px;
   padding: 0 clamp(24px, 5vw, 76px);
@@ -1158,20 +1159,21 @@
   background: rgb(255 255 255 / 96%);
 }
 
-.archive__project-toolbar .archive__language { margin-left: auto; }
+.archive__project-toolbar .archive__language { margin: 0; }
 
 .archive__back {
   position: static;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   min-height: 40px;
-  padding: 0 16px;
-  border: 1px solid #e3e9ec;
-  border-radius: 999px;
-  background: rgba(248,250,251,.9);
+  padding: 0 2px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: #40535e;
-  font: 12px/1.3 var(--font-sans);
+  font: 13px/1.3 var(--font-sans);
+  text-decoration: none;
   text-align: left;
   cursor: pointer;
   transition: background 220ms ease, border-color 220ms ease, transform 220ms var(--motion-standard);
@@ -1179,7 +1181,8 @@
 
 .archive__back span:first-child { transition: transform 220ms var(--motion-standard); }
 .archive__back:hover,
-.archive__back:focus-visible { background: #edf2f4; border-color: #cbd9e0; transform: translateY(-1px); }
+.archive__back:focus-visible { background: transparent; border-color: transparent; color: #263f4b; text-decoration: none; transform: translateY(-1px); }
+.archive__back span { text-decoration: none; }
 .archive__back:hover span:first-child { transform: translateX(-3px); }
 
 .archive__project-grid {
