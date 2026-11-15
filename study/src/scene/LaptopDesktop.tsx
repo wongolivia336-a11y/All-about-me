@@ -85,10 +85,14 @@ function WebsiteFrame({ project, mode, revision, language }: {
   useEffect(() => { setLoading(true); }, [project.website, revision, mode]);
 
   const scale = Math.max(size.width / DESKTOP_VIEWPORT, .1);
+  const virtualHeight = Math.max(size.height / scale, 720);
   const frameStyle: CSSProperties = mode === "desktop"
     ? {
       width: DESKTOP_VIEWPORT,
-      height: Math.max(size.height / scale, 1),
+      // A short laptop pane must not make source sites lay out as a
+      // 1024 × 350 desktop; many full-page compositions use viewport height.
+      // Keep a normal desktop height and let the physical screen crop/scroll.
+      height: virtualHeight,
       transform: `scale(${scale})`,
       transformOrigin: "top left",
     }
@@ -97,16 +101,21 @@ function WebsiteFrame({ project, mode, revision, language }: {
   return (
     <div className="laptop-os__web-viewport" ref={containerRef}>
       {loading && <div className="laptop-os__loading" role="status">{language === "zh" ? "正在连接作品…" : "Connecting to project…"}</div>}
-      <iframe
-        key={`${project.entry.id}-${revision}-${mode}`}
-        title={projectText(project.entry, language).title}
-        src={project.website}
-        loading="eager"
-        referrerPolicy="no-referrer"
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-        style={frameStyle}
-        onLoad={() => setLoading(false)}
-      />
+      <div
+        className="laptop-os__iframe-canvas"
+        style={mode === "desktop" ? { width: size.width, height: virtualHeight * scale } : undefined}
+      >
+        <iframe
+          key={`${project.entry.id}-${revision}-${mode}`}
+          title={projectText(project.entry, language).title}
+          src={project.website}
+          loading="eager"
+          referrerPolicy="no-referrer"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+          style={frameStyle}
+          onLoad={() => setLoading(false)}
+        />
+      </div>
     </div>
   );
 }
