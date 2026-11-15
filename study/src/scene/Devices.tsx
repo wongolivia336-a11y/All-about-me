@@ -136,7 +136,7 @@ function Laptop() {
               transform
               center
               position={[0, 0.105, 0.00465]}
-              scale={0.0005}
+              scale={0.0205}
               zIndexRange={[8, 2]}
             >
               <LaptopDesktop language={language} />
