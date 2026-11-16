@@ -16,6 +16,7 @@ export interface Copy {
   closeNavigation: string;
   navWorlds: string;
   navWork: string;
+  navJournal: string;
   navAbout: string;
   contact: string;
   archiveAria: string;
@@ -39,9 +40,37 @@ export interface Copy {
   practiceEyebrow: string;
   selectedWorks: string;
   selectedWorksDescription: string;
+  allProjectsEyebrow: string;
+  allProjects: string;
+  allProjectsDescription: string;
+  viewAllProjects: string;
   aboutEyebrow: string;
   aboutTitle: string;
   aboutBody: string;
+  journalEyebrow: string;
+  journalTitle: string;
+  journalDescription: string;
+  journalFeatured: string;
+  journalIndex: string;
+  journalPublishedCount: string;
+  journalTopics: string;
+  journalDevelopmentLabel: string;
+  journalAwaiting: string;
+  journalEmptyTitle: string;
+  journalEmptyBody: string;
+  journalNoEntries: string;
+  journalPaperHint: string;
+  journalPaperAlt: string;
+  journalPaperInstructions: string;
+  journalPaperLoading: string;
+  journalPaperError: string;
+  journalPaperFlat: string;
+  journalPaperHolding: string;
+  journalPaperCreased: string;
+  journalPaperCrumpled: string;
+  journalRead: string;
+  journalBack: string;
+  journalCollectLink: string;
   openLine: string;
   exploreRoom: string;
   projectTags: string;
@@ -77,9 +106,6 @@ export interface Copy {
   retry: string;
   loaderForming: string;
   loaderReady: string;
-  loaderTitle: string;
-  loaderSubtitle: string;
-  loaderWorking: string;
   loaderProgress: string;
   lampBrightness: string;
   turnLampOn: string;
@@ -154,6 +180,7 @@ const translations: Record<Language, Copy> = {
     closeNavigation: "Close navigation",
     navWorlds: "Worlds",
     navWork: "Work",
+    navJournal: "Journal",
     navAbout: "About",
     contact: "Contact",
     archiveAria: "Olivia Wong / Four Hearts personal archive",
@@ -177,9 +204,37 @@ const translations: Record<Language, Copy> = {
     practiceEyebrow: "A cross-section of the practice",
     selectedWorks: "Selected works",
     selectedWorksDescription: "Three starting points across product, inquiry and interaction.",
+    allProjectsEyebrow: "The complete index",
+    allProjects: "All projects",
+    allProjectsDescription: "Twelve projects across products, research, moving image and playful experiments. Open a project for its notes and available links.",
+    viewAllProjects: "Browse all 12 projects",
     aboutEyebrow: "A note from the studio",
     aboutTitle: "Technical work, with attention to how it feels to be inside.",
     aboutBody: "I work where interaction, systems and human attention meet. The work can be technical, but it starts with noticing what people need to feel understood.",
+    journalEyebrow: "UNFOLD A THOUGHT",
+    journalTitle: "Journal",
+    journalDescription: "Ideas rarely arrive fully formed. A place for notes and questions still finding their shape.",
+    journalFeatured: "Featured paper",
+    journalIndex: "Entry index",
+    journalPublishedCount: "Published",
+    journalTopics: "Entry topics",
+    journalDevelopmentLabel: "Development sample · Not published",
+    journalAwaiting: "A PLACE FOR NOTES TO COME",
+    journalEmptyTitle: "The first page is still open.",
+    journalEmptyBody: "No public entries yet. This sheet is here to be handled while the writing takes shape.",
+    journalNoEntries: "No published entries yet. The first note will appear here when it is ready to share.",
+    journalPaperHint: "Hold and move to gather a crease; release to let the paper settle.",
+    journalPaperAlt: "A blank, cold-white paper sheet",
+    journalPaperInstructions: "Hold and drag to crumple. Release to unfold and keep a faint crease. Press Space or Enter, then use arrow keys; Escape resets.",
+    journalPaperLoading: "Preparing the paper surface.",
+    journalPaperError: "Interactive paper is unavailable. A static paper view is shown.",
+    journalPaperFlat: "resting",
+    journalPaperHolding: "in hand",
+    journalPaperCreased: "creased",
+    journalPaperCrumpled: "gathered",
+    journalRead: "Read entry",
+    journalBack: "Back to Journal",
+    journalCollectLink: "See the Collect world",
     openLine: "Open line",
     exploreRoom: "Explore Room ↗",
     projectTags: "tags",
@@ -215,9 +270,6 @@ const translations: Record<Language, Copy> = {
     retry: "Retry",
     loaderForming: "FORMING",
     loaderReady: "READY",
-    loaderTitle: "Some things take shape in motion.",
-    loaderSubtitle: "A small world is assembling in the background.",
-    loaderWorking: "WORKING",
     loaderProgress: "Loading progress",
     lampBrightness: "Desk lamp brightness",
     turnLampOn: "Turn desk lamp on",
@@ -290,6 +342,7 @@ const translations: Record<Language, Copy> = {
     closeNavigation: "收起导航",
     navWorlds: "四个世界",
     navWork: "作品",
+    navJournal: "手记",
     navAbout: "关于",
     contact: "联系",
     archiveAria: "王心蕊 / Four Hearts 个人档案",
@@ -313,9 +366,37 @@ const translations: Record<Language, Copy> = {
     practiceEyebrow: "实践的一组切面",
     selectedWorks: "精选作品",
     selectedWorksDescription: "从产品、研究与交互开始了解我的实践。",
+    allProjectsEyebrow: "项目全貌",
+    allProjects: "全部项目",
+    allProjectsDescription: "从产品、研究到影像与交互实验，收录十二个项目。点开项目可以继续看简介与现有入口。",
+    viewAllProjects: "浏览全部 12 个项目",
     aboutEyebrow: "来自工作室的一段话",
     aboutTitle: "关注技术，也关注身处其中的感受。",
     aboutBody: "我在交互、系统与人的注意力交汇处工作。工作可以很技术，但起点是留意人们需要怎样的理解与回应。",
+    journalEyebrow: "展开一个想法",
+    journalTitle: "Journal 手记",
+    journalDescription: "想法很少一开始就完整、清晰、平整。这里留给仍在成形的笔记与问题。",
+    journalFeatured: "一张被拿起的纸",
+    journalIndex: "文章索引",
+    journalPublishedCount: "已发布",
+    journalTopics: "文章主题",
+    journalDevelopmentLabel: "开发排版样例 · 尚未发布",
+    journalAwaiting: "留给之后的笔记",
+    journalEmptyTitle: "第一页还留着空白。",
+    journalEmptyBody: "目前还没有公开文章。写作慢慢成形时，这张纸可以先被拿起、揉皱，再舒展开来。",
+    journalNoEntries: "还没有正式发布的文章。准备好分享的第一篇笔记会出现在这里。",
+    journalPaperHint: "按住并移动，揉出折痕；松手后纸张舒展并留下淡淡痕迹。",
+    journalPaperAlt: "一张冷白色的空白纸",
+    journalPaperInstructions: "按住并拖动纸张以揉皱；松开后纸张会舒展并留下淡淡折痕。按住空格或回车，再用方向键移动；按 Escape 重置。",
+    journalPaperLoading: "正在准备纸张材质。",
+    journalPaperError: "纸张交互暂不可用，当前显示静态纸张。",
+    journalPaperFlat: "平放",
+    journalPaperHolding: "手中",
+    journalPaperCreased: "留有折痕",
+    journalPaperCrumpled: "揉皱",
+    journalRead: "阅读文章",
+    journalBack: "返回 Journal",
+    journalCollectLink: "去看看 Collect 世界",
     openLine: "保持联系",
     exploreRoom: "探索 Room ↗",
     projectTags: "标签",
@@ -351,9 +432,6 @@ const translations: Record<Language, Copy> = {
     retry: "重试",
     loaderForming: "正在成形",
     loaderReady: "已就绪",
-    loaderTitle: "有些世界，需要一点时间成形。",
-    loaderSubtitle: "一个小小的世界正在后台聚拢。",
-    loaderWorking: "处理中",
     loaderProgress: "载入进度",
     lampBrightness: "台灯亮度",
     turnLampOn: "打开台灯",
@@ -488,16 +566,16 @@ const projectTextById: Record<string, Record<Language, ProjectText>> = {
     zh: { title: "Healther", summary: "本地优先的长期健康管理工具：提醒、记录、报告整理与可信科普。", tags: ["健康", "本地优先", "产品系统"] },
   },
   "meow-gallery": {
-    en: { title: "meow gallery", summary: "A small ritual for pausing with real cat sounds—easy to ignore, worth stopping for.", tags: ["Creative technology", "Sound", "Personal experiment"] },
-    zh: { title: "meow gallery", summary: "把真实猫叫做成可被忽略、也值得停一下的休息仪式。", tags: ["创意技术", "声音", "个人实验"] },
+    en: { title: "meow gallery", summary: "A little desktop companion that brings a cat into the screen through playful interaction and sound.", tags: ["Desktop pet", "Cat", "Creative technology"] },
+    zh: { title: "meow gallery", summary: "一个像桌宠一样待在屏幕里的小项目，用互动和猫叫陪你停一会儿。", tags: ["桌面宠物", "猫", "创意技术"] },
   },
   "knock-knock": {
     en: { title: "KNOCK KNOCK", summary: "An interaction prototype for a companion robot that builds connection through light, sound and waiting.", tags: ["Interaction", "Light", "Companion robot"] },
     zh: { title: "KNOCK KNOCK", summary: "一个通过光、声音和等待建立关系的陪伴机器人交互原型。", tags: ["交互", "光", "陪伴机器人"] },
   },
   "zhang-zao": {
-    en: { title: "Two Sides of a Mirror", summary: "A multidimensional text-visualization study on bringing classical imagery into contemporary experience.", worldSummary: "Text visualization traces classical imagery into contemporary experience.", tags: ["Research", "Text visualization", "Culture"] },
-    zh: { title: "镜子的两面", summary: "古典意象如何进入现代经验的多维文本可视化研究。", worldSummary: "用文本可视化追踪古典意象如何进入现代经验。", tags: ["研究", "文本可视化", "文化"] },
+    en: { title: "Zhangzao / Two Sides of a Mirror", summary: "A multidimensional text and data visualization study on bringing classical imagery into contemporary experience.", worldSummary: "Data visualization traces classical imagery into contemporary experience.", tags: ["Data visualization", "Research", "Culture"] },
+    zh: { title: "张导 / 镜子的两面", summary: "以数据可视化探索古典意象如何进入现代经验。", worldSummary: "用数据可视化追踪古典意象如何进入现代经验。", tags: ["数据可视化", "研究", "文化"] },
   },
   qiaopi: {
     en: { title: "A Letter, After It Arrives", summary: "A data narrative tracing overseas remittance letters to a village in Chaoshan.", worldSummary: "Following remittance letters from overseas to a Chaoshan village.", tags: ["Data story", "Archive", "Geography"] },

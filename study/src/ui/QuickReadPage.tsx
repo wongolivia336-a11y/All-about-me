@@ -19,7 +19,16 @@ type QuickReadPageProps = {
 
 function ExperiencePage({ language }: { language: "en" | "zh" }) {
   const [selected, setSelected] = useState(0);
-  const reducedMotion = useMemo(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches, []);
+  const [reducedMotion, setReducedMotion] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  useEffect(() => {
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(preference.matches);
+    update();
+    preference.addEventListener("change", update);
+    return () => preference.removeEventListener("change", update);
+  }, []);
   const zh = language === "zh";
   const items = useMemo<BadgeItem[]>(() => zh
     ? [
@@ -79,6 +88,24 @@ function ExperiencePage({ language }: { language: "en" | "zh" }) {
 
 function EducationPage({ language }: { language: "en" | "zh" }) {
   const [selected, setSelected] = useState(0);
+  const folderInteractionRef = useRef(false);
+  const [folderOpen, setFolderOpen] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  const [sheetPulled, setSheetPulled] = useState(false);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let timer = 0;
+    const frame = window.requestAnimationFrame(() => {
+      timer = window.setTimeout(() => {
+        if (!folderInteractionRef.current) setFolderOpen(true);
+      }, 160);
+    });
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
+  }, []);
   const zh = language === "zh";
   const folios = zh
     ? [
@@ -108,32 +135,65 @@ function EducationPage({ language }: { language: "en" | "zh" }) {
             data-kind={folio.kind}
             data-has-art="true"
             data-selected={selected === index ? "true" : "false"}
+            data-open={selected === index && folderOpen ? "true" : "false"}
+            data-pulled={selected === index && sheetPulled ? "true" : "false"}
             type="button"
             key={folio.title}
             aria-pressed={selected === index}
-            onClick={() => setSelected(index)}
+            aria-expanded={selected === index && folderOpen}
+            aria-controls={`quick-read-folio-sheet-${index}`}
+            aria-label={`${folio.title}: ${selected === index && folderOpen ? (zh ? "收起文件夹" : "Close folder") : (zh ? "打开文件夹" : "Open folder")}`}
+            onClick={() => {
+              folderInteractionRef.current = true;
+              if (selected === index) {
+                setFolderOpen((open) => !open);
+                setSheetPulled(false);
+                return;
+              }
+              setSelected(index);
+              setFolderOpen(true);
+              setSheetPulled(false);
+            }}
           >
             <span className="quick-read-page__folio-back" />
-            <span className="quick-read-page__folio-tab" />
-            <span className="quick-read-page__folio-paper">
-              <span className="quick-read-page__folio-index">{String(index + 1).padStart(2, "0")} <i>·</i> {zh ? "研究资料" : "RESEARCH"}</span>
+            <span className="quick-read-page__folio-sheet" id={`quick-read-folio-sheet-${index}`}>
+              <span className="quick-read-page__folio-paper">
+                <span className="quick-read-page__folio-index">{String(index + 1).padStart(2, "0")} <i>·</i> {zh ? "研究资料" : "RESEARCH"}</span>
+                <strong>{folio.title}</strong>
+                <span className="quick-read-page__folio-subtitle">{folio.subtitle}</span>
+                <img className="quick-read-page__folio-art" src={folio.visual} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                <span className="quick-read-page__folio-lines" aria-hidden="true"><i /><i /><i /></span>
+                <span className="quick-read-page__folio-mark" aria-hidden="true">{folio.mark}</span>
+                <small>{folio.meta}</small>
+              </span>
+            </span>
+            <span className="quick-read-page__folio-sheet quick-read-page__folio-sheet--secondary" aria-hidden="true" />
+            <span className="quick-read-page__folio-tab" aria-hidden="true" />
+            <span className="quick-read-page__folio-front" aria-hidden="true">
               <strong>{folio.title}</strong>
-              <span className="quick-read-page__folio-subtitle">{folio.subtitle}</span>
-              <img className="quick-read-page__folio-art" src={folio.visual} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-              <span className="quick-read-page__folio-lines" aria-hidden="true"><i /><i /><i /></span>
-              <span className="quick-read-page__folio-mark" aria-hidden="true">{folio.mark}</span>
-              <small>{folio.meta}</small>
+              <small>{zh ? "研究档案 · 轻轻打开" : "RESEARCH FOLIO · OPEN GENTLY"}</small>
             </span>
           </button>
         ))}
       </div>
 
-      <article className="quick-read-page__folio-detail" data-pending={active.pending ? "true" : "false"}>
+      <article className="quick-read-page__folio-detail" data-pending={active.pending ? "true" : "false"} data-folder-open={folderOpen ? "true" : "false"}>
         <p className="quick-read-page__eyebrow">{zh ? "当前打开" : "OPEN FOLIO"} / {String(selected + 1).padStart(2, "0")}</p>
         <h2>{active.title}</h2>
         <p className="quick-read-page__folio-meta">{active.meta}</p>
         <p>{active.note}</p>
         {active.pending && <span className="quick-read-page__pending">{zh ? "待补充题目与材料" : "TITLE & MATERIALS TO COME"}</span>}
+        <button
+          className="quick-read-page__folio-pull"
+          type="button"
+          disabled={!folderOpen}
+          aria-expanded={sheetPulled}
+          aria-controls={`quick-read-folio-sheet-${selected}`}
+          onClick={() => setSheetPulled((pulled) => !pulled)}
+        >
+          {sheetPulled ? (zh ? "推回内页" : "Return sheet") : (zh ? "抽出内页" : "Pull out sheet")}
+          <span aria-hidden="true">{sheetPulled ? "↙" : "↗"}</span>
+        </button>
       </article>
     </div>
   );
@@ -145,34 +205,51 @@ function WorkPage({ language, entries, onProjectOpen }: {
   onProjectOpen: QuickReadPageProps["onProjectOpen"];
 }) {
   const zh = language === "zh";
+  const featuredEntries = entries.slice(0, 3);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const posterRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const illustrations: Record<string, string> = {
     "bioaz-agent-workbench": "/visuals/quick-read/work/bioaz-agent-workbench.png",
     "knock-knock": "/visuals/quick-read/work/knock-knock-care.png",
     qiaopi: "/visuals/quick-read/work/qiaopi-letter-routes.png",
+  };
+  const selectedEntry = featuredEntries[selectedIndex];
+  const selectedText = selectedEntry ? projectText(selectedEntry, language) : null;
+  const selectedTheme = selectedEntry ? themeText(selectedEntry.primaryTheme, language) : null;
+  const selectPoster = (index: number) => {
+    if (!featuredEntries.length) return;
+    setSelectedIndex((index + featuredEntries.length) % featuredEntries.length);
   };
   return (
     <div className="quick-read-page__content quick-read-page__content--work">
       <div className="quick-read-page__intro">
         <p className="quick-read-page__eyebrow">03 / {zh ? "精选作品 · 海报墙" : "SELECTED WORK · POSTER WALL"}</p>
         <h1 id="quick-read-title" tabIndex={-1}>{zh ? "三张海报，三种不同的靠近方式。" : "Three posters, three ways of getting closer."}</h1>
-        <p>{zh ? "点开海报进入项目档案。每张剪纸插画都对应一个具体的项目故事。" : "Open a poster to read the project file. Each cut-paper illustration belongs to a specific project story."}</p>
+        <p>{zh ? "选中海报预览故事，用箭头或方向键翻阅，再打开档案进入完整项目。" : "Select a poster to preview its story. Browse with the arrows or poster keys, then open its project file."}</p>
       </div>
 
       <div className="quick-read-page__poster-grid">
-        {entries.slice(0, 3).map((entry, index) => {
+        {featuredEntries.map((entry, index) => {
           const localized = projectText(entry, language);
           const definition = themeText(entry.primaryTheme, language);
           const illustration = illustrations[entry.id];
           return (
               <article className="quick-read-page__poster-card" key={entry.id} style={{ "--poster-accent": definition.accent } as CSSProperties}>
               <button
+                ref={(node) => { posterRefs.current[index] = node; }}
                 type="button"
                 className="quick-read-page__poster-open"
-                onClick={(event) => {
-                  const rect = event.currentTarget.getBoundingClientRect();
-                  onProjectOpen(entry, { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+                data-selected={selectedIndex === index ? "true" : "false"}
+                aria-pressed={selectedIndex === index}
+                aria-label={`${localized.title} — ${selectedIndex === index ? (zh ? "当前选中海报" : "Selected poster") : (zh ? "选择海报" : "Select poster")}`}
+                onClick={() => selectPoster(index)}
+                onKeyDown={(event) => {
+                  if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+                  event.preventDefault();
+                  const next = (index + (event.key === "ArrowRight" ? 1 : -1) + featuredEntries.length) % featuredEntries.length;
+                  selectPoster(next);
+                  posterRefs.current[next]?.focus();
                 }}
-                aria-label={`${localized.title} — ${zh ? "打开项目" : "Open project"}`}
               >
                 <span className="quick-read-page__poster-art" data-art={illustration ? "cutout" : "cover"}>
                   {illustration
@@ -181,7 +258,7 @@ function WorkPage({ language, entries, onProjectOpen }: {
                       ? <img src={entry.cover} alt="" loading="lazy" decoding="async" />
                       : <span className="quick-read-page__poster-fallback">{definition.shortLabel}</span>}
                   <span className="quick-read-page__poster-number">{String(index + 1).padStart(2, "0")}</span>
-                  <span className="quick-read-page__poster-open-label">{zh ? "打开档案" : "OPEN CASE"} <i aria-hidden="true">↗</i></span>
+                  <span className="quick-read-page__poster-open-label">{zh ? "查看故事" : "VIEW STORY"} <i aria-hidden="true">↗</i></span>
                 </span>
                 <span className="quick-read-page__poster-meta"><span>{definition.label}</span><span>{entry.year}</span></span>
                 <strong>{localized.title}</strong>
@@ -191,6 +268,33 @@ function WorkPage({ language, entries, onProjectOpen }: {
           );
         })}
       </div>
+
+      {selectedEntry && selectedText && selectedTheme && (
+        <section className="quick-read-page__work-detail" aria-live="polite" aria-atomic="true">
+          <div className="quick-read-page__work-story">
+            <p className="quick-read-page__eyebrow">{String(selectedIndex + 1).padStart(2, "0")} / {selectedTheme.label} · {selectedEntry.year}</p>
+            <h2>{selectedText.title}</h2>
+            <p>{selectedText.summary}</p>
+          </div>
+          <div className="quick-read-page__work-controls" aria-label={zh ? "浏览精选项目" : "Browse selected projects"}>
+            <button type="button" className="quick-read-page__work-turn" onClick={() => selectPoster(selectedIndex - 1)} aria-label={zh ? "上一张海报" : "Previous poster"}>←</button>
+            <span>{String(selectedIndex + 1).padStart(2, "0")} / {String(featuredEntries.length).padStart(2, "0")}</span>
+            <button type="button" className="quick-read-page__work-turn" onClick={() => selectPoster(selectedIndex + 1)} aria-label={zh ? "下一张海报" : "Next poster"}>→</button>
+            <button
+              type="button"
+              className="quick-read-page__work-open"
+              data-project-entry={selectedEntry.id}
+              data-project-context="quick-read"
+              onClick={(event) => {
+                const rect = event.currentTarget.getBoundingClientRect();
+                onProjectOpen(selectedEntry, { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+              }}
+            >
+              {zh ? "打开项目档案" : "Open project file"}<span aria-hidden="true">↗</span>
+            </button>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
@@ -198,6 +302,11 @@ function WorkPage({ language, entries, onProjectOpen }: {
 export function QuickReadPage({ pageId, entries, onBack, onNavigate, onProjectOpen }: QuickReadPageProps) {
   const { language, copy } = useLanguage();
   const rootRef = useRef<HTMLElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  if (returnFocusRef.current === null && typeof document !== "undefined") {
+    const opener = document.activeElement;
+    if (opener instanceof HTMLElement && opener !== document.body) returnFocusRef.current = opener;
+  }
   const zh = language === "zh";
   const titles: Record<QuickReadPageId, string> = zh
     ? { experience: "实习经历", education: "教育与研究", work: "精选作品" }
@@ -205,6 +314,14 @@ export function QuickReadPage({ pageId, entries, onBack, onNavigate, onProjectOp
 
   useEffect(() => {
     rootRef.current?.focus({ preventScroll: true });
+    return () => {
+      const target = returnFocusRef.current;
+      if (!target?.isConnected) return;
+      window.requestAnimationFrame(() => {
+        if (target.closest("[inert], [aria-hidden='true']")) return;
+        target.focus({ preventScroll: true });
+      });
+    };
   }, [pageId]);
 
   const trapFocus = (event: KeyboardEvent<HTMLElement>) => {

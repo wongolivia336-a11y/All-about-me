@@ -1,70 +1,32 @@
-import { useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import "./QuickRead.css";
 import { useLanguage } from "../i18n";
 import type { QuickReadPageId } from "../data/quickRead";
+import { MetalPass } from "./MetalPass";
 
 interface QuickReadProps {
   active: boolean;
   onOpenPage: (pageId: QuickReadPageId) => void;
 }
 
-function PhysicalCard({ className, accent, onActivate, children }: {
+function PhysicalCard({ active, className, accent, onActivate, children }: {
+  active: boolean;
   className: string;
   accent: string;
   onActivate: () => void;
   children: ReactNode;
 }) {
-  const cardRef = useRef<HTMLElement>(null);
-  const resetTilt = (element: HTMLElement) => {
-    element.style.setProperty("--card-rotate-x", "0deg");
-    element.style.setProperty("--card-rotate-y", "0deg");
-    element.style.setProperty("--card-lift", "0px");
-    element.style.setProperty("--card-press", "1");
-    element.style.setProperty("--card-shadow-x", "0px");
-    element.style.setProperty("--glare-x", "50%");
-    element.style.setProperty("--glare-y", "24%");
-  };
-  const trackPointer = (event: ReactPointerEvent<HTMLElement>) => {
-    if (event.pointerType === "touch" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const card = event.currentTarget;
-    const bounds = card.getBoundingClientRect();
-    const x = Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / bounds.width) * 2 - 1));
-    const y = Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / bounds.height) * 2 - 1));
-    card.style.setProperty("--card-rotate-x", `${-y * 4.2}deg`);
-    card.style.setProperty("--card-rotate-y", `${x * 5.2}deg`);
-    card.style.setProperty("--card-lift", "-5px");
-    card.style.setProperty("--card-shadow-x", `${-x * 7}px`);
-    card.style.setProperty("--glare-x", `${50 + x * 42}%`);
-    card.style.setProperty("--glare-y", `${24 + y * 34}%`);
-  };
-  const setPress = (event: ReactPointerEvent<HTMLElement>, value: string) => {
-    event.currentTarget.style.setProperty("--card-press", value);
-  };
-
   return (
-    <article
-      ref={cardRef}
-      className={["quick-read__card", className].join(" ")}
-      style={{ "--card-accent": accent } as CSSProperties}
-      onPointerMove={trackPointer}
-      onPointerLeave={(event) => resetTilt(event.currentTarget)}
-      onPointerDown={(event) => setPress(event, ".986")}
-      onPointerUp={(event) => setPress(event, "1")}
-      onPointerCancel={(event) => resetTilt(event.currentTarget)}
-      onClick={(event) => {
-        if ((event.target as HTMLElement).closest("button, a, input, textarea, select")) return;
-        onActivate();
-      }}
-    >
+    <MetalPass active={active} accent={accent} className={className} onActivate={onActivate}>
       {children}
-    </article>
+    </MetalPass>
   );
 }
 
 export function QuickRead({ active, onOpenPage }: QuickReadProps) {
   const { copy } = useLanguage();
   const [deckTurn, setDeckTurn] = useState(0);
-  const deckDragStart = useRef<number | null>(null);
+  const deckDragStart = useRef<{ pointerId: number; x: number; y: number } | null>(null);
   const suppressDeckClick = useRef(false);
   const turnDeck = () => setDeckTurn((turn) => (turn + 1) % 3);
   const deckNumber = (offset: number) => String(((deckTurn + offset) % 3) + 1).padStart(2, "0");
@@ -76,24 +38,19 @@ export function QuickRead({ active, onOpenPage }: QuickReadProps) {
       aria-labelledby="resume-title"
       aria-hidden={!active}
       inert={!active}
+      data-active={active ? "true" : "false"}
     >
-      <div className="archive__resume-heading">
+      <div className="archive__resume-heading quick-read__heading">
         <p className="archive__eyebrow">{copy.resumeEyebrow}</p>
         <h2 id="resume-title">{copy.resumeTitle}</h2>
       </div>
 
       <div className="archive__resume-grid quick-read__grid">
-        <PhysicalCard className="quick-read__card--badge" accent="#b68285" onActivate={() => onOpenPage("experience")}>
+        <PhysicalCard active={active} className="quick-read__card--badge" accent="#F5DED8" onActivate={() => onOpenPage("experience")}>
           <div className="quick-read__artifact quick-read__artifact--badge" aria-hidden="true">
-            <span className="quick-read__strap" />
-            <span className="quick-read__badge-clip" />
-            <span className="quick-read__badge-face">
-              <span className="quick-read__badge-topline">FOUR HEARTS <i>01</i></span>
-              <span className="quick-read__badge-monogram">OW</span>
-              <span className="quick-read__badge-name">OLIVIA WONG</span>
-              <span className="quick-read__badge-role">{copy.experienceLabel}</span>
-            </span>
-            <span className="quick-read__badge-shine" />
+            <span className="quick-read__artifact-index">FIELD NOTE / 01</span>
+            <img src="/visuals/quick-read/experience/bioaz-workflow.png" alt="" loading="lazy" decoding="async" />
+            <span className="quick-read__artifact-caption">BIOAZ · PRODUCT PRACTICE</span>
           </div>
           <div className="quick-read__content">
             <p className="archive__eyebrow"><span>{copy.experienceLabel}</span><span>01 / 03</span></p>
@@ -109,17 +66,11 @@ export function QuickRead({ active, onOpenPage }: QuickReadProps) {
           </div>
         </PhysicalCard>
 
-        <PhysicalCard className="quick-read__card--research" accent="#748f9b" onActivate={() => onOpenPage("education")}>
+        <PhysicalCard active={active} className="quick-read__card--research" accent="#DAEBF5" onActivate={() => onOpenPage("education")}>
           <div className="quick-read__artifact quick-read__artifact--research" aria-hidden="true">
-            <span className="quick-read__paper quick-read__paper--back" />
-            <span className="quick-read__paper quick-read__paper--middle" />
-            <span className="quick-read__paper quick-read__paper--front">
-              <span className="quick-read__paper-index">02 <i>·</i> {copy.educationLabel}</span>
-              <span className="quick-read__paper-rule" />
-              <span className="quick-read__paper-lines" />
-              <span className="quick-read__paper-mark">§</span>
-            </span>
-            <span className="quick-read__paper-tab" />
+            <span className="quick-read__artifact-index">STUDY FILE / 02</span>
+            <img src="/visuals/quick-read/education/ai-data-design.png" alt="" loading="lazy" decoding="async" />
+            <span className="quick-read__artifact-caption">TONGJI · AI &amp; DATA DESIGN</span>
           </div>
           <div className="quick-read__content">
             <p className="archive__eyebrow"><span>{copy.educationLabel}</span><span>02 / 03</span></p>
@@ -135,39 +86,55 @@ export function QuickRead({ active, onOpenPage }: QuickReadProps) {
           </div>
         </PhysicalCard>
 
-        <PhysicalCard className="quick-read__card--work" accent="#879c91" onActivate={() => onOpenPage("work")}>
+        <PhysicalCard active={active} className="quick-read__card--work" accent="#D8EDE1" onActivate={() => onOpenPage("work")}>
           <button
             className="quick-read__artifact quick-read__artifact--work"
             type="button"
-            aria-label={`${copy.selectedWorkLabel}: ${copy.browseSelectedWork}`}
+            aria-label={`${copy.selectedWorkLabel}: ${copy.browseSelectedWork}. ${deckNumber(0)} / 03`}
             data-turn={deckTurn}
             onPointerDown={(event) => {
-              deckDragStart.current = event.clientX;
-              event.currentTarget.setPointerCapture(event.pointerId);
+              if (event.pointerType === "mouse" && event.button !== 0) return;
+              deckDragStart.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+              if (event.pointerType === "mouse") event.currentTarget.setPointerCapture(event.pointerId);
+            }}
+            onPointerMove={(event) => {
+              const start = deckDragStart.current;
+              if (!start || start.pointerId !== event.pointerId || event.pointerType === "mouse") return;
+              const dx = event.clientX - start.x;
+              const dy = event.clientY - start.y;
+              if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) && !event.currentTarget.hasPointerCapture(event.pointerId)) {
+                event.currentTarget.setPointerCapture(event.pointerId);
+              }
             }}
             onPointerUp={(event) => {
-              if (deckDragStart.current === null) return;
-              const moved = Math.abs(event.clientX - deckDragStart.current) > 20;
+              const start = deckDragStart.current;
               deckDragStart.current = null;
-              if (moved) {
+              if (!start || start.pointerId !== event.pointerId) return;
+              const dx = event.clientX - start.x;
+              const dy = event.clientY - start.y;
+              if (Math.abs(dx) > 20 && Math.abs(dx) > Math.abs(dy)) {
                 suppressDeckClick.current = true;
                 turnDeck();
-                window.requestAnimationFrame(() => { suppressDeckClick.current = false; });
+                window.setTimeout(() => { suppressDeckClick.current = false; }, 0);
               }
             }}
             onPointerCancel={() => { deckDragStart.current = null; }}
+            onLostPointerCapture={() => { deckDragStart.current = null; }}
             onClick={() => {
               if (suppressDeckClick.current) return;
               onOpenPage("work");
             }}
+            onKeyDown={(event) => {
+              if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+              event.preventDefault();
+              turnDeck();
+            }}
           >
-            <span className="quick-read__deck quick-read__deck--back"><i>{deckNumber(2)}</i></span>
-            <span className="quick-read__deck quick-read__deck--middle"><i>{deckNumber(1)}</i></span>
-            <span className="quick-read__deck quick-read__deck--front">
-              <i>{deckNumber(0)}</i>
-              <span className="quick-read__deck-lines" />
-              <span className="quick-read__deck-stamp">A—B—C</span>
-            </span>
+            <img className="quick-read__work-image quick-read__work-image--1" src="/visuals/quick-read/work/bioaz-agent-workbench.png" alt="" draggable={false} loading="lazy" decoding="async" />
+            <img className="quick-read__work-image quick-read__work-image--2" src="/visuals/quick-read/work/knock-knock-care.png" alt="" draggable={false} loading="lazy" decoding="async" />
+            <img className="quick-read__work-image quick-read__work-image--3" src="/visuals/quick-read/work/qiaopi-letter-routes.png" alt="" draggable={false} loading="lazy" decoding="async" />
+            <span className="quick-read__artifact-index">SELECTED / {deckNumber(0)}</span>
+            <span className="quick-read__artifact-caption">THREE PROJECT STORIES</span>
           </button>
           <div className="quick-read__content">
             <p className="archive__eyebrow"><span>{copy.selectedWorkLabel}</span><span>03 / 03</span></p>

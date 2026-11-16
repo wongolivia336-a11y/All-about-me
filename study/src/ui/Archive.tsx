@@ -4,6 +4,7 @@ import {
   type ArchiveEntry,
   type ThemeId,
 } from "../data/library";
+import { getJournalArticle, journalArticles } from "../data/journal";
 import { CONTACT_EMAIL, GITHUB_USER } from "../data/links";
 import type { ThemeZoomOrigin } from "../brand/Heartwheel";
 import type { QuickReadPageId } from "../data/quickRead";
@@ -13,6 +14,8 @@ import { LeafWorld as LeafCanvas, type ThemeSelectionSource } from "./LeafWorld"
 import { LanguageSwitch } from "./LanguageSwitch";
 import { QuickRead } from "./QuickRead";
 import { QuickReadPage } from "./QuickReadPage";
+import { JournalSection } from "./journal/JournalSection";
+import { JournalReader, type JournalOrigin } from "./journal/JournalReader";
 
 interface ArchiveProps {
   active: boolean;
@@ -21,12 +24,15 @@ interface ArchiveProps {
   showThemeArchive: boolean;
   projectId?: string;
   quickReadId?: QuickReadPageId;
+  journalId?: string;
   onClose: () => void;
   onThemeChange: (theme: ThemeId, showAll?: boolean, focused?: boolean, origin?: ThemeZoomOrigin) => void;
   onProjectOpen: (entry: ArchiveEntry, origin?: ThemeZoomOrigin) => void;
   onProjectClose: (theme: ThemeId) => void;
   onQuickReadOpen: (pageId: QuickReadPageId) => void;
   onQuickReadClose: () => void;
+  onJournalOpen: (id: string) => void;
+  onJournalClose: () => void;
 }
 const visibleEntries = library.filter(
   (entry) => entry.status === "published" || entry.status === "prototype",
@@ -35,6 +41,9 @@ const visibleEntries = library.filter(
 const featuredEntries = visibleEntries
   .filter((entry) => entry.featured)
   .sort((a, b) => (a.featuredOrder ?? 99) - (b.featuredOrder ?? 99));
+const allProjectEntries = visibleEntries
+  .filter((entry) => entry.portfolioOrder !== undefined)
+  .sort((a, b) => (a.portfolioOrder ?? 99) - (b.portfolioOrder ?? 99));
 
 function ProjectCard({
   entry,
@@ -102,6 +111,52 @@ function ProjectCard({
     </article>
   );
 }
+
+function ProjectIndexItem({
+  entry,
+  onOpen,
+}: {
+  entry: ArchiveEntry;
+  onOpen: (origin: ThemeZoomOrigin) => void;
+}) {
+  const { language, copy } = useLanguage();
+  const definition = themeText(entry.primaryTheme, language);
+  const localized = projectText(entry, language);
+  return (
+    <li className="project-index__item" style={{ "--card-accent": definition.accent, "--card-ink": definition.ink } as CSSProperties}>
+      <button
+        className="project-index__open"
+        type="button"
+        data-project-entry={entry.id}
+        data-project-context="all-projects"
+        onClick={(event) => {
+          const bounds = event.currentTarget.getBoundingClientRect();
+          onOpen({ x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 });
+        }}
+      >
+        <span className="project-index__meta">
+          <span className="project-index__number">{String(entry.portfolioOrder ?? 0).padStart(2, "0")}</span>
+          <span>{definition.label} / {localized.type}</span>
+          {entry.status === "prototype" && <span>{localized.status}</span>}
+        </span>
+        <strong>{localized.title}</strong>
+        <span className="project-index__summary">{localized.summary}</span>
+        <span className="project-index__tags">{localized.tags.slice(0, 2).map((tag) => <i key={tag}>{tag}</i>)}</span>
+        <span className="project-index__action">{copy.exploreProject} <span aria-hidden="true">↗</span></span>
+      </button>
+      {entry.links.length > 0 && (
+        <div className="project-index__links">
+          {entry.links.map((link, index) => (
+            <a key={link.url} href={link.url} target="_blank" rel="noreferrer">
+              {localized.links[index]} <span aria-hidden="true">↗</span>
+            </a>
+          ))}
+        </div>
+      )}
+    </li>
+  );
+}
+
 function ProjectDetail({
   entry,
   detailRef,
@@ -212,12 +267,15 @@ export function Archive({
   showThemeArchive,
   projectId,
   quickReadId,
+  journalId,
   onClose,
   onThemeChange,
   onProjectOpen,
   onProjectClose,
   onQuickReadOpen,
   onQuickReadClose,
+  onJournalOpen,
+  onJournalClose,
 }: ArchiveProps) {
   const { language, copy } = useLanguage();
   const heroNameParts = copy.heroTitle.replace(/\.$/, "").split(" ");
@@ -229,6 +287,7 @@ export function Archive({
   const [projectTransition, setProjectTransition] = useState<"entering" | "entered" | "exiting">("entered");
   const [projectSourceOrigin, setProjectSourceOrigin] = useState<ThemeZoomOrigin | null>(null);
   const [projectOrigin, setProjectOrigin] = useState({ x: 50, y: 50 });
+  const [journalOrigin, setJournalOrigin] = useState<JournalOrigin | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const archiveRef = useRef<HTMLElement | null>(null);
   const detailRef = useRef<HTMLElement | null>(null);
@@ -239,6 +298,9 @@ export function Archive({
   const projectReturnScrollTop = useRef<number | null>(null);
   const projectReturnFocusTop = useRef<number | null>(null);
   const previousProjectId = useRef(selectedProjectId);
+  const previousJournalId = useRef(journalId);
+  const journalReturnFocus = useRef<HTMLElement | null>(null);
+  const journalReturnScrollTop = useRef<number | null>(null);
 
   useEffect(() => {
     setActiveTheme(initialTheme);
@@ -285,6 +347,29 @@ export function Archive({
   const selectedProject = selectedProjectId
     ? visibleEntries.find((entry) => entry.id === selectedProjectId)
     : undefined;
+  const journalArticle = getJournalArticle(journalId);
+
+  useEffect(() => {
+    if (journalId) {
+      previousJournalId.current = journalId;
+      return;
+    }
+    if (!previousJournalId.current) return;
+    previousJournalId.current = undefined;
+    const frame = requestAnimationFrame(() => {
+      if (journalReturnScrollTop.current !== null && archiveRef.current) {
+        archiveRef.current.scrollTop = journalReturnScrollTop.current;
+      }
+      const target = journalReturnFocus.current?.isConnected
+        ? journalReturnFocus.current
+        : archiveRef.current?.querySelector<HTMLElement>("#journal-title");
+      target?.focus({ preventScroll: true });
+      journalReturnFocus.current = null;
+      journalReturnScrollTop.current = null;
+      setJournalOrigin(null);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [journalId]);
 
   useLayoutEffect(() => {
     if (!selectedProject || !projectSourceOrigin || !detailRef.current) return;
@@ -317,14 +402,19 @@ export function Archive({
       if (projectReturnScrollTop.current !== null && archiveRef.current) {
         archiveRef.current.scrollTop = projectReturnScrollTop.current;
       }
+      const quickReadReturn = projectReturnTarget.current?.context === "quick-read";
+      if (quickReadReturn && projectReturnScrollTop.current !== null) {
+        const quickReadPage = document.querySelector<HTMLElement>(".quick-read-page");
+        if (quickReadPage) quickReadPage.scrollTop = projectReturnScrollTop.current;
+      }
       const target = projectReturnFocus.current?.isConnected
         ? projectReturnFocus.current
         : projectReturnTarget.current
-          ? archiveRef.current?.querySelector<HTMLElement>(
+          ? (quickReadReturn ? document : archiveRef.current)?.querySelector<HTMLElement>(
               `[data-project-entry="${projectReturnTarget.current.entryId}"][data-project-context="${projectReturnTarget.current.context}"]`,
             )
           : null;
-      if (target && archiveRef.current && projectReturnFocusTop.current !== null) {
+      if (!quickReadReturn && target && archiveRef.current && projectReturnFocusTop.current !== null) {
         archiveRef.current.scrollTop += target.getBoundingClientRect().top - projectReturnFocusTop.current;
       }
       (target ?? archiveRef.current?.querySelector<HTMLElement>("#worlds"))?.focus({ preventScroll: true });
@@ -347,8 +437,10 @@ export function Archive({
     if (!active) return;
     document.title = selectedProject
       ? `${projectText(selectedProject, language).title} — ${language === "zh" ? "王心蕊" : "Olivia Wong"} / Four Hearts`
-      : language === "zh" ? "王心蕊 — Four Hearts" : "Olivia Wong — Four Hearts";
-  }, [active, language, selectedProject]);
+      : journalArticle
+        ? `${journalArticle.title[language]} — Journal / Four Hearts`
+        : language === "zh" ? "王心蕊 — Four Hearts" : "Olivia Wong — Four Hearts";
+  }, [active, language, journalArticle, selectedProject]);
 
   const selectTheme = (
     theme: ThemeId,
@@ -375,7 +467,9 @@ export function Archive({
           context: activeElement.dataset.projectContext ?? "selected",
         }
       : null;
-    projectReturnScrollTop.current = archiveRef.current?.scrollTop ?? 0;
+    projectReturnScrollTop.current = quickReadId
+      ? document.querySelector<HTMLElement>(".quick-read-page")?.scrollTop ?? 0
+      : archiveRef.current?.scrollTop ?? 0;
     projectReturnFocusTop.current = activeElement instanceof HTMLElement
       ? activeElement.getBoundingClientRect().top
       : null;
@@ -408,8 +502,8 @@ export function Archive({
         className="archive"
         data-zoom={selectedProject ? "project" : worldFocused ? "world" : "index"}
         aria-label={copy.archiveAria}
-        aria-hidden={Boolean(selectedProject || quickReadId)}
-        inert={Boolean(selectedProject || quickReadId)}
+        aria-hidden={Boolean(selectedProject || quickReadId || journalId)}
+        inert={Boolean(selectedProject || quickReadId || journalId)}
       >
         <div className="archive__shell">
           <header className="archive__bar" id="top" aria-hidden={worldFocused} inert={worldFocused}>
@@ -450,6 +544,7 @@ export function Archive({
             >
               <button type="button" onClick={() => scrollToSection("worlds")}>{copy.navWorlds}</button>
               <button type="button" onClick={() => scrollToSection("selected-works")}>{copy.navWork}</button>
+              <button type="button" onClick={() => scrollToSection("journal")}>{copy.navJournal}</button>
               <button type="button" onClick={() => scrollToSection("about")}>{copy.navAbout}</button>
             </nav>
 
@@ -495,7 +590,7 @@ export function Archive({
           </div>
 
           <QuickRead
-            active={!worldFocused}
+            active={!worldFocused && !quickReadId && !selectedProject && !journalId}
             onOpenPage={onQuickReadOpen}
           />
 
@@ -512,7 +607,41 @@ export function Archive({
                 <ProjectCard key={entry.id} entry={entry} onOpen={(origin) => openProject(entry, origin)} />
               ))}
             </div>
+            <a className="archive__all-projects-link" href="#all-projects">{copy.viewAllProjects}<span aria-hidden="true">↘</span></a>
           </section>
+
+          <section id="all-projects" className="archive__project-index" aria-labelledby="all-projects-title" aria-hidden={worldFocused} inert={worldFocused}>
+            <div className="archive__section-heading">
+              <div>
+                <p className="archive__eyebrow">{copy.allProjectsEyebrow} / {String(allProjectEntries.length).padStart(2, "0")}</p>
+                <h2 id="all-projects-title">{copy.allProjects}</h2>
+              </div>
+              <p>{copy.allProjectsDescription}</p>
+            </div>
+            <ol className="project-index">
+              {allProjectEntries.map((entry) => (
+                <ProjectIndexItem key={entry.id} entry={entry} onOpen={(origin) => openProject(entry, origin)} />
+              ))}
+            </ol>
+          </section>
+
+          <JournalSection
+            articles={journalArticles}
+            active={active}
+            readerOpen={Boolean(journalId)}
+            inactive={worldFocused}
+            onOpenArticle={(id, trigger) => {
+              journalReturnFocus.current = trigger;
+              journalReturnScrollTop.current = archiveRef.current?.scrollTop ?? 0;
+              const bounds = trigger.getBoundingClientRect();
+              setJournalOrigin({ x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 });
+              onJournalOpen(id);
+            }}
+            onOpenCollect={() => {
+              selectTheme("keep");
+              scrollToSection("worlds");
+            }}
+          />
 
           <section id="about" className="archive__about" aria-labelledby="about-title" aria-hidden={worldFocused} inert={worldFocused}>
             <div>
@@ -550,6 +679,13 @@ export function Archive({
           onBack={onQuickReadClose}
           onNavigate={onQuickReadOpen}
           onProjectOpen={openProject}
+        />
+      )}
+      {journalArticle && (
+        <JournalReader
+          article={journalArticle}
+          origin={journalOrigin}
+          onBack={onJournalClose}
         />
       )}
       {selectedProject && (
