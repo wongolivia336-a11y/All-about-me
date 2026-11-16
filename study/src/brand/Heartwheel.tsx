@@ -1,12 +1,10 @@
-import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from "react";
 import type { ThemeId } from "../data/library";
 import { themeConfig, themeOrder } from "../data/themeConfig";
 import { themeText, useLanguage } from "../i18n";
-import { HEART_PATH } from "./HeartTextTexture";
-import { HeartwheelFallback } from "./HeartwheelFallback";
+import { HEART_PATH } from "./heartPath";
+import { PaperHeart } from "./PaperHeart";
 import "./Heartwheel.css";
-
-const HeartwheelScene = lazy(() => import("./HeartwheelScene").then(({ HeartwheelScene: Scene }) => ({ default: Scene })));
 
 export interface ThemeZoomOrigin {
   x: number;
@@ -319,7 +317,9 @@ export function Heartwheel({
 
   const handleWheel = (event: ReactWheelEvent<HTMLDivElement>) => {
     if (focused || selectionPending.current || gesture.current) return;
-    const rawDelta = event.deltaY || event.deltaX;
+    // Keep ordinary vertical page scrolling intact. Horizontal trackpad
+    // gestures and Shift+wheel remain explicit rotation gestures.
+    const rawDelta = event.deltaX || (event.shiftKey ? event.deltaY : 0);
     if (rawDelta === 0) return;
 
     // Scroll can still move the page; the wheel responds only while the pointer is over it.
@@ -384,11 +384,6 @@ export function Heartwheel({
         }}
       >
         <div className="heartwheel__orbit">
-          <div className="heartwheel__scene" aria-hidden="true">
-            <Suspense fallback={<HeartwheelFallback />}>
-              <HeartwheelScene activeTheme={activeTheme} focused={focused} hoveredTheme={hoveredTheme} />
-            </Suspense>
-          </div>
           <svg className="heartwheel__svg" viewBox="-170 -170 340 340" role="presentation">
             {themeOrder.map((theme) => {
               const active = focused && activeTheme === theme;
@@ -402,7 +397,9 @@ export function Heartwheel({
                   transform={`rotate(${themeConfig[theme].leafAngle} 0 0)`}
                 >
                   <g className="heartwheel__leaf-visual" aria-hidden="true">
-                    <path d={HEART_PATH} className="heartwheel__leaf-fill" />
+                    <g transform="translate(0 -3.2)">
+                    <PaperHeart theme={theme} />
+                  </g>
                   </g>
                   <path
                     className="heartwheel__leaf-hit"
@@ -423,7 +420,6 @@ export function Heartwheel({
                 </g>
               );
             })}
-            <circle className="heartwheel__hub" cx="0" cy="0" r="6" />
           </svg>
         </div>
 

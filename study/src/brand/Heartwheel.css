@@ -40,27 +40,6 @@
   overflow: visible;
 }
 
-.heartwheel__scene {
-  position: absolute;
-  z-index: 0;
-  inset: 0;
-  pointer-events: none;
-}
-
-.heartwheel__scene > div,
-.heartwheel__scene canvas {
-  display: block;
-  width: 100% !important;
-  height: 100% !important;
-  pointer-events: none !important;
-}
-
-.heartwheel__scene-fallback {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
 .heartwheel__leaf {
   color: var(--leaf-ink);
   transition: opacity 180ms ease;
@@ -68,45 +47,37 @@
 
 .heartwheel__leaf-visual {
   transform-box: fill-box;
-  transform-origin: center;
-  transition: transform 420ms cubic-bezier(.18,.78,.23,1);
+  transform-origin: 50% 100%;
+  transition: transform 360ms cubic-bezier(.18, .8, .27, 1);
 }
 
-.heartwheel__leaf-fill {
-  fill: transparent;
+.paper-heart__edge { fill: var(--leaf-ink); opacity: .095; }
+.paper-heart__body {
+  fill: var(--leaf-color);
+  stroke: color-mix(in srgb, var(--leaf-ink) 22%, white);
+  stroke-width: .62;
+  stroke-linejoin: round;
+}
+.paper-heart__wash { opacity: .66; }
+.paper-heart__fibers { fill: none; stroke-linecap: round; }
+.paper-heart__fibers--ink { stroke: var(--leaf-ink); stroke-width: .48; opacity: .17; }
+.paper-heart__fibers--light { stroke: white; stroke-width: .58; opacity: .28; }
+.paper-heart__fold-shadow,
+.paper-heart__fold-light { fill: none; stroke-linecap: round; pointer-events: none; }
+.paper-heart__fold-shadow { stroke: var(--leaf-ink); stroke-width: .72; opacity: .1; }
+.paper-heart__fold-light { stroke: white; stroke-width: 1.08; opacity: .31; }
+.paper-heart__contour {
+  fill: none;
+  stroke: color-mix(in srgb, var(--leaf-ink) 24%, white);
+  stroke-width: .45;
+  opacity: .48;
+  pointer-events: none;
 }
 
-.heartwheel__leaf-hit {
-  cursor: pointer;
-}
-
-.heartwheel__leaf--hovered .heartwheel__leaf-fill {
-  fill: transparent;
-}
-
-.heartwheel__leaf--hovered .heartwheel__leaf-visual {
-  transform: scale(1.045);
-}
-
-.heartwheel__leaf--active .heartwheel__leaf-fill {
-  fill: transparent;
-}
-
-.heartwheel__leaf--active .heartwheel__leaf-visual {
-  transform: scale(1.025);
-}
-
-.heartwheel__texture {
-  font: 500 3.3px/1 var(--font-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
-  letter-spacing: 0.1px;
-  opacity: 0.12;
-}
-
-.heartwheel__hub {
-  fill: var(--color-ink, var(--archive-ink));
-  opacity: 0.8;
-}
-
+.heartwheel__leaf-hit { fill: transparent; cursor: pointer; pointer-events: all; }
+.heartwheel__leaf--hovered .heartwheel__leaf-visual { transform: scale(1.065); }
+.heartwheel__leaf--active .heartwheel__leaf-visual { transform: scale(1.018); }
+.heartwheel__leaf--active.heartwheel__leaf--hovered .heartwheel__leaf-visual { transform: scale(1.065); }
 .heartwheel__labels {
   position: absolute;
   inset: 0;
@@ -202,10 +173,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .heartwheel__orbit,
-  .heartwheel__label,
-  .heartwheel__leaf-fill,
-  .heartwheel__leaf-visual {
-    transition-duration: 0.01ms;
-  }
+  .heartwheel__leaf-visual,
+  .heartwheel__label { transition-duration: .01ms; }
+  .heartwheel__leaf--hovered .heartwheel__leaf-visual,
+  .heartwheel__leaf--active .heartwheel__leaf-visual { transform: none; }
 }

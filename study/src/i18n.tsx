@@ -503,6 +503,30 @@ const projectTextById: Record<string, Record<Language, ProjectText>> = {
     en: { title: "A Letter, After It Arrives", summary: "A data narrative tracing overseas remittance letters to a village in Chaoshan.", worldSummary: "Following remittance letters from overseas to a Chaoshan village.", tags: ["Data story", "Archive", "Geography"] },
     zh: { title: "一封侨批，抵达之后", summary: "从海外寄批地到潮汕村庄的侨批数据叙事。", worldSummary: "沿着侨批的寄递轨迹，连接海外与潮汕村庄。", tags: ["数据叙事", "档案", "地理"] },
   },
+  peekaboo: {
+    en: { title: "Peekaboo", summary: "A video interpretation of Yuan Zheshen’s novel 《寂寞的游戏》, translating its literary world into moving images.", tags: ["Film", "Literary adaptation", "Moving image"] },
+    zh: { title: "Peekaboo", summary: "将袁哲生小说《寂寞的游戏》转译为一部影像作品。", tags: ["影像", "文学转译", "视频"] },
+  },
+  "zhenru-temple": {
+    en: { title: "Zhenru Temple", summary: "A 3D model and interactive-space concept exploring how the temple can extend into an inhabitable digital world.", tags: ["3D modeling", "Interactive space", "Digital world"] },
+    zh: { title: "真如寺", summary: "真如寺的 3D 建模与可交互空间概念，探索寺院空间如何延展为可进入的数字世界。", tags: ["3D 建模", "交互空间", "数字世界"] },
+  },
+  "so-shaped": {
+    en: { title: "So Shaped", summary: "An independent storefront in progress, bringing product, identity and an online shopping experience together.", tags: ["Independent store", "Brand", "E-commerce"] },
+    zh: { title: "So Shaped", summary: "一个正在构思中的独立站，把产品、品牌与线上购物体验放进同一个小世界。", tags: ["独立站", "品牌", "线上商店"] },
+  },
+  "gama-qgis": {
+    en: { title: "Gamma QGIS", summary: "A University Road study combining Grasshopper and street agents to explore the street environment and urban life.", tags: ["University Road", "Grasshopper", "Street agents"] },
+    zh: { title: "伽马 QGIS", summary: "以大学路为场域，结合 Grasshopper 与街道智能体，研究街道环境和城市生活。", tags: ["大学路", "Grasshopper", "街道智能体"] },
+  },
+  glassaha: {
+    en: { title: "glassaha", summary: "A set of front-end experiments with frosted glass, transparency, blur and interaction.", tags: ["Frontend", "Frosted glass", "Visual experiment"] },
+    zh: { title: "glassaha", summary: "围绕雾面玻璃视觉展开的一组前端实验，研究透明、模糊与层次如何回应交互。", tags: ["前端实验", "雾面玻璃", "视觉设计"] },
+  },
+  "psychologist-cafe": {
+    en: { title: "Psychologist Café", summary: "An existentialist café concept that brings questions of freedom, choice and everyday life into a spatial experience.", tags: ["Existentialism", "Cafe concept", "Space"] },
+    zh: { title: "Psychologist 咖啡馆", summary: "以存在主义为主题的咖啡馆概念，把关于自由、选择与日常的思考放进空间体验。", tags: ["存在主义", "咖啡馆概念", "空间体验"] },
+  },
   "film-shelf": {
     en: { title: "Film shelf", summary: "A small shelf for returning to the films of Lynch, Edward Yang and Hou Hsiao-hsien.", tags: ["Cinema", "Film notes", "Room object"] },
     zh: { title: "Film shelf / 片单", summary: "一方小小的架子，留给林奇、杨德昌与侯孝贤的电影。", tags: ["电影", "观影笔记", "房间物件"] },
