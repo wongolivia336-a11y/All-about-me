@@ -1,54 +1,60 @@
+import { useState, type CSSProperties } from "react";
 import { phoneApps } from "../data/links";
 import { focus } from "../interaction/studyStore";
 import { phoneAppText, useLanguage } from "../i18n";
 
-/**
- * The phone's apps. None of these platforms expose a public API, so every one
- * of them is an honest outbound link rather than embedded content.
- */
 export function PhonePanel() {
   const { language, copy } = useLanguage();
+  const [flippedId, setFlippedId] = useState<string | null>(null);
+
   return (
-    <aside className="panel">
-      <button className="panel__close" onClick={() => focus(null)} aria-label={copy.closePanel}>
+    <aside className="panel phone-panel" aria-labelledby="phone-panel-title">
+      <button className="panel__close" type="button" onClick={() => focus(null)} aria-label={copy.closePanel}>
         ✕
       </button>
 
       <p className="panel__kicker">{copy.phoneKicker}</p>
-      <h2 className="panel__title">{copy.phoneTitle}</h2>
+      <h2 className="panel__title" id="phone-panel-title">{copy.phoneTitle}</h2>
       <p className="panel__body">{copy.phoneBody}</p>
 
-      <div className="apps">
+      <div className="phone-panel__cards">
         {phoneApps.map((app) => {
-          const inner = (
-            <>
-              <span className="apps__icon" style={{ background: app.tone }}>
-                {app.mark}
-              </span>
-              <span className="apps__text">
-                <span className="apps__label">{phoneAppText(app.id, app.label, language)}</span>
-                <span className="apps__handle">
-                  {app.href ? app.handle : copy.phoneLinksMissing}
+          const label = phoneAppText(app.id, app.label, language);
+          const flipped = flippedId === app.id;
+          return (
+            <button
+              key={app.id}
+              className="phone-panel__card"
+              type="button"
+              data-flipped={flipped}
+              aria-expanded={flipped}
+              aria-label={label + ": " + (flipped ? copy.phoneCardHide : copy.phoneCardReveal)}
+              onClick={() => setFlippedId((current) => current === app.id ? null : app.id)}
+            >
+              <span className="phone-panel__card-inner">
+                <span className="phone-panel__face phone-panel__face--front">
+                  <span className="phone-panel__app-icon" style={{ "--app-tone": app.tone } as CSSProperties}>
+                    {app.mark}
+                  </span>
+                  <span className="phone-panel__app-label">{label}</span>
+                  <span className="phone-panel__app-handle">{language === "zh" ? app.handleZh ?? app.handle : app.handle}</span>
+                  <span className="phone-panel__hint">{copy.phoneCardReveal}<i aria-hidden="true">↗</i></span>
+                </span>
+                <span className="phone-panel__face phone-panel__face--back" aria-hidden={!flipped}>
+                  {app.qrSrc ? (
+                    <img src={app.qrSrc} alt={copy.phoneQrAlt + " " + label} loading="lazy" decoding="async" />
+                  ) : (
+                    <span className="phone-panel__qr-fallback">{copy.phoneLinksMissing}</span>
+                  )}
+                  <span className="phone-panel__back-label">{copy.phoneCardHide}</span>
                 </span>
               </span>
-            </>
-          );
-
-          return app.href ? (
-            <a key={app.id} className="apps__item" href={app.href} target="_blank" rel="noreferrer">
-              {inner}
-            </a>
-          ) : (
-            <span key={app.id} className="apps__item apps__item--empty" title={app.note}>
-              {inner}
-            </span>
+            </button>
           );
         })}
       </div>
 
-      <p className="panel__note">
-        {copy.phoneSources}
-      </p>
+      <p className="panel__note">{copy.phoneSources}</p>
     </aside>
   );
 }

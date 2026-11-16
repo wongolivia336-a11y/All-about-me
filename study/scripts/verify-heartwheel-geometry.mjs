@@ -31,9 +31,9 @@ assert.equal(leafAngles[3] - leafAngles[2], 90);
 assert.match(pageTurn, /position: fixed;/);
 assert.match(pageTurn, /\.paper-corner\s*\{[\s\S]*?top: max\(0px, env\(safe-area-inset-top\)\);/);
 assert.match(pageTurn, /right: max\(0px, env\(safe-area-inset-right\)\);/);
-assert.match(pageTurn, /width: 104px;[\s\S]*?height: 104px;/);
-assert.match(pageTurn, /\.paper-corner__underpage,\s*\.paper-corner__flap\s*\{[\s\S]*?width: 100px;[\s\S]*?height: 100px;/);
-assert.match(pageTurn, /@media \(max-width: 720px\)[\s\S]*?width: 84px;[\s\S]*?height: 84px;/);
+assert.match(pageTurn, /width: 88px;[\s\S]*?height: 88px;/);
+assert.match(pageTurn, /\.paper-corner__underpage,\s*\.paper-corner__flap\s*\{[\s\S]*?width: 84px;[\s\S]*?height: 84px;/);
+assert.match(pageTurn, /@media \(max-width: 720px\)[\s\S]*?width: 72px;[\s\S]*?height: 72px;/);
 assert.match(pageTurn, /\.paper-corner__flap\s*\{[\s\S]*?transform-origin: 100% 0;[\s\S]*?filter: drop-shadow/);
 
 console.log("Heartwheel geometry and Paper Corner assertions passed.");

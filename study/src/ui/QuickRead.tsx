@@ -17,12 +17,11 @@ function PhysicalCard({ active, className, accent, onActivate, children }: {
   children: ReactNode;
 }) {
   return (
-    <MetalPass active={active} accent={accent} className={className} onActivate={onActivate}>
+    <MetalPass active={active} className={className} accent={accent} onActivate={onActivate}>
       {children}
     </MetalPass>
   );
 }
-
 export function QuickRead({ active, onOpenPage }: QuickReadProps) {
   const { copy } = useLanguage();
   const [deckTurn, setDeckTurn] = useState(0);
@@ -47,6 +46,7 @@ export function QuickRead({ active, onOpenPage }: QuickReadProps) {
 
       <div className="archive__resume-grid quick-read__grid">
         <PhysicalCard active={active} className="quick-read__card--badge" accent="#F5DED8" onActivate={() => onOpenPage("experience")}>
+          <span className="quick-read__node" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="M16 15C9 15 7 10 9 6c2-4 7-1 7 6 0-7 5-10 7-6 2 4 0 9-7 9Zm0 2c-7 0-9 5-7 9 2 4 7 1 7-6 0 7 5 10 7 6 2-4 0-9-7-9Z" /><path d="M16 13v6" /></svg></span>
           <div className="quick-read__artifact quick-read__artifact--badge" aria-hidden="true">
             <span className="quick-read__artifact-index">FIELD NOTE / 01</span>
             <img src="/visuals/quick-read/experience/bioaz-workflow.png" alt="" loading="lazy" decoding="async" />
@@ -67,6 +67,7 @@ export function QuickRead({ active, onOpenPage }: QuickReadProps) {
         </PhysicalCard>
 
         <PhysicalCard active={active} className="quick-read__card--research" accent="#DAEBF5" onActivate={() => onOpenPage("education")}>
+          <span className="quick-read__node" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="M16 15C9 15 7 10 9 6c2-4 7-1 7 6 0-7 5-10 7-6 2 4 0 9-7 9Zm0 2c-7 0-9 5-7 9 2 4 7 1 7-6 0 7 5 10 7 6 2-4 0-9-7-9Z" /><path d="M16 13v6" /></svg></span>
           <div className="quick-read__artifact quick-read__artifact--research" aria-hidden="true">
             <span className="quick-read__artifact-index">STUDY FILE / 02</span>
             <img src="/visuals/quick-read/education/ai-data-design.png" alt="" loading="lazy" decoding="async" />
@@ -87,6 +88,7 @@ export function QuickRead({ active, onOpenPage }: QuickReadProps) {
         </PhysicalCard>
 
         <PhysicalCard active={active} className="quick-read__card--work" accent="#D8EDE1" onActivate={() => onOpenPage("work")}>
+          <span className="quick-read__node" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="M16 15C9 15 7 10 9 6c2-4 7-1 7 6 0-7 5-10 7-6 2 4 0 9-7 9Zm0 2c-7 0-9 5-7 9 2 4 7 1 7-6 0 7 5 10 7 6 2-4 0-9-7-9Z" /><path d="M16 13v6" /></svg></span>
           <button
             className="quick-read__artifact quick-read__artifact--work"
             type="button"

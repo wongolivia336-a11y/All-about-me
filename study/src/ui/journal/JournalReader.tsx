@@ -1,12 +1,88 @@
-import { useEffect, useRef } from "react";
-import type { CSSProperties } from "react";
-import type { JournalArticle, JournalBlock } from "../../data/journal";
+import { useEffect, useRef, useState } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import type { JournalArticle, JournalBlock, LocalizedText } from "../../data/journal";
 import { useLanguage } from "../../i18n";
 import { LanguageSwitch } from "../LanguageSwitch";
 
 export interface JournalOrigin {
   x: number;
   y: number;
+}
+
+type BodyPart =
+  | { type: "paragraph"; text: string }
+  | { type: "heading"; level: 2 | 3; text: string };
+
+function parseBody(source: string): BodyPart[] {
+  return source
+    .split(/\r?\n\s*\r?\n/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((text) => {
+      const match = text.match(/^(#{2,3})\s+(.+)$/);
+      return match
+        ? { type: "heading" as const, level: match[1].length as 2 | 3, text: match[2].trim() }
+        : { type: "paragraph" as const, text };
+    });
+}
+
+function inlineLinks(text: string): ReactNode[] {
+  const parts = text.split(/(https?:\/\/[^\s<>"“”]+)/g);
+  return parts.map((part, index) => {
+    if (!/^https?:\/\//i.test(part)) return part;
+    const trailing = part.match(/[.,;:!?，。；：）)\]]+$/u)?.[0] ?? "";
+    const href = trailing ? part.slice(0, -trailing.length) : part;
+    return (
+      <span key={index}>
+        <a href={href} target="_blank" rel="noreferrer">{href}</a>{trailing}
+      </span>
+    );
+  });
+}
+
+function renderBlock(block: JournalBlock, index: number, language: "en" | "zh") {
+  if (block.type === "heading") {
+    return block.level === 2
+      ? <h2 key={index}>{block.text[language]}</h2>
+      : <h3 key={index}>{block.text[language]}</h3>;
+  }
+  if (block.type === "quote") {
+    return (
+      <blockquote key={index}>
+        <p>{block.text[language]}</p>
+        {block.attribution && <cite>{block.attribution[language]}</cite>}
+      </blockquote>
+    );
+  }
+  if (block.type === "image") {
+    return (
+      <figure key={index}>
+        <img src={block.src} alt={block.alt[language]} loading="lazy" decoding="async" />
+        {block.caption && <figcaption>{block.caption[language]}</figcaption>}
+      </figure>
+    );
+  }
+  if (block.type === "link") {
+    const external = /^https?:\/\//i.test(block.href);
+    return (
+      <p className="journal-reader__link" key={index}>
+        <a href={block.href} target={external ? "_blank" : undefined} rel={external ? "noreferrer" : undefined}>
+          {block.label[language]}<span aria-hidden="true"> ↗</span>
+        </a>
+      </p>
+    );
+  }
+  return <p key={index}>{inlineLinks(block.text[language])}</p>;
+}
+
+function renderBodyPart(part: BodyPart, index: number) {
+  const linkedText = inlineLinks(part.text);
+  if (part.type === "heading") {
+    return part.level === 2
+      ? <h2 key={index}>{linkedText}</h2>
+      : <h3 key={index}>{linkedText}</h3>;
+  }
+  return <p key={index}>{linkedText}</p>;
 }
 
 export function JournalReader({
@@ -21,54 +97,46 @@ export function JournalReader({
   const { language, copy } = useLanguage();
   const readerRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const [entered, setEntered] = useState(false);
+  const [resolvedBody, setResolvedBody] = useState<{
+    id: string;
+    value: LocalizedText | null;
+    failed: boolean;
+  }>({ id: article.id, value: article.body ?? null, failed: false });
+  const body = resolvedBody.id === article.id ? resolvedBody.value : article.body ?? null;
+  const bodyFailed = resolvedBody.id === article.id && resolvedBody.failed;
 
   useEffect(() => {
-    const reader = readerRef.current;
-    const title = titleRef.current;
-    if (!reader || !title) return;
-    reader.dataset.entered = "false";
+    setEntered(false);
     const frame = window.requestAnimationFrame(() => {
-      reader.dataset.entered = "true";
-      title.focus({ preventScroll: true });
+      setEntered(true);
+      titleRef.current?.focus({ preventScroll: true });
     });
     return () => window.cancelAnimationFrame(frame);
   }, [article.id]);
 
-  const renderBlock = (block: JournalBlock, index: number) => {
-    if (block.type === "heading") {
-      return block.level === 2
-        ? <h2 key={index}>{block.text[language]}</h2>
-        : <h3 key={index}>{block.text[language]}</h3>;
+  useEffect(() => {
+    let cancelled = false;
+    if (article.body) {
+      setResolvedBody({ id: article.id, value: article.body, failed: false });
+      return;
     }
-    if (block.type === "quote") {
-      return (
-        <blockquote key={index}>
-          <p>{block.text[language]}</p>
-          {block.attribution && <cite>{block.attribution[language]}</cite>}
-        </blockquote>
-      );
+    if (article.status !== "published" || article.blocks) {
+      setResolvedBody({ id: article.id, value: null, failed: false });
+      return;
     }
-    if (block.type === "image") {
-      return (
-        <figure key={index}>
-          <img src={block.src} alt={block.alt[language]} loading="lazy" decoding="async" />
-          {block.caption && <figcaption>{block.caption[language]}</figcaption>}
-        </figure>
-      );
-    }
-    if (block.type === "link") {
-      const external = /^https?:\/\//i.test(block.href);
-      return (
-        <p className="journal-reader__link" key={index}>
-          <a href={block.href} target={external ? "_blank" : undefined} rel={external ? "noreferrer" : undefined}>
-            {block.label[language]}<span aria-hidden="true"> ↗</span>
-          </a>
-        </p>
-      );
-    }
-    return <p key={index}>{block.text[language]}</p>;
-  };
-
+    setResolvedBody({ id: article.id, value: null, failed: false });
+    import("../../data/journalContent")
+      .then(({ journalBodies }) => {
+        if (cancelled) return;
+        const value = journalBodies[article.id] ?? null;
+        setResolvedBody({ id: article.id, value, failed: value === null });
+      })
+      .catch(() => {
+        if (!cancelled) setResolvedBody({ id: article.id, value: null, failed: true });
+      });
+    return () => { cancelled = true; };
+  }, [article.id, article.status, article.body, article.blocks]);
   const style = origin
     ? ({
         "--journal-origin-x": `${origin.x}px`,
@@ -84,7 +152,7 @@ export function JournalReader({
       aria-modal="true"
       aria-labelledby="journal-reader-title"
       style={style}
-      data-entered="false"
+      data-entered={entered ? "true" : "false"}
       onKeyDown={(event) => {
         if (event.key !== "Tab") return;
         const root = event.currentTarget;
@@ -112,21 +180,39 @@ export function JournalReader({
       </header>
       <article className="journal-reader__paper" aria-labelledby="journal-reader-title">
         <div className="journal-reader__content">
-          {article.status === "development" && (
-            <p className="journal-reader__sample">{copy.journalDevelopmentLabel}</p>
-          )}
           <p className="journal-reader__eyebrow">
             {article.topics[language].map((topic) => <span key={topic}>{topic}</span>)}
           </p>
           <h1 id="journal-reader-title" ref={titleRef} tabIndex={-1}>{article.title[language]}</h1>
-          <div className="journal-reader__meta">
-            {article.date
-              ? <time dateTime={article.date}>{article.dateLabel[language]}</time>
-              : <span>{article.dateLabel[language]}</span>}
-          </div>
-          <p className="journal-reader__summary">{article.summary[language]}</p>
-          <div className="journal-reader__body">
-            {article.blocks.map(renderBlock)}
+          {(article.date || article.dateLabel?.[language]) && (
+            <div className="journal-reader__meta">
+              {article.date
+                ? <time dateTime={article.date}>{article.dateLabel?.[language] ?? article.date}</time>
+                : <span>{article.dateLabel?.[language]}</span>}
+            </div>
+          )}
+          <p className="journal-reader__summary" id="journal-reader-summary">{article.summary[language]}</p>
+          <div className="journal-reader__body" aria-describedby="journal-reader-summary">
+            {article.status === "source" ? (
+              <div className="journal-reader__source">
+                <p>{copy.journalArticlePending}</p>
+                {article.sourceUrl && (
+                  <a className="journal-reader__source-link" href={article.sourceUrl} target="_blank" rel="noreferrer">
+                    {copy.journalOpenOriginal}<span aria-hidden="true"> ↗</span>
+                  </a>
+                )}
+              </div>
+            ) : body?.[language] ? (
+              parseBody(body[language]).map(renderBodyPart)
+            ) : (
+              article.blocks ? (
+                article.blocks.map((block, index) => renderBlock(block, index, language))
+              ) : bodyFailed ? (
+                <p role="alert">{copy.journalArticleLoadError}</p>
+              ) : (
+                <p role="status" aria-live="polite">{copy.journalArticleLoading}</p>
+              )
+            )}
           </div>
           <footer className="journal-reader__footer">
             <button className="journal-reader__back" type="button" onClick={onBack}>
@@ -139,4 +225,3 @@ export function JournalReader({
     </section>
   );
 }
-

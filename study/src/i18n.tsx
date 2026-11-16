@@ -68,6 +68,15 @@ export interface Copy {
   journalPaperHolding: string;
   journalPaperCreased: string;
   journalPaperCrumpled: string;
+  journalSourceLabel: string;
+  journalEssayLabel: string;
+  journalPaperSelected: string;
+  journalPaperOpen: string;
+  journalPaperBack: string;
+  journalArticlePending: string;
+  journalOpenOriginal: string;
+  journalArticleLoading: string;
+  journalArticleLoadError: string;
   journalRead: string;
   journalBack: string;
   journalCollectLink: string;
@@ -156,6 +165,9 @@ export interface Copy {
   cinemaTitle: string;
   posterFallback: string;
   phoneLinksMissing: string;
+  phoneCardReveal: string;
+  phoneCardHide: string;
+  phoneQrAlt: string;
   phoneSources: string;
   phoneTitle: string;
   phoneBody: string;
@@ -232,6 +244,15 @@ const translations: Record<Language, Copy> = {
     journalPaperHolding: "in hand",
     journalPaperCreased: "creased",
     journalPaperCrumpled: "gathered",
+    journalSourceLabel: "WeChat original",
+    journalEssayLabel: "Essay",
+    journalPaperSelected: "Selected",
+    journalPaperOpen: "Unfold",
+    journalPaperBack: "Back to papers",
+    journalArticlePending: "This entry is a source link; its title and article text are awaiting import.",
+    journalOpenOriginal: "Open original on WeChat",
+    journalArticleLoading: "Opening the page…",
+    journalArticleLoadError: "This article could not be opened. Please return to the index and try again.",
     journalRead: "Read entry",
     journalBack: "Back to Journal",
     journalCollectLink: "See the Collect world",
@@ -320,9 +341,12 @@ const translations: Record<Language, Copy> = {
     cinemaTitle: "Film shelf",
     posterFallback: "Typeset placeholders are shown until the poster assets are added.",
     phoneLinksMissing: "Link not set",
-    phoneSources: "Add profile URLs in src/data/links.ts to activate these links.",
+    phoneCardReveal: "Show QR code",
+    phoneCardHide: "Return to app",
+    phoneQrAlt: "QR code for",
+    phoneSources: "Scan a code with another device to find these accounts.",
     phoneTitle: "Things I write",
-    phoneBody: "Open each platform from its own icon. These services do not offer public APIs, so the links open the original sites instead of embedding them.",
+    phoneBody: "A few small windows into the places where I share words, images and music. Turn a card to reveal its code.",
     portfolioTitle: "Portfolio · 2022—2026",
     portfolioLoadError: "Could not load the portfolio:",
     portfolioLoading: "Loading portfolio…",
@@ -394,6 +418,15 @@ const translations: Record<Language, Copy> = {
     journalPaperHolding: "手中",
     journalPaperCreased: "留有折痕",
     journalPaperCrumpled: "揉皱",
+    journalSourceLabel: "微信原文",
+    journalEssayLabel: "手记",
+    journalPaperSelected: "已选中",
+    journalPaperOpen: "展开",
+    journalPaperBack: "返回纸团",
+    journalArticlePending: "这是原文链接入口，标题与正文待补充。",
+    journalOpenOriginal: "在微信打开原文",
+    journalArticleLoading: "正在展开文章…",
+    journalArticleLoadError: "文章暂时无法打开，请返回索引后重试。",
     journalRead: "阅读文章",
     journalBack: "返回 Journal",
     journalCollectLink: "去看看 Collect 世界",
@@ -482,9 +515,12 @@ const translations: Record<Language, Copy> = {
     cinemaTitle: "片单",
     posterFallback: "目前显示的是排版占位图，添加海报素材后会替换。",
     phoneLinksMissing: "链接待补",
-    phoneSources: "在 src/data/links.ts 中添加个人主页地址即可启用链接。",
+    phoneCardReveal: "查看二维码",
+    phoneCardHide: "返回图标",
+    phoneQrAlt: "用于联系的二维码",
+    phoneSources: "使用另一台设备扫码，找到这些账号。",
     phoneTitle: "我写的东西",
-    phoneBody: "发布在哪儿，就从哪个图标进。这些平台不开放 API，因此这里提供的是跳转链接，而非嵌入内容。",
+    phoneBody: "文字、影像与音乐各有一扇小窗。翻转卡片，看看对应的二维码。",
     portfolioTitle: "作品集 · 2022—2026",
     portfolioLoadError: "作品集载入失败：",
     portfolioLoading: "正在载入作品集…",
@@ -682,7 +718,7 @@ export function collectionText(collection: Collection, language: Language) {
 }
 
 const englishPhoneApps: Record<string, string> = {
-  wechat: "WeChat Official Account",
+  wechat: "WeChat",
   xiaohongshu: "Xiaohongshu",
   netease: "NetEase Cloud Music",
 };
