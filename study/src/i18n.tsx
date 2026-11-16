@@ -81,9 +81,6 @@ export interface Copy {
   retry: string;
   loaderForming: string;
   loaderReady: string;
-  loaderTitle: string;
-  loaderSubtitle: string;
-  loaderWorking: string;
   loaderProgress: string;
   lampBrightness: string;
   turnLampOn: string;
@@ -223,9 +220,6 @@ const translations: Record<Language, Copy> = {
     retry: "Retry",
     loaderForming: "FORMING",
     loaderReady: "READY",
-    loaderTitle: "Some things take shape in motion.",
-    loaderSubtitle: "A small world is assembling in the background.",
-    loaderWorking: "WORKING",
     loaderProgress: "Loading progress",
     lampBrightness: "Desk lamp brightness",
     turnLampOn: "Turn desk lamp on",
@@ -363,9 +357,6 @@ const translations: Record<Language, Copy> = {
     retry: "重试",
     loaderForming: "正在成形",
     loaderReady: "已就绪",
-    loaderTitle: "有些世界，需要一点时间成形。",
-    loaderSubtitle: "一个小小的世界正在后台聚拢。",
-    loaderWorking: "处理中",
     loaderProgress: "载入进度",
     lampBrightness: "台灯亮度",
     turnLampOn: "打开台灯",
