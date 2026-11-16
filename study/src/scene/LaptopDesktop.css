@@ -158,9 +158,9 @@
 }
 .laptop-os__project-icon {
   display: block;
-  width: 40px;
-  height: 34px;
-  background-color: #fff;
+  width: 44px;
+  height: 38px;
+  background: transparent;
   object-fit: contain;
   image-rendering: pixelated;
   transform-origin: center bottom;

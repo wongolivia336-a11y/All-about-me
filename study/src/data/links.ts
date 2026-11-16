@@ -6,16 +6,18 @@
  * a static site may read. Those are honest outbound links, not stale caches
  * dressed up as live data.
  *
- * TODO: fill in the URLs marked `null` — they are yours to supply.
+ * Optional profile URLs can be added later; phone QR images live in public/images/social/qr.
  */
 export interface Account {
   id: string;
   label: string;
   handle: string;
+  handleZh?: string;
   href: string | null;
   /** two-letter mark drawn on the phone's home screen icon */
   mark: string;
   tone: string;
+  qrSrc?: string;
   live?: boolean;
   note?: string;
 }
@@ -35,30 +37,33 @@ export const CONTACT_PHONE: string | null = null;
 export const phoneApps: Account[] = [
   {
     id: "wechat",
-    label: "公众号",
-    handle: "微信公众号",
+    label: "微信",
+    handle: "Personal contact",
+    handleZh: "个人联系",
     href: null,
     mark: "微",
     tone: "#2aae67",
-    note: "需要你提供文章主页链接或二维码图片",
+    qrSrc: "/images/social/qr/wechat-contact.jpg",
   },
   {
     id: "xiaohongshu",
     label: "小红书",
-    handle: "Xiaohongshu",
+    handle: "Chasing endlessly",
+    handleZh: "小红书号 5369230951",
     href: null,
     mark: "书",
     tone: "#e2394a",
-    note: "需要你提供主页链接",
+    qrSrc: "/images/social/qr/xiaohongshu.jpg",
   },
   {
     id: "netease",
     label: "网易云",
     handle: "NetEase Music",
+    handleZh: "音乐主页",
     href: null,
     mark: "云",
     tone: "#d8322a",
-    note: "需要你提供歌单链接",
+    qrSrc: "/images/social/qr/netease-music.jpg",
   },
 ];
 

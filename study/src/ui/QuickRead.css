@@ -689,3 +689,27 @@
   .archive__resume-grid .quick-read__card,
   .quick-read__work-image { transition: none !important; }
 }
+
+/* Clover markers stay inside the restored 320 × 500 silver card composition. */
+.quick-read__node {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  place-items: center;
+  align-self: center;
+  margin: 0 auto 9px;
+  color: #718d78;
+}
+.quick-read__node svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.quick-read__card--research .quick-read__node { color: #758a91; }
+.quick-read__card--work .quick-read__node { color: #8b806c; }
