@@ -66,25 +66,16 @@ export function SpeechCodeLoader({ active, progress = null, error = null, onRetr
   return (
     <section className={["speech-loader", !presented && "speech-loader--hidden", leaving && "speech-loader--leaving"].filter(Boolean).join(" ")} aria-hidden={!presented} aria-label={language === "zh" ? "网站正在载入" : "Website is loading"}>
       <header className="speech-loader__topline">
-        <div>
-          <strong>FOUR HEARTS<span aria-hidden="true">.</span></strong>
-          <small>OLIVIA WONG / 王心蕊</small>
-        </div>
+        <strong>FOUR HEARTS<span aria-hidden="true">.</span></strong>
         <span className="speech-loader__state">{active ? copy.loaderForming : copy.loaderReady}</span>
       </header>
       <div className="speech-loader__artwork">
         <canvas ref={canvasRef} className="speech-loader__canvas" role="img" aria-label={language === "zh" ? "由 ASCII 字符和网点组成的四叶草" : "A four-leaf clover made from ASCII marks and halftone particles"} />
-        <p className="speech-loader__sidenote"><b>01—04</b> / FOUR WORLDS<br />{language === "zh" ? "构建 · 追问 · 玩耍 · 珍藏" : "Build · Question · Play · Collect"}</p>
-        <span className="speech-loader__caption" aria-hidden="true">a world, assembled from little things.</span>
       </div>
       <footer className="speech-loader__footer">
-        <div>
-          <p>{copy.loaderTitle}</p>
-          <small>{copy.loaderSubtitle}</small>
-        </div>
         <div className="speech-loader__progress-copy">
-          <span>{progress == null ? copy.loaderWorking : `${Math.round(progress * 100)}%`}</span>
-          <span className="speech-loader__track" role={progress == null ? undefined : "progressbar"} aria-label={copy.loaderProgress} aria-valuemin={progress == null ? undefined : 0} aria-valuemax={progress == null ? undefined : 100} aria-valuenow={progress == null ? undefined : Math.round(progress * 100)}>
+          {progress != null && <span>{Math.round(progress * 100)}%</span>}
+          <span className="speech-loader__track" role="progressbar" aria-label={copy.loaderProgress} aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress == null ? undefined : Math.round(progress * 100)}>
             <i style={progress == null ? undefined : { width: `${Math.round(progress * 100)}%` }} />
           </span>
         </div>

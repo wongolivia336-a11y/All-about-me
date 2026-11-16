@@ -46,7 +46,7 @@ export const collectionLabels: Record<Collection, string> = {
 
 /**
  * Publicly shareable projects only. This is the single source of truth for the
- * quick-scan Index; room objects remain an experiential way into the site.
+ * Index, four theme worlds, and Macintosh project desk; room-only objects stay out.
  */
 export const library: readonly ArchiveEntry[] = [
   {
@@ -102,7 +102,7 @@ export const library: readonly ArchiveEntry[] = [
     type: "experiment",
     status: "published",
     year: 2026,
-    summary: "把真实猫叫做成可被忽略、也值得停一下的休息仪式。",
+    summary: "一只可以留在桌面上的小猫，用轻量的互动和猫叫陪你停一会儿。",
     cover: "/portfolio/mono/04_meow-gallery-cat_wide.png",
     detailCover: "/portfolio/mono/04_meow-gallery-cat.png",
     coverKind: "conceptual",

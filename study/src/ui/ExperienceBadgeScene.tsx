@@ -136,6 +136,7 @@ function SwingingBadge({
   const angle = useRef(0);
   const velocity = useRef(0);
   const [hovered, setHovered] = useState(false);
+  const invalidate = useThree((state) => state.invalidate);
   const texture = useMemo(() => makeBadgeTexture(item, index), [index, item]);
   const strapGeometry = useMemo(() => {
     const curve = new THREE.CatmullRomCurve3([
@@ -153,7 +154,7 @@ function SwingingBadge({
     strapGeometry.dispose();
   }, [strapGeometry, texture]);
 
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (!pivot.current) return;
     if (reducedMotion) {
       pivot.current.rotation.z = 0;
@@ -164,9 +165,8 @@ function SwingingBadge({
     velocity.current += (target - angle.current) * dt * 14;
     velocity.current *= Math.exp(-dt * (hovered ? 3.7 : 4.8));
     angle.current += velocity.current * dt;
-    // A barely perceptible idle drift keeps the badge feeling suspended.
-    const drift = hovered ? 0 : Math.sin(state.clock.elapsedTime * 0.8 + index * 1.7) * 0.009;
-    pivot.current.rotation.z = angle.current + drift;
+    pivot.current.rotation.z = angle.current;
+    if (Math.abs(target - angle.current) > 0.001 || Math.abs(velocity.current) > 0.001) invalidate();
   });
 
   return (
@@ -184,13 +184,14 @@ function SwingingBadge({
           smoothness={6}
           castShadow
           receiveShadow
-          onPointerOver={(event) => { event.stopPropagation(); setHovered(true); }}
-          onPointerOut={(event) => { event.stopPropagation(); setHovered(false); }}
+          onPointerOver={(event) => { event.stopPropagation(); setHovered(true); invalidate(); }}
+          onPointerOut={(event) => { event.stopPropagation(); setHovered(false); invalidate(); }}
           onPointerDown={(event) => {
             event.stopPropagation();
             velocity.current += index % 2 === 0 ? -0.72 : 0.72;
+            invalidate();
           }}
-          onClick={(event) => { event.stopPropagation(); onSelect(); }}
+          onClick={(event) => { event.stopPropagation(); onSelect(); invalidate(); }}
         >
           <meshStandardMaterial color="#f7f5ef" roughness={0.58} metalness={0.02} />
         </RoundedBox>
@@ -247,12 +248,14 @@ export function ExperienceBadgeScene({ items, selectedIndex, onSelect, reducedMo
   return (
     <Canvas
       className="quick-read-page__badge-canvas"
+      frameloop="demand"
       orthographic
       camera={{ position: [0, 0, 10], zoom: 86, near: 0.1, far: 40 }}
-      dpr={[1, 1.5]}
+      dpr={[1, 1.2]}
       shadows
-      gl={{ alpha: true, antialias: true }}
+      gl={{ alpha: true, antialias: true, powerPreference: "low-power" }}
       aria-label="Three swinging internship badges"
+      fallback={<div className="quick-read-page__badge-fallback" aria-hidden="true">Choose a badge from the archive below</div>}
     >
       <BadgeLineup items={items} selectedIndex={selectedIndex} onSelect={onSelect} reducedMotion={reducedMotion} />
     </Canvas>
