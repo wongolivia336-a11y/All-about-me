@@ -80,13 +80,17 @@ export function GlobalLoadingProvider({
   );
 
   // Wait for fonts and two real paint opportunities. This is a readiness
-  // boundary for the static index, not simulated resource progress.
+  // boundary for the static index, not simulated resource progress. A bounded
+  // fallback prevents an unavailable web font from trapping the full-screen
+  // loader over an otherwise usable page.
   useEffect(() => {
     let cancelled = false;
+    const fallback = window.setTimeout(() => complete("app-shell"), 1800);
     const settle = () => {
       if (cancelled) return;
       const frame = window.requestAnimationFrame(() => {
         if (cancelled) return;
+        window.clearTimeout(fallback);
         complete("app-shell");
       });
       return () => window.cancelAnimationFrame(frame);
@@ -98,6 +102,7 @@ export function GlobalLoadingProvider({
     });
     return () => {
       cancelled = true;
+      window.clearTimeout(fallback);
       cancelFrame?.();
     };
   }, [complete]);

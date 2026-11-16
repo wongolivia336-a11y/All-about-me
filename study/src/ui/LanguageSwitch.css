@@ -11,20 +11,21 @@
   backdrop-filter: blur(20px) saturate(1.22);
   -webkit-backdrop-filter: blur(20px) saturate(1.22);
   color: #626d73;
-  font: 11px/1 var(--font-sans, system-ui, sans-serif);
+  font: var(--control-font-weight, 500) var(--control-font-size, 13px)/var(--control-line-height, 1.2) var(--font-sans, system-ui, sans-serif);
 }
 
 .language-switch button {
   min-width: 40px;
-  min-height: 32px;
-  padding: 0 11px;
+  min-height: var(--control-height-compact, 32px);
+  padding: 0 10px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--control-radius-pill, 999px);
   background: transparent;
   color: inherit;
   font: inherit;
+  font-size: var(--control-font-size, 13px);
   cursor: pointer;
-  transition: color 220ms ease, background 240ms ease, box-shadow 240ms ease, transform 240ms cubic-bezier(.2,.85,.25,1);
+  transition: color var(--control-transition, 180ms ease), background var(--control-transition, 180ms ease), box-shadow var(--control-transition, 180ms ease), transform var(--control-transition, 180ms ease);
 }
 
 .language-switch button[aria-pressed="true"] {
@@ -62,7 +63,7 @@
 
   .language-switch button {
     min-width: 42px;
-    min-height: 44px;
+    min-height: var(--control-hit-target, 44px);
   }
 }
 

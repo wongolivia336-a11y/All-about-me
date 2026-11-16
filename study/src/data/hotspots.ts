@@ -1,4 +1,4 @@
-import { layout } from "../scene/layout";
+import { DESK_TOP_Y, layout } from "../scene/layout";
 
 /**
  * The navigation model of the whole site: every piece of content lives on a
@@ -65,12 +65,12 @@ const lampDialTarget: Vec3 = [
 export const hotspots: Hotspot[] = [
   {
     id: "laptop",
-    label: "Work",
+    label: "Macintosh",
     blurb: "作品与系统",
     path: "/work",
-    // A reading distance for the live desktop on the physical laptop display.
-    ...at([layout.laptop.pos[0], 0.8, layout.laptop.pos[2] - 0.02], 0.08, [
-      0, 0.07, 0.365,
+    // Frame the CRT screen so the live desktop remains easy to read.
+    ...at([layout.laptop.pos[0], DESK_TOP_Y + 0.255, layout.laptop.pos[2]], 0, [
+      0, 0.045, 0.49,
     ]),
   },
   {

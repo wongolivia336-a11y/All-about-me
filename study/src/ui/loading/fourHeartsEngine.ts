@@ -1,3 +1,6 @@
+import { HEART_PATH } from "../../brand/heartPath";
+import { themeConfig, themeOrder } from "../../data/themeConfig";
+
 export interface FourHeartsEngine {
   setProgress: (progress: number | null) => void;
   burst: () => void;
@@ -48,22 +51,15 @@ export function createFourHeartsEngine(
   const reducedMotion = options.reducedMotion === true;
   const random = mulberry32(250106);
   const glyphs = ["·", "·", "·", "+", "+", "×", "x", "*", ":", "◦", "/", "⌁", "◇"];
-  const colors = ["#526fbd", "#648983", "#213c70"];
-  const shape = new Path2D();
-  shape.moveTo(0, -9);
-  shape.bezierCurveTo(-13, -28, -49, -38, -61, -67);
-  shape.bezierCurveTo(-75, -94, -67, -127, -42, -140);
-  shape.bezierCurveTo(-15, -154, 18, -135, 32, -113);
-  shape.bezierCurveTo(45, -94, 45, -71, 25, -47);
-  shape.bezierCurveTo(11, -26, 4, -15, 0, -9);
-  shape.closePath();
+  const colors = themeOrder.map((theme) => themeConfig[theme].ink);
+  const shape = new Path2D(HEART_PATH);
 
   const particles: Particle[] = [];
   for (let leaf = 0; leaf < 4; leaf += 1) {
     let accepted = 0;
     while (accepted < 118) {
-      const x = random() * 135 - 75;
-      const y = -157 + random() * 149;
+      const x = random() * 150 - 75;
+      const y = -157 + random() * 157;
       if (!context.isPointInPath(shape, x, y)) continue;
       const distance = Math.hypot(x, y);
       const angle = Math.atan2(y, x);
@@ -74,7 +70,7 @@ export function createFourHeartsEngine(
         angle,
         distance,
         glyph: glyphs[Math.floor(random() * glyphs.length)],
-        color: Math.floor(random() * colors.length),
+        color: leaf,
         size: 6.5 + random() * 4.8,
         alpha: 0.26 + random() * 0.62,
         drift: random() * Math.PI * 2,
@@ -153,13 +149,13 @@ export function createFourHeartsEngine(
     context.translate(center.x, center.y);
     context.beginPath();
     context.arc(0, 0, 151 * scale, 0, Math.PI * 2);
-    context.strokeStyle = "rgba(47, 69, 86, .08)";
+    context.strokeStyle = "rgba(32, 35, 32, .07)";
     context.lineWidth = 0.85;
     context.stroke();
     context.beginPath();
     context.arc(0, 0, 212 * scale, 0, Math.PI * 2);
     context.setLineDash([1.2, 8]);
-    context.strokeStyle = "rgba(54, 82, 116, .075)";
+    context.strokeStyle = "rgba(100, 123, 135, .10)";
     context.stroke();
     context.setLineDash([]);
     context.save();
@@ -168,12 +164,14 @@ export function createFourHeartsEngine(
     for (let leaf = 0; leaf < 4; leaf += 1) {
       context.save();
       context.rotate(leaf * Math.PI / 2);
-      context.strokeStyle = `rgba(80, 112, 186, ${0.38 + scatter * 0.22})`;
+      context.globalAlpha = 0.42 + scatter * 0.2;
+      context.strokeStyle = themeConfig[themeOrder[leaf]].ink;
       context.lineWidth = 0.85;
       context.stroke(shape);
       context.save();
       context.translate(0.8, -0.35);
-      context.strokeStyle = "rgba(91, 137, 140, .15)";
+      context.globalAlpha = 0.14;
+      context.strokeStyle = themeConfig[themeOrder[leaf]].leafColor;
       context.lineWidth = 0.6;
       context.stroke(shape);
       context.restore();
@@ -182,7 +180,7 @@ export function createFourHeartsEngine(
     context.restore();
     context.beginPath();
     context.arc(0, 0, 5.3, 0, Math.PI * 2);
-    context.fillStyle = "#2c3d4c";
+    context.fillStyle = "#202320";
     context.fill();
     context.restore();
 
@@ -225,7 +223,7 @@ export function createFourHeartsEngine(
     }
     context.globalAlpha = 1;
     context.save();
-    context.strokeStyle = "rgba(71, 103, 182, .24)";
+    context.strokeStyle = "rgba(100, 123, 135, .22)";
     context.lineWidth = 0.65;
     context.setLineDash([2, 4]);
     context.beginPath();

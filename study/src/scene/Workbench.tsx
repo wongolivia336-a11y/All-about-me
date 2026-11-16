@@ -56,11 +56,11 @@ function Sketchbook() {
             <cylinderGeometry args={[0.0042, 0.0042, 0.15, 6]} />
             <meshStandardMaterial color="#d9a441" roughness={0.55} />
           </mesh>
-          <mesh position={[-0.082, 0, 0]} rotation={[0, 0, -Math.PI / 2]} castShadow>
+          <mesh position={[-0.082, 0, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
             <coneGeometry args={[0.0042, 0.016, 6]} />
             <meshStandardMaterial color="#e8d2ac" roughness={0.7} />
           </mesh>
-          <mesh position={[-0.0905, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
+          <mesh position={[-0.0905, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
             <coneGeometry args={[0.0016, 0.005, 6]} />
             <meshStandardMaterial color="#2e2b28" roughness={0.6} />
           </mesh>

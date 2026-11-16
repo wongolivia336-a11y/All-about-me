@@ -6,15 +6,20 @@ import { fileURLToPath } from "node:url";
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const read = (relativePath) => fs.readFileSync(path.join(scriptDirectory, "..", relativePath), "utf8");
 
-const texture = read("src/brand/HeartTextTexture.tsx");
+const heartPath = read("src/brand/heartPath.ts");
 const wheel = read("src/brand/Heartwheel.tsx");
 const themeConfig = read("src/data/themeConfig.ts");
 const pageTurn = read("src/PageTurn.css");
 
-assert.match(texture, /"M 0 0 C/);
-assert.doesNotMatch(texture, /translate\(50 4\)/);
+assert.match(heartPath, /M 0 0 \$\{HEART_CURVES/);
+assert.match(heartPath, /HEART_CURVES\.map/);
+assert.doesNotMatch(heartPath, /translate\(50 4\)/);
+assert.match(wheel, /<PaperHeart theme=\{theme\} \/>/);
+assert.doesNotMatch(wheel, /HeartwheelScene|HeartwheelFallback|heartwheel__hub/);
 assert.match(wheel, /viewBox="-170 -170 340 340"/);
 assert.match(wheel, /rotate\(\$\{themeConfig\[theme\]\.leafAngle\} 0 0\)/);
+assert.match(wheel, /event\.deltaX \|\| \(event\.shiftKey \? event\.deltaY : 0\)/);
+assert.doesNotMatch(wheel, /const rawDelta = event\.deltaY \|\| event\.deltaX/);
 
 const leafAngles = [...themeConfig.matchAll(/leafAngle: (\d+)/g)].map((match) => Number(match[1]));
 assert.deepEqual(leafAngles, [0, 90, 180, 270]);
@@ -26,10 +31,9 @@ assert.equal(leafAngles[3] - leafAngles[2], 90);
 assert.match(pageTurn, /position: fixed;/);
 assert.match(pageTurn, /\.paper-corner\s*\{[\s\S]*?top: max\(0px, env\(safe-area-inset-top\)\);/);
 assert.match(pageTurn, /right: max\(0px, env\(safe-area-inset-right\)\);/);
-assert.match(pageTurn, /width: 76px;/);
-assert.match(pageTurn, /height: 76px;/);
-assert.match(pageTurn, /width: 60px;/);
-assert.match(pageTurn, /height: 60px;/);
-assert.match(pageTurn, /paper-corner__grain/);
+assert.match(pageTurn, /width: 104px;[\s\S]*?height: 104px;/);
+assert.match(pageTurn, /\.paper-corner__underpage,\s*\.paper-corner__flap\s*\{[\s\S]*?width: 100px;[\s\S]*?height: 100px;/);
+assert.match(pageTurn, /@media \(max-width: 720px\)[\s\S]*?width: 84px;[\s\S]*?height: 84px;/);
+assert.match(pageTurn, /\.paper-corner__flap\s*\{[\s\S]*?transform-origin: 100% 0;[\s\S]*?filter: drop-shadow/);
 
 console.log("Heartwheel geometry and Paper Corner assertions passed.");
