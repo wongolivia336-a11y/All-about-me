@@ -19,6 +19,7 @@ type QuickReadPageProps = {
 
 function ExperiencePage({ language }: { language: "en" | "zh" }) {
   const [selected, setSelected] = useState(0);
+  const [flipped, setFlipped] = useState<number | null>(null);
   const [reducedMotion, setReducedMotion] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
@@ -32,55 +33,37 @@ function ExperiencePage({ language }: { language: "en" | "zh" }) {
   const zh = language === "zh";
   const items = useMemo<BadgeItem[]>(() => zh
     ? [
-        { title: "BioAZ", role: "AI 产品与 Agent 工作流设计", accent: "#bb8d8c", illustration: "/visuals/quick-read/experience/bioaz-workflow.png" },
-        { title: "第二段经历", role: "公司、职位与时间待补充", accent: "#849eac", placeholder: true },
-        { title: "第三段经历", role: "公司、职位与时间待补充", accent: "#9aa98e", placeholder: true },
+        { title: "BioAZ", role: "AI 产品与 Agent 工作流设计", accent: "#bb8d8c", illustration: "/visuals/quick-read/experience/bioaz-workflow.png", description: "参与 AI 产品界面与 Agent workflow 原型设计，关注信息如何被整理、审阅与交接。" },
+        { title: "第二段经历", role: "公司、职位与时间待补充", accent: "#849eac", placeholder: true, description: "这一格保留给你补充真实经历：公司、职位、时间，以及一件最能代表你的具体成果。" },
+        { title: "第三段经历", role: "公司、职位与时间待补充", accent: "#9aa98e", placeholder: true, description: "这一格保留给你补充真实经历：公司、职位、时间，以及一件最能代表你的具体成果。" },
       ]
     : [
-        { title: "BioAZ", role: "AI product and agent workflow design", accent: "#bb8d8c", illustration: "/visuals/quick-read/experience/bioaz-workflow.png" },
-        { title: "Next chapter", role: "Company, role and dates to be added", accent: "#849eac", placeholder: true },
-        { title: "Another chapter", role: "Company, role and dates to be added", accent: "#9aa98e", placeholder: true },
+        { title: "BioAZ", role: "AI product and agent workflow design", accent: "#bb8d8c", illustration: "/visuals/quick-read/experience/bioaz-workflow.png", description: "Worked across AI product UI and agent workflow prototypes, with attention to how information is organized, reviewed and handed off." },
+        { title: "Next chapter", role: "Company, role and dates to be added", accent: "#849eac", placeholder: true, description: "Reserved for a real chapter: the company, role, dates, and one concrete piece of work that best represents it." },
+        { title: "Another chapter", role: "Company, role and dates to be added", accent: "#9aa98e", placeholder: true, description: "Reserved for a real chapter: the company, role, dates, and one concrete piece of work that best represents it." },
       ], [zh]);
 
   const active = items[selected];
+  const selectBadge = (index: number) => { setSelected(index); setFlipped((current) => current !== index ? null : current); };
+  const toggleBadge = (index: number) => setFlipped((current) => current === index ? null : index);
   return (
     <div className="quick-read-page__content quick-read-page__content--experience">
       <div className="quick-read-page__intro">
         <p className="quick-read-page__eyebrow">01 / {zh ? "实习经历 · 工牌档案" : "EXPERIENCE · BADGE ARCHIVE"}</p>
         <h1 id="quick-read-title" tabIndex={-1}>{zh ? "三张工牌，几段正在发生的工作。" : "Three badges, a few chapters of work."}</h1>
-        <p>{zh ? "把经历做成可以轻轻拨动的实体工牌。悬停会摆动，点一下会晃一晃；两段信息先留出位置，等你补充。" : "A small, tactile archive of work. Hover to set each badge swinging; tap to give it a little momentum. Two entries are ready for your details."}</p>
+        <p>{zh ? "轻轻拉动挂绳，看工牌随着手势回摆；点击或按 Enter 翻到背面，查看这段经历。" : "Pull a badge gently and feel the lanyard settle. Click or press Enter to turn it over and read the note."}</p>
       </div>
-
-      <div className="quick-read-page__badge-stage" aria-label={zh ? "可交互的三张实习工牌" : "Three interactive internship badges"}>
-        <span className="quick-read-page__stage-note" aria-hidden="true">{zh ? "轻轻碰一下" : "GIVE ONE A NUDGE"} <span>↗</span></span>
-        <ExperienceBadgeScene items={items} selectedIndex={selected} onSelect={setSelected} reducedMotion={reducedMotion} />
-        <div className="quick-read-page__badge-list" role="group" aria-label={zh ? "选择一段经历" : "Choose an experience"}>
-          {items.map((item, index) => (
-            <button
-              type="button"
-              key={item.title}
-              aria-pressed={selected === index}
-              onClick={() => setSelected(index)}
-              style={{ "--item-accent": item.accent } as CSSProperties}
-            >
-              <span>{String(index + 1).padStart(2, "0")}</span>{item.title}
-            </button>
-          ))}
-        </div>
+      <div className="quick-read-page__badge-stage">
+        <span className="quick-read-page__stage-note" aria-hidden="true">{zh ? "轻轻拨动 · 点击翻面" : "NUDGE TO SWING · TAP TO TURN"} <span>↗</span></span>
+        <ExperienceBadgeScene items={items} selectedIndex={selected} flippedIndex={flipped} onSelect={selectBadge}
+          onFlip={toggleBadge} onFlipBack={() => setFlipped(null)} reducedMotion={reducedMotion} language={language} />
       </div>
-
       <article className="quick-read-page__badge-detail" style={{ "--item-accent": active.accent } as CSSProperties}>
-        <p className="quick-read-page__eyebrow">{zh ? `工牌 ${String(selected + 1).padStart(2, "0")} / 03` : `BADGE ${String(selected + 1).padStart(2, "0")} / 03`}</p>
+        <p className="quick-read-page__eyebrow">{zh ? "工牌 " + String(selected + 1).padStart(2, "0") + " / 03" : "BADGE " + String(selected + 1).padStart(2, "0") + " / 03"}</p>
         <h2>{active.title}</h2>
         <p className="quick-read-page__badge-role">{active.role}</p>
-        <p>{selected === 0
-          ? zh
-            ? "参与 AI 产品界面与 Agent workflow 原型设计，关注信息如何被整理、审阅与交接。具体公司介绍、职位与时间可后续补齐。"
-            : "Worked across AI product UI and agent workflow prototypes, with attention to how information is organized, reviewed and handed off. Company, title and dates can be added next."
-          : zh
-            ? "这一格保留给你补充真实经历；补上公司、职位、时间和一件最能代表你的具体成果即可。"
-            : "This space is reserved for a real chapter. Add the company, role, dates and one concrete piece of work that best represents it."}</p>
-        {selected > 0 && <span className="quick-read-page__pending">{zh ? "待补充" : "DETAILS TO COME"}</span>}
+        <p>{active.description}</p>
+        {active.placeholder && <span className="quick-read-page__pending">{zh ? "待补充" : "DETAILS TO COME"}</span>}
       </article>
     </div>
   );

@@ -61,7 +61,7 @@ body,
 }
 
 body {
-  background: #e8e3da;
+  background: var(--color-paper);
 }
 
 .app {
@@ -1339,7 +1339,7 @@ input:focus-visible {
 .room-loading {
   position: absolute;
   inset: 0;
-  background: #e8e3da;
+  background: #1d2020;
 }
 
 .app--evening .room-loading {
