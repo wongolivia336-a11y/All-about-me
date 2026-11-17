@@ -133,10 +133,25 @@ function SwingingBadge({
   onSelect: () => void;
 }) {
   const pivot = useRef<THREE.Group>(null);
+  const card = useRef<THREE.Group>(null);
   const angle = useRef(0);
   const velocity = useRef(0);
+  const pitchVelocity = useRef(0);
+  const yawVelocity = useRef(0);
+  const drag = useRef<{
+    pointerId: number;
+    originX: number;
+    originY: number;
+    lastX: number;
+    lastY: number;
+    lastAt: number;
+    moved: boolean;
+  } | null>(null);
+  const suppressClickUntil = useRef(0);
   const [hovered, setHovered] = useState(false);
   const invalidate = useThree((state) => state.invalidate);
+  const viewWidth = useThree((state) => state.size.width);
+  const viewHeight = useThree((state) => state.size.height);
   const texture = useMemo(() => makeBadgeTexture(item, index), [index, item]);
   const strapGeometry = useMemo(() => {
     const curve = new THREE.CatmullRomCurve3([
@@ -158,16 +173,106 @@ function SwingingBadge({
     if (!pivot.current) return;
     if (reducedMotion) {
       pivot.current.rotation.z = 0;
+      if (card.current) {
+        card.current.rotation.x = 0;
+        card.current.rotation.y = 0;
+      }
+      angle.current = velocity.current = pitchVelocity.current = yawVelocity.current = 0;
       return;
     }
-    const target = hovered ? (index % 2 === 0 ? -0.12 : 0.12) : selected ? 0.035 : 0;
-    const dt = Math.min(delta, 0.04);
-    velocity.current += (target - angle.current) * dt * 14;
-    velocity.current *= Math.exp(-dt * (hovered ? 3.7 : 4.8));
+
+    if (drag.current) return;
+
+    const target = hovered ? (index % 2 === 0 ? -0.085 : 0.085) : selected ? 0.022 : 0;
+    const dt = Math.min(delta, 0.032);
+    velocity.current += (target - angle.current) * dt * 15;
+    velocity.current *= Math.exp(-dt * (hovered ? 3.6 : 4.7));
     angle.current += velocity.current * dt;
     pivot.current.rotation.z = angle.current;
-    if (Math.abs(target - angle.current) > 0.001 || Math.abs(velocity.current) > 0.001) invalidate();
+
+    if (card.current) {
+      pitchVelocity.current += -card.current.rotation.x * dt * 18;
+      pitchVelocity.current *= Math.exp(-dt * 5.4);
+      card.current.rotation.x += pitchVelocity.current * dt;
+
+      yawVelocity.current += -card.current.rotation.y * dt * 17;
+      yawVelocity.current *= Math.exp(-dt * 5.1);
+      card.current.rotation.y += yawVelocity.current * dt;
+    }
+
+    if (
+      Math.abs(target - angle.current) > 0.001 ||
+      Math.abs(velocity.current) > 0.001 ||
+      Math.abs(pitchVelocity.current) > 0.001 ||
+      Math.abs(yawVelocity.current) > 0.001
+    ) invalidate();
   });
+
+  const handlePointerDown = (event: any) => {
+    event.stopPropagation();
+    if (reducedMotion || (event.pointerType === "mouse" && event.button !== 0)) return;
+    drag.current = {
+      pointerId: event.pointerId,
+      originX: event.clientX,
+      originY: event.clientY,
+      lastX: event.clientX,
+      lastY: event.clientY,
+      lastAt: performance.now(),
+      moved: false,
+    };
+    try { event.target.setPointerCapture(event.pointerId); } catch { /* Pointer capture may be unavailable in a fallback renderer. */ }
+  };
+
+  const handlePointerMove = (event: any) => {
+    const current = drag.current;
+    if (!current || current.pointerId !== event.pointerId || reducedMotion) return;
+    event.stopPropagation();
+
+    const totalDistance = Math.hypot(event.clientX - current.originX, event.clientY - current.originY);
+    if (totalDistance > 3) current.moved = true;
+    const dx = event.clientX - current.lastX;
+    const dy = event.clientY - current.lastY;
+    const now = performance.now();
+    const dt = Math.max((now - current.lastAt) / 1000, 1 / 120);
+
+    if (current.moved) {
+      const angleDelta = -dx / Math.max(viewWidth, 1) * 3.15;
+      const nextAngle = THREE.MathUtils.clamp(angle.current + angleDelta, -0.58, 0.58);
+      velocity.current = THREE.MathUtils.clamp((nextAngle - angle.current) / dt, -4.2, 4.2);
+      angle.current = nextAngle;
+      if (pivot.current) pivot.current.rotation.z = nextAngle;
+
+      if (card.current) {
+        const pitchDelta = -dy / Math.max(viewHeight, 1) * 1.8;
+        const nextPitch = THREE.MathUtils.clamp(card.current.rotation.x + pitchDelta, -0.32, 0.32);
+        pitchVelocity.current = THREE.MathUtils.clamp((nextPitch - card.current.rotation.x) / dt, -2.6, 2.6);
+        card.current.rotation.x = nextPitch;
+
+        const yawDelta = dx / Math.max(viewWidth, 1) * 1.35;
+        const nextYaw = THREE.MathUtils.clamp(card.current.rotation.y + yawDelta, -0.26, 0.26);
+        yawVelocity.current = THREE.MathUtils.clamp((nextYaw - card.current.rotation.y) / dt, -2.4, 2.4);
+        card.current.rotation.y = nextYaw;
+      }
+      invalidate();
+    }
+
+    current.lastX = event.clientX;
+    current.lastY = event.clientY;
+    current.lastAt = now;
+  };
+
+  const finishDrag = (pointerId: number, canceled = false) => {
+    const current = drag.current;
+    if (!current || current.pointerId !== pointerId) return;
+    if (current.moved && !canceled) suppressClickUntil.current = performance.now() + 220;
+    if (canceled) {
+      velocity.current *= 0.35;
+      pitchVelocity.current *= 0.35;
+      yawVelocity.current *= 0.35;
+    }
+    drag.current = null;
+    invalidate();
+  };
 
   return (
     <group ref={pivot} position={[0, 1.48, 0]}>
@@ -177,21 +282,28 @@ function SwingingBadge({
       <RoundedBox args={[0.5, 0.11, 0.11]} radius={0.035} smoothness={4} position={[0, -0.48, 0.1]} castShadow>
         <meshStandardMaterial color="#c5a66d" metalness={0.7} roughness={0.28} />
       </RoundedBox>
-      <group position={[0, -1.72, 0]}>
+      <group ref={card} position={[0, -1.72, 0]}
+          onPointerOver={(event) => { event.stopPropagation(); setHovered(true); invalidate(); }}
+          onPointerOut={(event) => { event.stopPropagation(); setHovered(false); invalidate(); }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={(event) => finishDrag(event.pointerId)}
+          onPointerCancel={(event) => finishDrag(event.pointerId, true)}
+          onLostPointerCapture={(event) => finishDrag(event.pointerId, true)}
+          onClick={(event) => {
+            event.stopPropagation();
+            if (performance.now() < suppressClickUntil.current) return;
+            if (!reducedMotion) velocity.current += index % 2 === 0 ? -0.34 : 0.34;
+            onSelect();
+            invalidate();
+          }}
+      >
         <RoundedBox
           args={[2.18, 2.9, 0.11]}
           radius={0.09}
           smoothness={6}
           castShadow
           receiveShadow
-          onPointerOver={(event) => { event.stopPropagation(); setHovered(true); invalidate(); }}
-          onPointerOut={(event) => { event.stopPropagation(); setHovered(false); invalidate(); }}
-          onPointerDown={(event) => {
-            event.stopPropagation();
-            velocity.current += index % 2 === 0 ? -0.72 : 0.72;
-            invalidate();
-          }}
-          onClick={(event) => { event.stopPropagation(); onSelect(); invalidate(); }}
         >
           <meshStandardMaterial color="#f7f5ef" roughness={0.58} metalness={0.02} />
         </RoundedBox>
@@ -209,7 +321,6 @@ function SwingingBadge({
     </group>
   );
 }
-
 function BadgeLineup({ items, selectedIndex, onSelect, reducedMotion }: {
   items: BadgeItem[];
   selectedIndex: number;

@@ -271,12 +271,17 @@ function WorkPage({ language, entries, onProjectOpen }: {
 
       {selectedEntry && selectedText && selectedTheme && (
         <section className="quick-read-page__work-detail" aria-live="polite" aria-atomic="true">
-          <div className="quick-read-page__work-story">
+          <div className="quick-read-page__work-story" key={selectedEntry.id}>
             <p className="quick-read-page__eyebrow">{String(selectedIndex + 1).padStart(2, "0")} / {selectedTheme.label} · {selectedEntry.year}</p>
             <h2>{selectedText.title}</h2>
             <p>{selectedText.summary}</p>
           </div>
-          <div className="quick-read-page__work-controls" aria-label={zh ? "浏览精选项目" : "Browse selected projects"}>
+          <div
+            className="quick-read-page__work-controls"
+            role="group"
+            aria-label={zh ? "浏览精选项目" : "Browse selected projects"}
+            style={{ "--work-progress": `${((selectedIndex + 1) / featuredEntries.length) * 100}%` } as CSSProperties}
+          >
             <button type="button" className="quick-read-page__work-turn" onClick={() => selectPoster(selectedIndex - 1)} aria-label={zh ? "上一张海报" : "Previous poster"}>←</button>
             <span>{String(selectedIndex + 1).padStart(2, "0")} / {String(featuredEntries.length).padStart(2, "0")}</span>
             <button type="button" className="quick-read-page__work-turn" onClick={() => selectPoster(selectedIndex + 1)} aria-label={zh ? "下一张海报" : "Next poster"}>→</button>
