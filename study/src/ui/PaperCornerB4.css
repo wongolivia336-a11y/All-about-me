@@ -1,0 +1,92 @@
+/*
+ * Isolated B4 styles. Deliberately scoped so the integration agent can remove
+ * the old .paper-corner* rules without touching PageTurn's room reveal/HUD CSS.
+ */
+.paper-corner-b4 {
+  position: fixed;
+  z-index: var(--layer-paper-corner, 30);
+  top: max(0px, env(safe-area-inset-top));
+  right: max(0px, env(safe-area-inset-right));
+  display: block;
+  width: 112px;
+  height: 112px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #2d3940;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.paper-corner-b4:disabled { cursor: wait; }
+
+.paper-corner-b4__visual {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: block;
+  width: 108px;
+  height: 108px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.paper-corner-b4__label {
+  position: absolute;
+  z-index: 1;
+  right: 14px;
+  bottom: 37px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 0;
+  color: rgb(45 57 64 / 68%);
+  font: 600 8px/1 var(--font-mono, ui-monospace, monospace);
+  letter-spacing: .08em;
+  white-space: nowrap;
+  opacity: .82;
+  pointer-events: none;
+  transition: color 180ms ease, opacity 180ms ease;
+}
+
+.paper-corner-b4__label i {
+  color: currentColor;
+  font: normal 10px/1 Arial, sans-serif;
+}
+
+.paper-corner-b4:is(:hover, :focus-visible) .paper-corner-b4__label {
+  color: #26363d;
+  opacity: 1;
+}
+
+.paper-corner-b4__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.paper-corner-b4:focus-visible {
+  outline: 2px solid #526c79;
+  outline-offset: -7px;
+}
+
+/* Preserve the existing optional room-class contract if it is used later. */
+.paper-corner-b4.paper-corner--room { z-index: var(--layer-room-controls, 12); }
+
+@media (max-width: 720px) {
+  .paper-corner-b4 { width: 88px; height: 88px; }
+  .paper-corner-b4__visual { width: 86px; height: 86px; }
+  .paper-corner-b4__label { right: 11px; bottom: 30px; font-size: 7px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paper-corner-b4,
+  .paper-corner-b4__label { transition: none !important; }
+}
