@@ -6,8 +6,9 @@ import { Marshall } from "./Marshall";
 import { DeskProps } from "./Objects";
 import { PostFX } from "./PostFX";
 import { PosterWall } from "./PosterWall";
-import { Bookshelf, Corkboard } from "./Shelf";
-import { Shell } from "./Shell";
+import { Corkboard } from "./Shelf";
+import { ShellWindow } from "./Shell";
+import { ChiselRoomModel } from "./ChiselRoomModel";
 import { Studio } from "./Studio";
 import { Whiteboard } from "./Whiteboard";
 import { Workbench } from "./Workbench";
@@ -23,14 +24,14 @@ export function Room({ isNight }: RoomProps) {
     <Suspense fallback={null}>
       <Studio isNight={isNight} />
       <group name="architecture" userData={{ debugBounds: true }}>
-        <Shell isNight={isNight} />
+        <ChiselRoomModel />
+        <ShellWindow isNight={isNight} />
       </group>
       <group name="furnishings" userData={{ debugBounds: true }}>
         <Devices />
         <DeskProps />
         <Workbench />
         <Marshall />
-        <Bookshelf />
         <Corkboard />
         <Whiteboard />
         <PosterWall />

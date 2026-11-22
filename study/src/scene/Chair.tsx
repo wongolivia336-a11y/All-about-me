@@ -3,6 +3,8 @@ import { RoundedBox } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import {
   CatmullRomCurve3,
+  BufferAttribute,
+  Color,
   ExtrudeGeometry,
   MeshPhysicalMaterial,
   Shape,
@@ -14,15 +16,15 @@ import {
 import { Hotspot } from "../interaction/Hotspot";
 import { currentVolume } from "../interaction/studyStore";
 import { layout } from "./layout";
-import { palette } from "./theme";
-import { makeFabric, makeFur, makeWood } from "./textures";
+import { makeFabric, makeFur } from "./textures";
+import { useChiselModelNode } from "./chiselModelNodes";
 
 const SEAT_Y = 0.44;
 
 const fur = {
-  coat: "#ebe9e4",
-  stripe: "#b9b6b0",
-  innerEar: "#eeb0b4",
+  coat: "#f3f5f4",
+  stripe: "#a4afb2",
+  innerEar: "#d4aaa7",
   nose: "#e0949a",
   eye: "#86bf4f",
   pupil: "#26303a",
@@ -39,6 +41,7 @@ function makeBodyGeometry() {
     const shoulder = Math.max(0, y);
     points.setXYZ(i, x * (1 - shoulder * 0.27), y < -0.62 ? -0.62 + (y + 0.62) * 0.55 : y, z * (1 - shoulder * 0.13));
   }
+  addSilverGradient(geometry, 0.1);
   geometry.computeVertexNormals();
   return geometry;
 }
@@ -53,17 +56,43 @@ function makeHeadGeometry() {
     const cheek = 1 + 0.12 * (1 - Math.abs(y)) - 0.06 * y;
     points.setXYZ(i, x * cheek, y < -0.48 ? -0.48 + (y + 0.48) * 0.65 : y, z * (1 - Math.max(0, y) * 0.08));
   }
+  addSilverGradient(geometry, 0.82);
   geometry.computeVertexNormals();
   return geometry;
 }
 
+function addSilverGradient(geometry: SphereGeometry, faceLight: number) {
+  const points = geometry.attributes.position;
+  const colors = new Float32Array(points.count * 3);
+  const white = new Color("#f8f8f5");
+  const silver = new Color("#88969b");
+  const smoothstep = (edge0: number, edge1: number, value: number) => {
+    const t = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
+    return t * t * (3 - 2 * t);
+  };
+
+  for (let i = 0; i < points.count; i++) {
+    const x = points.getX(i);
+    const y = points.getY(i);
+    const z = points.getZ(i);
+    const crown = smoothstep(-0.62, 0.35, y);
+    const face = smoothstep(0.1, 0.78, z);
+    const softMarking = Math.sin(x * 14 + z * 11) * Math.cos(y * 18 - x * 6) * 0.012;
+    const shade = Math.max(0.02, Math.min(0.44, 0.035 + crown * 0.42 * (1 - face * faceLight) + softMarking));
+    const color = white.clone().lerp(silver, shade);
+    color.toArray(colors, i * 3);
+  }
+
+  geometry.setAttribute("color", new BufferAttribute(colors, 3));
+}
+
 function makeEarGeometry() {
   const shape = new Shape();
-  shape.moveTo(-0.028, -0.021);
-  shape.quadraticCurveTo(-0.026, 0.015, -0.006, 0.050);
-  shape.quadraticCurveTo(0.001, 0.058, 0.009, 0.047);
-  shape.quadraticCurveTo(0.028, 0.012, 0.028, -0.021);
-  shape.quadraticCurveTo(0, -0.031, -0.028, -0.021);
+  shape.moveTo(-0.03, -0.008);
+  shape.quadraticCurveTo(-0.03, 0.008, -0.019, 0.02);
+  shape.quadraticCurveTo(-0.008, 0.03, 0.005, 0.022);
+  shape.quadraticCurveTo(0.021, 0.013, 0.028, -0.006);
+  shape.quadraticCurveTo(0.001, -0.018, -0.03, -0.008);
   const geometry = new ExtrudeGeometry(shape, {
     depth: 0.005,
     bevelEnabled: true,
@@ -88,46 +117,14 @@ export function ReadingChair() {
 }
 
 function Chair() {
-  const oak = useMemo(() => makeWood("#d8b489", "#a3784a", [1, 1]), []);
   const cloth = useMemo(() => makeFabric("#c2a894", [3, 3]), []);
-  const legs: [number, number][] = [
-    [-0.17, -0.17],
-    [0.17, -0.17],
-    [-0.17, 0.17],
-    [0.17, 0.17],
-  ];
+  const model = useChiselModelNode("CHAIR_and_DOMI_interaction_root", true, ["DOMI_"]);
 
   return (
     <group>
-      {legs.map(([x, z], i) => (
-        <mesh key={i} position={[x, SEAT_Y / 2, z]} castShadow>
-          <cylinderGeometry args={[0.017, 0.014, SEAT_Y, 16]} />
-          <meshStandardMaterial
-            color={palette.deskLeg}
-            metalness={0.8}
-            roughness={0.35}
-          />
-        </mesh>
-      ))}
+      <primitive object={model} dispose={null} />
 
-      <RoundedBox
-        args={[0.44, 0.045, 0.44]}
-        radius={0.012}
-        smoothness={4}
-        position={[0, SEAT_Y + 0.022, 0]}
-        castShadow
-        receiveShadow
-      >
-        <meshPhysicalMaterial
-          map={oak.map}
-          bumpMap={oak.bumpMap}
-          bumpScale={0.2}
-          roughness={0.44}
-          clearcoat={0.3}
-        />
-      </RoundedBox>
-
-      {/* cushion */}
+      {/* The Chisel model supplies the timber frame; keep the original soft seat. */}
       <RoundedBox
         args={[0.38, 0.05, 0.38]}
         radius={0.022}
@@ -146,34 +143,6 @@ function Chair() {
         />
       </RoundedBox>
 
-      {/* back */}
-      <group position={[0, 0, -0.2]}>
-        {[-0.19, 0.19].map((x) => (
-          <mesh key={x} position={[x, SEAT_Y + 0.26, 0]} castShadow>
-            <cylinderGeometry args={[0.015, 0.015, 0.52, 16]} />
-            <meshStandardMaterial
-              color={palette.deskLeg}
-              metalness={0.8}
-              roughness={0.35}
-            />
-          </mesh>
-        ))}
-        <RoundedBox
-          args={[0.42, 0.17, 0.035]}
-          radius={0.014}
-          smoothness={4}
-          position={[0, SEAT_Y + 0.44, 0]}
-          castShadow
-        >
-          <meshPhysicalMaterial
-            map={oak.map}
-            bumpMap={oak.bumpMap}
-            bumpScale={0.2}
-            roughness={0.44}
-            clearcoat={0.3}
-          />
-        </RoundedBox>
-      </group>
     </group>
   );
 }
@@ -206,9 +175,19 @@ function Domi() {
     map: furMaps.map,
     bumpMap: furMaps.bumpMap,
     bumpScale: 0.012,
+    color: fur.coat,
     roughness: 0.96,
     sheen: 0.48,
     sheenColor: "#f7f1e9",
+  }), [furMaps]);
+  const silverCoatMaterial = useMemo(() => new MeshPhysicalMaterial({
+    map: furMaps.map,
+    bumpMap: furMaps.bumpMap,
+    bumpScale: 0.012,
+    vertexColors: true,
+    roughness: 0.96,
+    sheen: 0.48,
+    sheenColor: "#f4f6f5",
   }), [furMaps]);
   const bodyGeometry = useMemo(makeBodyGeometry, []);
   const headGeometry = useMemo(makeHeadGeometry, []);
@@ -258,6 +237,7 @@ function Domi() {
 
   useEffect(() => () => {
     coatMaterial.dispose();
+    silverCoatMaterial.dispose();
     furMaps.map.dispose();
     furMaps.bumpMap.dispose();
     bodyGeometry.dispose();
@@ -265,7 +245,7 @@ function Domi() {
     earGeometry.dispose();
     tailGeometry.dispose();
     tailTipGeometry.dispose();
-  }, [bodyGeometry, coatMaterial, earGeometry, furMaps, headGeometry, tailGeometry, tailTipGeometry]);
+  }, [bodyGeometry, coatMaterial, earGeometry, furMaps, headGeometry, silverCoatMaterial, tailGeometry, tailTipGeometry]);
 
   // one mutable bag rather than state — none of this should trigger a re-render
   const beat = useRef({
@@ -349,7 +329,7 @@ function Domi() {
       {/* turned out of the chair so her face catches the default camera */}
       <group ref={root} position={[0, SEAT_Y + 0.09, 0.01]} rotation={[0, 0.95, 0]}>
         {/* Shaped shoulders and a flattened seated base form one coat mass. */}
-        <mesh geometry={bodyGeometry} material={coatMaterial} position={[0, 0.13, -0.01]} scale={[0.102, 0.15, 0.09]} castShadow receiveShadow />
+        <mesh geometry={bodyGeometry} material={silverCoatMaterial} position={[0, 0.13, -0.01]} scale={[0.102, 0.15, 0.09]} castShadow receiveShadow />
 
         {stripes.map((s, i) => (
           <mesh
@@ -364,7 +344,7 @@ function Domi() {
 
         {/* everything from here up turns together when she looks around */}
         <group ref={head} position={[0, 0.285, 0.022]}>
-          <mesh geometry={headGeometry} material={coatMaterial} scale={[0.081, 0.07, 0.069]} castShadow receiveShadow />
+          <mesh geometry={headGeometry} material={silverCoatMaterial} scale={[0.081, 0.07, 0.069]} castShadow receiveShadow />
 
           {/* Low-relief markings follow the forehead instead of floating on it. */}
           <mesh position={[0, 0.045, 0.050]} scale={[0.017, 0.014, 0.004]}>
@@ -386,8 +366,8 @@ function Domi() {
           {[-1, 1].map((side) => (
             <group
               key={side}
-              position={[side * 0.052, 0.061, -0.008]}
-              rotation={[0.08, 0, -side * 0.18]}
+              position={[side * 0.052, 0.052, 0.015]}
+              rotation={[0.16, 0, -side * 0.58]}
             >
               <mesh geometry={earGeometry} material={coatMaterial} castShadow />
               <mesh geometry={earGeometry} position={[0, -0.007, 0.005]} scale={[0.57, 0.67, 0.5]}>
@@ -411,15 +391,15 @@ function Domi() {
           <group ref={eyes}>
             {[-1, 1].map((side) => (
               <group key={side} position={[side * 0.031, 0.007, 0.062]}>
-                <mesh scale={[0.022, 0.015, 0.004]}>
+                <mesh scale={[0.025, 0.017, 0.004]}>
                   <sphereGeometry args={[1, 20, 14]} />
                   <meshStandardMaterial color="#6f7770" roughness={0.9} />
                 </mesh>
-                <mesh position={[0, 0, 0.003]} scale={[0.017, 0.012, 0.004]}>
+                <mesh position={[0, 0, 0.003]} scale={[0.020, 0.014, 0.004]}>
                   <sphereGeometry args={[1, 20, 14]} />
                   <meshStandardMaterial color={fur.eye} roughness={0.47} />
                 </mesh>
-                <mesh position={[0, 0, 0.006]} scale={[0.0036, 0.009, 0.003]}>
+                <mesh position={[0, 0, 0.006]} scale={[0.0042, 0.010, 0.003]}>
                   <sphereGeometry args={[1, 12, 10]} />
                   <meshStandardMaterial color={fur.pupil} roughness={0.38} />
                 </mesh>

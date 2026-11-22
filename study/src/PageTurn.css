@@ -16,7 +16,7 @@
 }
 
 .page-sheet--room {
-  background: #e8e3da;
+  background: #1d2020;
 }
 
 .app--evening .page-sheet--room {
@@ -36,7 +36,7 @@
   z-index: var(--layer-room-surface);
   inset: 0;
   overflow: hidden;
-  background: #e8e3da;
+  background: #1d2020;
   isolation: isolate;
   will-change: clip-path;
 }
@@ -48,8 +48,8 @@
   z-index: 9;
   inset: 0;
   background:
-    radial-gradient(ellipse at 83% 7%, rgb(255 255 255 / 80%), transparent 53%),
-    linear-gradient(145deg, #f8f8f5 0%, #e7e9e6 46%, #d7dedc 100%);
+    radial-gradient(ellipse at 83% 7%, rgb(255 255 255 / 9%), transparent 53%),
+    linear-gradient(145deg, #303436 0%, #222627 46%, #181b1c 100%);
   opacity: 1;
   content: "";
   pointer-events: none;

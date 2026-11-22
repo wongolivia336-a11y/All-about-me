@@ -167,7 +167,7 @@ export function makeFur(): Maps {
   const S = 256;
   const { c, ctx } = canvas(S, S);
   const { c: bc, ctx: bctx } = canvas(S, S);
-  ctx.fillStyle = "#ebe9e4";
+  ctx.fillStyle = "#f3f5f4";
   ctx.fillRect(0, 0, S, S);
   bctx.fillStyle = "#808080";
   bctx.fillRect(0, 0, S, S);
@@ -176,7 +176,7 @@ export function makeFur(): Maps {
     const x = rand(i + 111) * S;
     const y = rand(i + 237) * S;
     const length = 1.5 + rand(i + 19) * 3.5;
-    const shade = rand(i + 71) > 0.48 ? "255,255,255" : "100,94,88";
+    const shade = rand(i + 71) > 0.48 ? "255,255,255" : "108,119,123";
     ctx.strokeStyle = `rgba(${shade},${0.028 + rand(i + 43) * 0.045})`;
     ctx.lineWidth = 0.6;
     ctx.beginPath();

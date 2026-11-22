@@ -38,8 +38,9 @@ export interface Hotspot {
   target: Vec3;
 }
 
-export const HOME_CAM: Vec3 = [2.75, 1.9, 3.0];
-export const HOME_TARGET: Vec3 = [0, 0.95, -1.05];
+// Match the standalone Chisel study's centered, wider room overview.
+export const HOME_CAM: Vec3 = [5.3, 3.9, 5.8];
+export const HOME_TARGET: Vec3 = [0, 1.25, -0.05];
 
 const at = (
   base: readonly [number, number, number],
@@ -69,9 +70,11 @@ export const hotspots: Hotspot[] = [
     blurb: "作品与系统",
     path: "/work",
     // Frame the CRT screen so the live desktop remains easy to read.
-    ...at([layout.laptop.pos[0], DESK_TOP_Y + 0.255, layout.laptop.pos[2]], 0, [
-      0, 0.045, 0.49,
-    ]),
+    ...at([
+      layout.laptop.pos[0] + Math.sin(layout.laptop.rotY) * 0.155,
+      DESK_TOP_Y + 0.255,
+      layout.laptop.pos[2] + Math.cos(layout.laptop.rotY) * 0.155,
+    ], 0, [0, 0.045, 0.49]),
   },
   {
     id: "phone",

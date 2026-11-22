@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { Hotspot } from "../../interaction/Hotspot";
@@ -6,6 +6,7 @@ import { currentEffectiveLampBrightness } from "../../interaction/studyStore";
 import { layout } from "../layout";
 import { palette } from "../theme";
 import { LampDimmer } from "./LampDimmer";
+import { useChiselModelNode } from "../chiselModelNodes";
 
 /**
  * A continuous task light. The physical dimmer supplies a stable brightness
@@ -14,8 +15,26 @@ import { LampDimmer } from "./LampDimmer";
  */
 export function DeskLamp() {
   const { pos, rotY } = layout.lamp;
-  const armLen = 0.4;
-  const headY = 0.44;
+  const headY = 0.47;
+  const lampModel = useChiselModelNode("INTERACTIVE_Lamp_dimmer_pivot_preserved");
+  const shadeGeometry = useMemo(
+    () => new THREE.LatheGeometry([
+      new THREE.Vector2(0, 0.03),
+      new THREE.Vector2(0.035, 0.027),
+      new THREE.Vector2(0.072, 0.017),
+      new THREE.Vector2(0.102, -0.003),
+      new THREE.Vector2(0.122, -0.03),
+      new THREE.Vector2(0.132, -0.06),
+      new THREE.Vector2(0.13, -0.076),
+      new THREE.Vector2(0.117, -0.076),
+      new THREE.Vector2(0.108, -0.051),
+      new THREE.Vector2(0.093, -0.025),
+      new THREE.Vector2(0.067, -0.002),
+      new THREE.Vector2(0.034, 0.015),
+      new THREE.Vector2(0, 0.019),
+    ], 56),
+    [],
+  );
   const spotTarget = useMemo(() => new THREE.Object3D(), []);
   const spotLight = useRef<THREE.SpotLight>(null);
   const spillLight = useRef<THREE.PointLight>(null);
@@ -32,6 +51,17 @@ export function DeskLamp() {
       window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     [],
   );
+
+  useEffect(() => {
+    const proxy = lampModel.getObjectByName("LAMP_shade_proxy");
+    if (!(proxy instanceof THREE.Mesh)) return;
+    const wasVisible = proxy.visible;
+    proxy.visible = false;
+    return () => {
+      proxy.visible = wasVisible;
+      shadeMaterial.current = null;
+    };
+  }, [lampModel]);
 
   useFrame((_state, delta) => {
     const effectiveLampBrightness = currentEffectiveLampBrightness();
@@ -73,38 +103,29 @@ export function DeskLamp() {
   return (
     <Hotspot id="lamp" labelAt={[pos[0], pos[1] + 0.6, pos[2]]}>
       <group position={[pos[0], pos[1], pos[2]]} rotation={[0, rotY, 0]}>
-        <mesh position={[0, 0.011, 0]} castShadow receiveShadow>
-          <cylinderGeometry args={[0.085, 0.09, 0.022, 32]} />
+        <primitive object={lampModel} dispose={null} />
+        <mesh
+          geometry={shadeGeometry}
+          position={[0, headY, 0.03]}
+          castShadow
+          receiveShadow
+        >
           <meshPhysicalMaterial
-            color="#565a5c"
-            metalness={0.85}
-            roughness={0.38}
-            clearcoat={0.18}
+            ref={shadeMaterial}
+            color={palette.ceramic}
+            emissive="#f2b86e"
+            emissiveIntensity={0.03}
+            metalness={0.06}
+            roughness={0.43}
+            clearcoat={0.14}
+            clearcoatRoughness={0.52}
+            side={THREE.DoubleSide}
           />
         </mesh>
 
         <LampDimmer />
 
-        <mesh position={[0, armLen / 2 + 0.02, -0.03]} rotation={[0.14, 0, 0]} castShadow>
-          <cylinderGeometry args={[0.0075, 0.0075, armLen, 16]} />
-          <meshStandardMaterial color={palette.aluminumDark} metalness={0.9} roughness={0.3} />
-        </mesh>
-
-        <group position={[0, headY, 0.03]} rotation={[0.62, 0, 0]}>
-          <mesh castShadow>
-            <sphereGeometry args={[0.075, 28, 18, 0, Math.PI * 2, 0, Math.PI / 2]} />
-            <meshPhysicalMaterial
-              ref={shadeMaterial}
-              color={palette.ceramic}
-              emissive="#f2b86e"
-              emissiveIntensity={0.03}
-              metalness={0.15}
-              roughness={0.4}
-              clearcoat={0.7}
-              side={2}
-            />
-          </mesh>
-
+        <group position={[0, headY - 0.008, 0.03]}>
           <mesh position={[0, -0.004, 0]} rotation={[Math.PI / 2, 0, 0]}>
             <circleGeometry args={[0.062, 28]} />
             <meshBasicMaterial
@@ -129,10 +150,10 @@ export function DeskLamp() {
           </mesh>
         </group>
 
-        <primitive object={spotTarget} position={[0.16, -0.62, 0.42]} />
+        <primitive object={spotTarget} position={[0.12, -0.03, 0.34]} />
         <spotLight
           ref={spotLight}
-          position={[0, headY - 0.06, 0.06]}
+          position={[0, headY - 0.014, 0.06]}
           target={spotTarget}
           angle={0.72}
           penumbra={0.85}
@@ -146,7 +167,7 @@ export function DeskLamp() {
         />
         <pointLight
           ref={spillLight}
-          position={[0, headY - 0.02, 0.04]}
+          position={[0, headY - 0.012, 0.04]}
           intensity={0}
           distance={0.9}
           decay={2}

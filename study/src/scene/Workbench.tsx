@@ -1,8 +1,8 @@
 import { useMemo } from "react";
-import { RoundedBox } from "@react-three/drei";
 import { Hotspot } from "../interaction/Hotspot";
 import { requestArchive } from "../interaction/studyStore";
 import { layout } from "./layout";
+import { useChiselModelNode } from "./chiselModelNodes";
 import { makeCoffeeRing, makeSketchSpread } from "./surfaces";
 import { palette } from "./theme";
 import { makeFabric, makeWood } from "./textures";
@@ -18,40 +18,30 @@ export function Workbench() {
   );
 }
 
-/** An open A5 spread — 296 x 210mm across the gutter — with a pencil on it. */
+/** The Chisel sketchbook body keeps its drawn spread and resting pencil. */
 function Sketchbook() {
   const spread = useMemo(makeSketchSpread, []);
   const { pos, rotY } = layout.sketchbook;
-
-  const W = 0.296;
-  const D = 0.21;
-  const BLOCK = 0.014;
+  const book = useChiselModelNode("PROP_sketchbook");
+  const W = 0.24;
+  const D = 0.19;
 
   return (
     <Hotspot id="sketchbook" labelAt={[pos[0], pos[1] + 0.2, pos[2]]}>
-      <group position={[pos[0], pos[1], pos[2]]} rotation={[0, rotY, 0]}>
-        <RoundedBox
-          args={[W, BLOCK, D]}
-          radius={0.002}
-          smoothness={2}
-          position={[0, BLOCK / 2, 0]}
-          castShadow
-          receiveShadow
-        >
-          <meshStandardMaterial color="#efe9dc" roughness={0.92} />
-        </RoundedBox>
+      <group position={[pos[0], pos[1] + 0.014, pos[2]]} rotation={[0, rotY, 0]}>
+        <primitive object={book} dispose={null} />
 
         <mesh
-          position={[0, BLOCK + 0.0006, 0]}
+          position={[0, 0.0096, 0]}
           rotation={[-Math.PI / 2, 0, 0]}
           receiveShadow
         >
-          <planeGeometry args={[W - 0.004, D - 0.004]} />
-          <meshStandardMaterial map={spread} roughness={0.9} />
+          <planeGeometry args={[W - 0.006, D - 0.006]} />
+          <meshStandardMaterial map={spread} roughness={0.97} metalness={0} />
         </mesh>
 
         {/* pencil, resting across the right-hand page */}
-        <group position={[0.07, BLOCK + 0.005, 0.05]} rotation={[0, -0.42, 0]}>
+        <group position={[0.055, 0.014, 0.04]} rotation={[0, -0.42, 0]}>
           <mesh rotation={[0, 0, Math.PI / 2]} castShadow>
             <cylinderGeometry args={[0.0042, 0.0042, 0.15, 6]} />
             <meshStandardMaterial color="#d9a441" roughness={0.55} />
@@ -84,12 +74,9 @@ function Sketchbook() {
  */
 function MaterialTray() {
   const { pos, rotY } = layout.tray;
+  const tray = useChiselModelNode("PROP_material_tray");
   const oak = useMemo(() => makeWood("#c08a52", "#8a5c30", [1, 1]), []);
   const cloth = useMemo(() => makeFabric("#7d8b74", [2, 2]), []);
-
-  const TRAY_W = 0.2;
-  const TRAY_D = 0.1;
-  const TRAY_H = 0.012;
 
   const CHIP_W = 0.055;
   const CHIP_D = 0.04;
@@ -105,18 +92,8 @@ function MaterialTray() {
       onSelect={() => requestArchive("make")}
       labelAt={[pos[0], pos[1] + 0.16, pos[2]]}
     >
-      <group position={[pos[0], pos[1], pos[2]]} rotation={[0, rotY, 0]}>
-        {/* tray */}
-        <RoundedBox
-          args={[TRAY_W, TRAY_H, TRAY_D]}
-          radius={0.004}
-          smoothness={3}
-          position={[0, TRAY_H / 2, 0]}
-          castShadow
-          receiveShadow
-        >
-          <meshPhysicalMaterial color="#2f2c29" roughness={0.72} clearcoat={0.2} />
-        </RoundedBox>
+      <group position={[pos[0], pos[1] + 0.016, pos[2]]} rotation={[0, rotY, 0]}>
+        <primitive object={tray} dispose={null} />
 
         {Array.from({ length: cols * rows }, (_, i) => {
           const col = i % cols;
@@ -126,7 +103,7 @@ function MaterialTray() {
               key={i}
               position={[
                 x0 + col * (CHIP_W + GAP),
-                TRAY_H + 0.0018,
+                0.0178,
                 z0 + row * (CHIP_D + GAP),
               ]}
               castShadow

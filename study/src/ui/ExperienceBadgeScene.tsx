@@ -1,374 +1,203 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { RoundedBox } from "@react-three/drei";
-import * as THREE from "three";
+import { useCallback, useEffect, useRef, type CSSProperties, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
 
 export interface BadgeItem {
   title: string;
   role: string;
   accent: string;
+  description: string;
   placeholder?: boolean;
   illustration?: string;
 }
 
-function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, radius: number) {
-  ctx.beginPath();
-  ctx.roundRect(x, y, w, h, radius);
-  ctx.fill();
-}
+type CardProps = { cardRef: (node: HTMLButtonElement | null) => void;
+  item: BadgeItem; index: number; selected: boolean; flipped: boolean;
+  reducedMotion: boolean; language: "en" | "zh";
+  onSelect: (index: number) => void; onFlip: (index: number) => void;
+  onFlipBack: () => void; onMoveFocus: (index: number) => void;
+};
 
-function makeBadgeTexture(item: BadgeItem, index: number) {
-  const canvas = document.createElement("canvas");
-  canvas.width = 640;
-  canvas.height = 840;
-  const ctx = canvas.getContext("2d")!;
-  const inset = 12;
-  const x = inset;
-  const y = inset;
-  const w = canvas.width - inset * 2;
-  const h = canvas.height - inset * 2;
+function useBadgeMotion(reducedMotion: boolean) {
+  const hangerRef = useRef<HTMLSpanElement>(null);
+  const motion = useRef({ angle: 0, velocity: 0, pull: 0, pullVelocity: 0, frame: 0 });
+  const pointer = useRef({ id: -1, x: 0, y: 0, lastX: 0, lastY: 0, lastTime: 0, moved: false });
+  const suppressClick = useRef(false);
 
-  ctx.fillStyle = "#f7f5ef";
-  roundedRect(ctx, x, y, w, h, 36);
-  ctx.save();
-  ctx.beginPath();
-  ctx.roundRect(x, y, w, h, 36);
-  ctx.clip();
-
-  ctx.fillStyle = item.accent;
-  ctx.globalAlpha = 0.18;
-  ctx.fillRect(x, y, w, 18);
-  ctx.globalAlpha = 1;
-  ctx.fillStyle = "#27363a";
-  ctx.font = "600 25px ui-monospace, SFMono-Regular, Consolas, monospace";
-  ctx.fillText("FOUR HEARTS", 48, 66);
-  ctx.textAlign = "right";
-  ctx.fillStyle = item.accent;
-  ctx.fillText(String(index + 1).padStart(2, "0"), canvas.width - 48, 66);
-  ctx.textAlign = "left";
-
-  ctx.strokeStyle = "rgba(39,54,58,.16)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(48, 92);
-  ctx.lineTo(canvas.width - 48, 92);
-  ctx.stroke();
-
-  ctx.fillStyle = item.accent;
-  ctx.globalAlpha = 0.16;
-  ctx.beginPath();
-  ctx.arc(canvas.width - 130, 238, 92, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.globalAlpha = 1;
-
-  ctx.fillStyle = "#253438";
-  ctx.font = item.title.length > 13 ? "600 46px Georgia, serif" : "600 58px Georgia, serif";
-  const words = item.title.split(" ");
-  if (words.length > 1 && item.title.length > 15) {
-    ctx.fillText(words.slice(0, Math.ceil(words.length / 2)).join(" "), 48, 242);
-    ctx.fillText(words.slice(Math.ceil(words.length / 2)).join(" "), 48, 301);
-  } else {
-    ctx.fillText(item.title, 48, 270);
-  }
-
-  ctx.fillStyle = "#63706e";
-  ctx.font = "500 25px ui-monospace, SFMono-Regular, Consolas, monospace";
-  ctx.fillText(item.placeholder ? "A NEW CHAPTER" : "DESIGN PRACTICE", 50, 365);
-  ctx.fillStyle = "#313e40";
-  ctx.font = "400 32px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
-  const roleWords = item.role.split(" ");
-  let line = "";
-  let lineY = 430;
-  for (const word of roleWords) {
-    const next = line ? `${line} ${word}` : word;
-    if (ctx.measureText(next).width > 520 && line) {
-      ctx.fillText(line, 50, lineY);
-      line = word;
-      lineY += 45;
-    } else line = next;
-  }
-  if (line) ctx.fillText(line, 50, lineY);
-
-  ctx.strokeStyle = item.accent;
-  ctx.globalAlpha = 0.72;
-  ctx.lineWidth = 5;
-  ctx.beginPath();
-  ctx.moveTo(50, 635);
-  ctx.lineTo(166, 635);
-  ctx.stroke();
-  ctx.globalAlpha = 1;
-  ctx.fillStyle = "#73807c";
-  ctx.font = "500 20px ui-monospace, SFMono-Regular, Consolas, monospace";
-  ctx.fillText("OLIVIA WONG  ·  EXPERIENCE", 50, 684);
-  ctx.restore();
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 4;
-  if (item.illustration) {
-    const illustration = new Image();
-    illustration.onload = () => {
-      ctx.save();
-      ctx.globalAlpha = 0.96;
-      ctx.drawImage(illustration, 402, 118, 190, 238);
-      ctx.restore();
-      texture.needsUpdate = true;
-    };
-    illustration.src = item.illustration;
-  }
-  return texture;
-}
-
-function SwingingBadge({
-  item,
-  index,
-  selected,
-  reducedMotion,
-  onSelect,
-}: {
-  item: BadgeItem;
-  index: number;
-  selected: boolean;
-  reducedMotion: boolean;
-  onSelect: () => void;
-}) {
-  const pivot = useRef<THREE.Group>(null);
-  const card = useRef<THREE.Group>(null);
-  const angle = useRef(0);
-  const velocity = useRef(0);
-  const pitchVelocity = useRef(0);
-  const yawVelocity = useRef(0);
-  const drag = useRef<{
-    pointerId: number;
-    originX: number;
-    originY: number;
-    lastX: number;
-    lastY: number;
-    lastAt: number;
-    moved: boolean;
-  } | null>(null);
-  const suppressClickUntil = useRef(0);
-  const [hovered, setHovered] = useState(false);
-  const invalidate = useThree((state) => state.invalidate);
-  const viewWidth = useThree((state) => state.size.width);
-  const viewHeight = useThree((state) => state.size.height);
-  const texture = useMemo(() => makeBadgeTexture(item, index), [index, item]);
-  const strapGeometry = useMemo(() => {
-    const curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-0.27, 0.04, 0.08),
-      new THREE.Vector3(-0.29, -0.24, 0.08),
-      new THREE.Vector3(0, -0.43, 0.08),
-      new THREE.Vector3(0.29, -0.24, 0.08),
-      new THREE.Vector3(0.27, 0.04, 0.08),
-    ]);
-    return new THREE.TubeGeometry(curve, 32, 0.047, 8, false);
+  const paint = useCallback(() => {
+    const node = hangerRef.current;
+    if (!node) return;
+    const m = motion.current;
+    node.style.transform = "translateY(" + m.pull.toFixed(2) + "px) rotate(" + m.angle.toFixed(2) + "deg)";
+    node.style.setProperty("--lanyard-extra", Math.max(0, m.pull * 0.42).toFixed(2) + "px");
   }, []);
 
-  useEffect(() => () => {
-    texture.dispose();
-    strapGeometry.dispose();
-  }, [strapGeometry, texture]);
-
-  useFrame((_, delta) => {
-    if (!pivot.current) return;
-    if (reducedMotion) {
-      pivot.current.rotation.z = 0;
-      if (card.current) {
-        card.current.rotation.x = 0;
-        card.current.rotation.y = 0;
-      }
-      angle.current = velocity.current = pitchVelocity.current = yawVelocity.current = 0;
-      return;
-    }
-
-    if (drag.current) return;
-
-    const target = hovered ? (index % 2 === 0 ? -0.085 : 0.085) : selected ? 0.022 : 0;
-    const dt = Math.min(delta, 0.032);
-    velocity.current += (target - angle.current) * dt * 15;
-    velocity.current *= Math.exp(-dt * (hovered ? 3.6 : 4.7));
-    angle.current += velocity.current * dt;
-    pivot.current.rotation.z = angle.current;
-
-    if (card.current) {
-      pitchVelocity.current += -card.current.rotation.x * dt * 18;
-      pitchVelocity.current *= Math.exp(-dt * 5.4);
-      card.current.rotation.x += pitchVelocity.current * dt;
-
-      yawVelocity.current += -card.current.rotation.y * dt * 17;
-      yawVelocity.current *= Math.exp(-dt * 5.1);
-      card.current.rotation.y += yawVelocity.current * dt;
-    }
-
-    if (
-      Math.abs(target - angle.current) > 0.001 ||
-      Math.abs(velocity.current) > 0.001 ||
-      Math.abs(pitchVelocity.current) > 0.001 ||
-      Math.abs(yawVelocity.current) > 0.001
-    ) invalidate();
-  });
-
-  const handlePointerDown = (event: any) => {
-    event.stopPropagation();
-    if (reducedMotion || (event.pointerType === "mouse" && event.button !== 0)) return;
-    drag.current = {
-      pointerId: event.pointerId,
-      originX: event.clientX,
-      originY: event.clientY,
-      lastX: event.clientX,
-      lastY: event.clientY,
-      lastAt: performance.now(),
-      moved: false,
+  const settle = useCallback(() => {
+    if (reducedMotion || motion.current.frame) return;
+    let previous = 0;
+    const tick = (now: number) => {
+      const m = motion.current;
+      const dt = Math.min(0.032, Math.max(0.001, previous ? (now - previous) / 1000 : 0.016));
+      previous = now;
+      m.velocity += (-72 * m.angle - 13 * m.velocity) * dt;
+      m.angle += m.velocity * dt;
+      m.pullVelocity += (-88 * m.pull - 16 * m.pullVelocity) * dt;
+      m.pull += m.pullVelocity * dt;
+      if (Math.abs(m.angle) < 0.025 && Math.abs(m.velocity) < 0.04) m.angle = m.velocity = 0;
+      if (Math.abs(m.pull) < 0.025 && Math.abs(m.pullVelocity) < 0.04) m.pull = m.pullVelocity = 0;
+      paint();
+      if (m.angle || m.velocity || m.pull || m.pullVelocity) m.frame = requestAnimationFrame(tick);
+      else m.frame = 0;
     };
-    try { event.target.setPointerCapture(event.pointerId); } catch { /* Pointer capture may be unavailable in a fallback renderer. */ }
+    motion.current.frame = requestAnimationFrame(tick);
+  }, [paint, reducedMotion]);
+
+  useEffect(() => () => { if (motion.current.frame) cancelAnimationFrame(motion.current.frame); }, []);
+  useEffect(() => {
+    if (!reducedMotion) return;
+    if (motion.current.frame) cancelAnimationFrame(motion.current.frame);
+    motion.current.frame = 0;
+    motion.current.angle = motion.current.velocity = motion.current.pull = motion.current.pullVelocity = 0;
+    paint();
+  }, [paint, reducedMotion]);
+
+  const onPointerDown = (event: PointerEvent<HTMLButtonElement>) => {
+    if (reducedMotion || (event.pointerType === "mouse" && event.button !== 0)) return;
+    if (motion.current.frame) cancelAnimationFrame(motion.current.frame);
+    motion.current.frame = 0;
+    pointer.current = { id: event.pointerId, x: event.clientX, y: event.clientY, lastX: event.clientX, lastY: event.clientY, lastTime: performance.now(), moved: false };
+    try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* Embedded preview may not support capture. */ }
   };
 
-  const handlePointerMove = (event: any) => {
-    const current = drag.current;
-    if (!current || current.pointerId !== event.pointerId || reducedMotion) return;
-    event.stopPropagation();
-
-    const totalDistance = Math.hypot(event.clientX - current.originX, event.clientY - current.originY);
-    if (totalDistance > 3) current.moved = true;
-    const dx = event.clientX - current.lastX;
-    const dy = event.clientY - current.lastY;
-    const now = performance.now();
-    const dt = Math.max((now - current.lastAt) / 1000, 1 / 120);
-
-    if (current.moved) {
-      const angleDelta = -dx / Math.max(viewWidth, 1) * 3.15;
-      const nextAngle = THREE.MathUtils.clamp(angle.current + angleDelta, -0.58, 0.58);
-      velocity.current = THREE.MathUtils.clamp((nextAngle - angle.current) / dt, -4.2, 4.2);
-      angle.current = nextAngle;
-      if (pivot.current) pivot.current.rotation.z = nextAngle;
-
-      if (card.current) {
-        const pitchDelta = -dy / Math.max(viewHeight, 1) * 1.8;
-        const nextPitch = THREE.MathUtils.clamp(card.current.rotation.x + pitchDelta, -0.32, 0.32);
-        pitchVelocity.current = THREE.MathUtils.clamp((nextPitch - card.current.rotation.x) / dt, -2.6, 2.6);
-        card.current.rotation.x = nextPitch;
-
-        const yawDelta = dx / Math.max(viewWidth, 1) * 1.35;
-        const nextYaw = THREE.MathUtils.clamp(card.current.rotation.y + yawDelta, -0.26, 0.26);
-        yawVelocity.current = THREE.MathUtils.clamp((nextYaw - card.current.rotation.y) / dt, -2.4, 2.4);
-        card.current.rotation.y = nextYaw;
-      }
-      invalidate();
-    }
-
-    current.lastX = event.clientX;
-    current.lastY = event.clientY;
-    current.lastAt = now;
+  const onPointerMove = (event: PointerEvent<HTMLButtonElement>) => {
+    const p = pointer.current;
+    if (reducedMotion || p.id !== event.pointerId) return;
+    const dx = event.clientX - p.x, dy = event.clientY - p.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) p.moved = true;
+    if (!p.moved) return;
+    event.preventDefault();
+    const now = performance.now(), elapsed = Math.max(8, now - p.lastTime);
+    const m = motion.current;
+    m.angle = Math.max(-22, Math.min(22, dx * 0.22));
+    m.pull = Math.max(0, Math.min(52, dy * 0.34));
+    m.velocity = Math.max(-720, Math.min(720, ((event.clientX - p.lastX) * 0.22 / elapsed) * 1000));
+    m.pullVelocity = Math.max(-520, Math.min(520, ((event.clientY - p.lastY) * 0.34 / elapsed) * 1000));
+    p.lastX = event.clientX; p.lastY = event.clientY; p.lastTime = now;
+    paint();
   };
 
-  const finishDrag = (pointerId: number, canceled = false) => {
-    const current = drag.current;
-    if (!current || current.pointerId !== pointerId) return;
-    if (current.moved && !canceled) suppressClickUntil.current = performance.now() + 220;
-    if (canceled) {
-      velocity.current *= 0.35;
-      pitchVelocity.current *= 0.35;
-      yawVelocity.current *= 0.35;
+  const onPointerUp = (event: PointerEvent<HTMLButtonElement>) => {
+    if (pointer.current.id !== event.pointerId) return;
+    const moved = pointer.current.moved;
+    pointer.current.id = -1;
+    if (moved) {
+      suppressClick.current = true;
+      window.setTimeout(() => { suppressClick.current = false; }, 0);
+      settle();
     }
-    drag.current = null;
-    invalidate();
+    try { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); } catch { /* Capture may be released by the browser. */ }
+  };
+
+  const onClickCapture = (event: MouseEvent<HTMLButtonElement>) => {
+    if (!suppressClick.current) return;
+    event.preventDefault(); event.stopPropagation(); suppressClick.current = false;
+  };
+
+  const nudge = (direction: number) => {
+    if (reducedMotion) return;
+    motion.current.velocity = Math.max(-520, Math.min(520, motion.current.velocity + direction * 210));
+    settle();
+  };
+
+  return { hangerRef, onPointerDown, onPointerMove, onPointerUp, onClickCapture, nudge };
+}
+
+function BadgeCard({ cardRef, item, index, selected, flipped, reducedMotion, language, onSelect, onFlip, onFlipBack, onMoveFocus }: CardProps) {
+  const physics = useBadgeMotion(reducedMotion);
+  const zh = language === "zh";
+  const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === "Escape" && flipped) { event.preventDefault(); onFlipBack(); return; }
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      event.preventDefault(); onMoveFocus(index + (event.key === "ArrowRight" ? 1 : -1));
+    }
   };
 
   return (
-    <group ref={pivot} position={[0, 1.48, 0]}>
-      <mesh geometry={strapGeometry}>
-        <meshStandardMaterial color={item.accent} roughness={0.72} />
-      </mesh>
-      <RoundedBox args={[0.5, 0.11, 0.11]} radius={0.035} smoothness={4} position={[0, -0.48, 0.1]} castShadow>
-        <meshStandardMaterial color="#c5a66d" metalness={0.7} roughness={0.28} />
-      </RoundedBox>
-      <group ref={card} position={[0, -1.72, 0]}
-          onPointerOver={(event) => { event.stopPropagation(); setHovered(true); invalidate(); }}
-          onPointerOut={(event) => { event.stopPropagation(); setHovered(false); invalidate(); }}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={(event) => finishDrag(event.pointerId)}
-          onPointerCancel={(event) => finishDrag(event.pointerId, true)}
-          onLostPointerCapture={(event) => finishDrag(event.pointerId, true)}
-          onClick={(event) => {
-            event.stopPropagation();
-            if (performance.now() < suppressClickUntil.current) return;
-            if (!reducedMotion) velocity.current += index % 2 === 0 ? -0.34 : 0.34;
-            onSelect();
-            invalidate();
-          }}
-      >
-        <RoundedBox
-          args={[2.18, 2.9, 0.11]}
-          radius={0.09}
-          smoothness={6}
-          castShadow
-          receiveShadow
+    <div className="quick-read-page__badge-slot" data-selected={selected ? "true" : "false"} style={{ "--item-accent": item.accent } as CSSProperties}>
+      <span className="quick-read-page__badge-anchor" aria-hidden="true" />
+      <span className="quick-read-page__badge-hanger" ref={physics.hangerRef}>
+        <span className="quick-read-page__badge-lanyard" aria-hidden="true" />
+        <span className="quick-read-page__badge-crimp" aria-hidden="true" />
+        <span className="quick-read-page__badge-swivel" aria-hidden="true"><i /></span>
+        <button
+          ref={cardRef} type="button" className="quick-read-page__badge"
+          data-flipped={flipped ? "true" : "false"} data-placeholder={item.placeholder ? "true" : "false"}
+          aria-label={item.title + " — " + (flipped ? (zh ? "返回正面" : "turn to front") : (zh ? "翻到背面" : "turn to back"))}
+          aria-pressed={flipped}
+          onFocus={() => onSelect(index)}
+          onPointerEnter={(event) => { if (event.pointerType === "mouse" && !selected) physics.nudge(index % 2 ? 1 : -1); }}
+          onPointerDown={physics.onPointerDown} onPointerMove={physics.onPointerMove}
+          onPointerUp={physics.onPointerUp} onPointerCancel={physics.onPointerUp}
+          onClickCapture={physics.onClickCapture}
+          onClick={() => { onSelect(index); physics.nudge(index % 2 ? 1 : -1); onFlip(index); }}
+          onKeyDown={onKeyDown}
         >
-          <meshStandardMaterial color="#f7f5ef" roughness={0.58} metalness={0.02} />
-        </RoundedBox>
-        <mesh position={[0, 0, 0.061]}>
-          <planeGeometry args={[2.04, 2.76]} />
-          <meshBasicMaterial map={texture} transparent toneMapped={false} />
-        </mesh>
-        {selected && (
-          <mesh position={[0, 0, 0.066]}>
-            <planeGeometry args={[2.2, 2.92]} />
-            <meshBasicMaterial color="#f6e7db" transparent opacity={0.075} depthWrite={false} />
-          </mesh>
-        )}
-      </group>
-    </group>
-  );
-}
-function BadgeLineup({ items, selectedIndex, onSelect, reducedMotion }: {
-  items: BadgeItem[];
-  selectedIndex: number;
-  onSelect: (index: number) => void;
-  reducedMotion: boolean;
-}) {
-  const viewportWidth = useThree((state) => state.viewport.width);
-  const cardWidth = Math.min(2.18, viewportWidth * 0.265);
-  const spacing = Math.max(cardWidth + 0.36, viewportWidth * 0.305);
-  return (
-    <>
-      <ambientLight intensity={1.05} />
-      <directionalLight position={[-3, 5, 5]} intensity={2.1} castShadow shadow-mapSize={[512, 512]} />
-      <directionalLight position={[4, 2, -2]} intensity={0.65} color="#ffe7d4" />
-      {items.map((item, index) => (
-        <group key={`${item.title}-${index}`} position={[(index - 1) * spacing, 0, 0]} scale={cardWidth / 2.18}>
-          <SwingingBadge
-            item={item}
-            index={index}
-            selected={selectedIndex === index}
-            reducedMotion={reducedMotion}
-            onSelect={() => onSelect(index)}
-          />
-        </group>
-      ))}
-    </>
+          <span className="quick-read-page__badge-depth" aria-hidden="true" />
+          <span className="quick-read-page__badge-flip">
+            <span className="quick-read-page__badge-face quick-read-page__badge-face--front" aria-hidden={flipped}>
+              <span className="quick-read-page__badge-topline"><span>FOUR HEARTS</span><span>{String(index + 1).padStart(2, "0")}</span></span>
+              <span className="quick-read-page__badge-body">
+                <span className="quick-read-page__badge-heading">{item.title}</span>
+                <span className="quick-read-page__badge-role">{item.role}</span>
+                {item.illustration
+                  ? <img className="quick-read-page__badge-art" src={item.illustration} alt="" draggable={false} decoding="async" />
+                  : <span className="quick-read-page__badge-placeholder"><i aria-hidden="true">+</i><span>{zh ? "档案待补" : "DETAILS TO COME"}</span></span>}
+              </span>
+              <span className="quick-read-page__badge-footer"><span>OLIVIA WONG</span><span>{zh ? "轻触翻面" : "TAP TO TURN"} <i aria-hidden="true">↻</i></span></span>
+            </span>
+            <span className="quick-read-page__badge-face quick-read-page__badge-face--back" aria-hidden={!flipped}>
+              <span className="quick-read-page__badge-back-index">{zh ? "经历档案" : "FIELD NOTE"} <i> / {String(index + 1).padStart(2, "0")}</i></span>
+              <strong>{item.title}</strong>
+              <span className="quick-read-page__badge-back-role">{item.role}</span>
+              <span className="quick-read-page__badge-back-copy">{item.description}</span>
+              {item.placeholder && <span className="quick-read-page__badge-back-status">{zh ? "等待补充真实经历" : "AWAITING REAL DETAILS"}</span>}
+              <span className="quick-read-page__badge-back-hint">{zh ? "按 Esc 返回正面" : "PRESS ESC TO RETURN"}</span>
+            </span>
+          </span>
+        </button>
+      </span>
+    </div>
   );
 }
 
-export function ExperienceBadgeScene({ items, selectedIndex, onSelect, reducedMotion }: {
-  items: BadgeItem[];
-  selectedIndex: number;
-  onSelect: (index: number) => void;
-  reducedMotion: boolean;
+export function ExperienceBadgeScene({ items, selectedIndex, flippedIndex, onSelect, onFlip, onFlipBack, reducedMotion, language }: {
+  items: BadgeItem[]; selectedIndex: number; flippedIndex: number | null;
+  onSelect: (index: number) => void; onFlip: (index: number) => void; onFlipBack: () => void;
+  reducedMotion: boolean; language: "en" | "zh";
 }) {
+  const cardRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const moveFocus = (index: number) => {
+    const next = (index + items.length) % items.length;
+    onSelect(next);
+    cardRefs.current[next]?.focus();
+  };
   return (
-    <Canvas
-      className="quick-read-page__badge-canvas"
-      frameloop="demand"
-      orthographic
-      camera={{ position: [0, 0, 10], zoom: 86, near: 0.1, far: 40 }}
-      dpr={[1, 1.2]}
-      shadows
-      gl={{ alpha: true, antialias: true, powerPreference: "low-power" }}
-      aria-label="Three swinging internship badges"
-      fallback={<div className="quick-read-page__badge-fallback" aria-hidden="true">Choose a badge from the archive below</div>}
-    >
-      <BadgeLineup items={items} selectedIndex={selectedIndex} onSelect={onSelect} reducedMotion={reducedMotion} />
-    </Canvas>
+    <div className="quick-read-page__badge-rail" role="group" aria-label={language === "zh" ? "三张可翻面的实习工牌" : "Three interactive internship badges"}>
+      <span className="quick-read-page__badge-rail-line" aria-hidden="true" />
+      <div className="quick-read-page__badge-track">
+        {items.map((item, index) => (
+          <BadgeCard key={item.title} cardRef={(node) => { cardRefs.current[index] = node; }} item={item} index={index} selected={selectedIndex === index}
+            flipped={flippedIndex === index} reducedMotion={reducedMotion} language={language}
+            onSelect={onSelect} onFlip={onFlip} onFlipBack={onFlipBack} onMoveFocus={moveFocus} />
+        ))}
+      </div>
+      <div className="quick-read-page__badge-list" role="group" aria-label={language === "zh" ? "选择一段经历" : "Choose an experience"}>
+        {items.map((item, index) => (
+          <button type="button" key={item.title + "-index"} aria-pressed={selectedIndex === index}
+            onClick={() => { onSelect(index); cardRefs.current[index]?.focus(); }}
+            style={{ "--item-accent": item.accent } as CSSProperties}>
+            <span>{String(index + 1).padStart(2, "0")}</span><strong>{item.title}</strong><i aria-hidden="true">{selectedIndex === index ? "↗" : "—"}</i>
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
