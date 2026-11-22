@@ -60,6 +60,7 @@ export interface Copy {
   journalEmptyBody: string;
   journalNoEntries: string;
   journalPaperHint: string;
+  journalBallHint: string;
   journalPaperAlt: string;
   journalPaperInstructions: string;
   journalPaperLoading: string;
@@ -236,6 +237,7 @@ const translations: Record<Language, Copy> = {
     journalEmptyBody: "No public entries yet. This sheet is here to be handled while the writing takes shape.",
     journalNoEntries: "No published entries yet. The first note will appear here when it is ready to share.",
     journalPaperHint: "Hold and move to gather a crease; release to let the paper settle.",
+    journalBallHint: "Drag a paper lightly to feel its spring; click to unfold.",
     journalPaperAlt: "A blank, cold-white paper sheet",
     journalPaperInstructions: "Hold and drag to crumple. Release to unfold and keep a faint crease. Press Space or Enter, then use arrow keys; Escape resets.",
     journalPaperLoading: "Preparing the paper surface.",
@@ -410,6 +412,7 @@ const translations: Record<Language, Copy> = {
     journalEmptyBody: "目前还没有公开文章。写作慢慢成形时，这张纸可以先被拿起、揉皱，再舒展开来。",
     journalNoEntries: "还没有正式发布的文章。准备好分享的第一篇笔记会出现在这里。",
     journalPaperHint: "按住并移动，揉出折痕；松手后纸张舒展并留下淡淡痕迹。",
+    journalBallHint: "轻轻拖动，感受纸团的回弹；点击后展开。",
     journalPaperAlt: "一张冷白色的空白纸",
     journalPaperInstructions: "按住并拖动纸张以揉皱；松开后纸张会舒展并留下淡淡折痕。按住空格或回车，再用方向键移动；按 Escape 重置。",
     journalPaperLoading: "正在准备纸张材质。",

@@ -4,64 +4,39 @@ interface StudioProps {
   isNight: boolean;
 }
 
-/**
- * The lighting rig. This is what carries the "Apple product render" look —
- * the geometry is trivial, the material response is everything.
- *
- * Three layers:
- *  1. <Environment> built from Lightformers. These never appear in the scene;
- *     they are rendered into a cube map that glossy materials reflect. The big
- *     soft rectangles are exactly what a photographer's softbox does, and they
- *     are the reason aluminium reads as aluminium.
- *  2. One shadow-casting key light with PCSS soft shadows for object-on-desk
- *     contact.
- *  3. ContactShadows to ground the furniture on the floor.
- */
+/** Soft, directional daylight tuned to the approved Chisel room study. */
 export function Studio({ isNight }: StudioProps) {
-  // Time changes the ambient world; the desk lamp remains a separate,
-  // continuous local light controlled from its physical dial.
   const daylight = isNight ? 0.16 : 1;
-  // Keep enough reflected light at night that materials and controls never
-  // collapse into black, even when the desk lamp is switched off.
   const environment = isNight ? 0.22 : 1;
 
   return (
     <>
-      {/*
-        No <SoftShadows> here. drei's PCSS injection calls unpackRGBAToDepth,
-        which current three.js no longer defines, and a failed injection breaks
-        shader compilation for *every* material in the scene — metalness and
-        clearcoat silently stop working and the room reads as matte plastic.
-        The Canvas uses three's own soft shadow map instead.
-      */}
-      <ambientLight intensity={isNight ? 0.1 : 0.28} />
+      <hemisphereLight args={["#fffaf1", "#b7aa94", isNight ? 0.22 : 1.45]} />
+      <ambientLight color="#fff8ed" intensity={isNight ? 0.1 : 0.65} />
 
       <directionalLight
         castShadow
-        position={[3.2, 5.4, 2.2]}
-        intensity={2.1 * daylight}
-        color="#fff4e6"
+        position={[-4.2, 7.4, 3.2]}
+        intensity={2.7 * daylight}
+        color="#fff1d9"
         shadow-mapSize={[2048, 2048]}
-        shadow-bias={-0.0005}
-        shadow-normalBias={0.02}
-        shadow-camera-near={0.5}
-        shadow-camera-far={14}
-        shadow-camera-left={-4}
-        shadow-camera-right={4}
-        shadow-camera-top={4}
-        shadow-camera-bottom={-4}
+        shadow-bias={-0.00035}
+        shadow-normalBias={0.018}
+        shadow-camera-near={0.1}
+        shadow-camera-far={18}
+        shadow-camera-left={-5}
+        shadow-camera-right={5}
+        shadow-camera-top={5}
+        shadow-camera-bottom={-5}
       />
 
-      {/* cool bounce from the window side, keeps the greys from going muddy */}
       <directionalLight
         position={[-4, 2.5, 1.5]}
-        intensity={0.5 * daylight}
-        color="#cfe0f5"
+        intensity={0.25 * daylight}
+        color="#dce6e7"
       />
 
-      {/* frames={1} bakes a stable reflection map for each time of day. */}
       <Environment key={isNight ? "night" : "day"} resolution={256} frames={1}>
-        {/* overhead softbox — the long highlight down the middle of glossy tops */}
         <Lightformer
           form="rect"
           intensity={3.4 * environment}
@@ -70,7 +45,6 @@ export function Studio({ isNight }: StudioProps) {
           scale={[6, 4, 1]}
           color="#ffffff"
         />
-        {/* window wall — the big cool gradient in side reflections */}
         <Lightformer
           form="rect"
           intensity={2.6 * environment}
@@ -79,7 +53,6 @@ export function Studio({ isNight }: StudioProps) {
           scale={[5, 3, 1]}
           color="#dceaff"
         />
-        {/* warm kicker from the lamp side, stops the back edges going dead */}
         <Lightformer
           form="rect"
           intensity={isNight ? 1.25 : 1.5}
@@ -88,7 +61,6 @@ export function Studio({ isNight }: StudioProps) {
           scale={[4, 2, 1]}
           color="#ffd9ad"
         />
-        {/* thin strip lights: these become the crisp specular lines on edges */}
         <Lightformer
           form="rect"
           intensity={4 * environment}
@@ -108,8 +80,6 @@ export function Studio({ isNight }: StudioProps) {
       <ContactShadows
         position={[0, 0.002, -0.9]}
         scale={7}
-        // Furniture is static; baking this depth pass once avoids redrawing
-        // the whole room into four shadow targets on every animation frame.
         frames={1}
         resolution={1024}
         blur={2.6}

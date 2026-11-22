@@ -3,6 +3,7 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { useEffect } from "react";
 import { HOME_CAM } from "../data/hotspots";
 import { focus } from "../interaction/studyStore";
+import * as THREE from "three";
 import { sceneDebug } from "./debug";
 import { Room } from "./Room";
 
@@ -66,13 +67,13 @@ function SceneReady({ onReady }: { onReady?: () => void }) {
 export default function RoomScene({ isNight, onReady, onAssetProgress }: RoomSceneProps) {
   return (
     <Canvas
-      shadows={sceneDebug.shadowsEnabled ? "soft" : false}
+      shadows={sceneDebug.shadowsEnabled ? "variance" : false}
       dpr={[1, 2]}
-      gl={{ antialias: true, toneMappingExposure: 1.05 }}
+      gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.04 }}
       camera={{ position: HOME_CAM, fov: 36, near: 0.05, far: 60 }}
       onPointerMissed={() => focus(null)}
     >
-      <color attach="background" args={[isNight ? "#171419" : "#e8e3da"]} />
+      <color attach="background" args={[isNight ? "#31383b" : "#efeee9"]} />
       <Room isNight={isNight} />
       <SceneReady onReady={onReady} />
       <SceneAssetProgress onAssetProgress={onAssetProgress} />

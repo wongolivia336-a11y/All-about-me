@@ -1,16 +1,16 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { RoundedBox } from "@react-three/drei";
+import { MeshStandardMaterial } from "three";
 import { Hotspot } from "../interaction/Hotspot";
 import { layout } from "./layout";
-import { palette } from "./theme";
 import { makeWood } from "./textures";
-
+import { eachChiselMaterial, useChiselModelNode } from "./chiselModelNodes";
+import { makeChiselCorkTexture, makeChiselNoteTexture, type ChiselNoteStyle } from "./chiselArtDirection";
 /** Deterministic pseudo-random, so the books don't reshuffle on every render. */
 const rnd = (seed: number) => {
   const x = Math.sin(seed * 127.1) * 43758.5453;
   return x - Math.floor(x);
 };
-
 const SPINE_COLORS = [
   "#7d8f9c",
   "#b46b52",
@@ -23,17 +23,14 @@ const SPINE_COLORS = [
   "#8c7a5e",
   "#5d7a63",
 ];
-
 export function Bookshelf() {
   const { pos, rotY } = layout.shelf;
   const oak = useMemo(() => makeWood("#c9a375", "#966c3e", [2, 1]), []);
   const backPanel = useMemo(() => makeWood("#c2a07c", "#8e6b42", [3, 2]), []);
-
   const W = 1.17; // inner width
   const D = 0.3;
   const H = 1.85;
   const shelfYs = [0.02, 0.44, 0.86, 1.28, 1.7];
-
   return (
     <Hotspot id="shelf" labelAt={[pos[0] + 0.3, 1.15, pos[2]]}>
       <group position={[pos[0], pos[1], pos[2]]} rotation={[0, rotY, 0]}>
@@ -49,7 +46,6 @@ export function Bookshelf() {
             />
           </mesh>
         ))}
-
         {/* back panel */}
         <mesh position={[0, H / 2, -D / 2 + 0.007]} receiveShadow>
           <boxGeometry args={[W + 0.03, H, 0.014]} />
@@ -60,7 +56,6 @@ export function Bookshelf() {
             roughness={0.82}
           />
         </mesh>
-
         {/* shelves */}
         {shelfYs.map((y) => (
           <mesh key={y} position={[0, y, 0]} castShadow receiveShadow>
@@ -73,17 +68,14 @@ export function Bookshelf() {
             />
           </mesh>
         ))}
-
         {shelfYs.slice(0, 4).map((y, row) => (
           <BookRow key={y} y={y + 0.014} width={W} row={row} />
         ))}
-
         <FaceDownBook y={shelfYs[4] + 0.014} />
       </group>
     </Hotspot>
   );
 }
-
 /**
  * A book left open and turned over on the top shelf. It is the one universally
  * legible sign that someone is halfway through something, and it costs three
@@ -111,7 +103,6 @@ function FaceDownBook({ y }: { y: number }) {
     </group>
   );
 }
-
 function BookRow({ y, width, row }: { y: number; width: number; row: number }) {
   const books = useMemo(() => {
     const out: {
@@ -124,7 +115,6 @@ function BookRow({ y, width, row }: { y: number; width: number; row: number }) {
     }[] = [];
     let x = -width / 2 + 0.02;
     let i = 0;
-
     while (x < width / 2 - 0.06) {
       const seed = row * 31 + i;
       const w = 0.016 + rnd(seed) * 0.028;
@@ -133,7 +123,6 @@ function BookRow({ y, width, row }: { y: number; width: number; row: number }) {
       // every so often a book leans, and occasionally there's a gap
       const tilt = rnd(seed + 2.5) > 0.88 ? 0.18 : 0;
       const gap = rnd(seed + 3.5) > 0.9 ? 0.035 : 0.002;
-
       out.push({
         x: x + w / 2,
         w,
@@ -147,7 +136,6 @@ function BookRow({ y, width, row }: { y: number; width: number; row: number }) {
     }
     return out;
   }, [width, row]);
-
   return (
     <group position={[0, y, 0]}>
       {books.map((b, i) => (
@@ -172,45 +160,75 @@ function BookRow({ y, width, row }: { y: number; width: number; row: number }) {
     </group>
   );
 }
-
 /** The pinboard above the desk: About, and what you're up to right now. */
 export function Corkboard() {
   const { pos } = layout.board;
-
+  const board = useChiselModelNode("BOARD_about_cork");
+  const cork = useMemo(makeChiselCorkTexture, []);
+  const notesArtwork = useMemo(
+    () => ({
+      city: makeChiselNoteTexture("city"),
+      botanical: makeChiselNoteTexture("botanical"),
+      blueprint: makeChiselNoteTexture("blueprint"),
+      coral: makeChiselNoteTexture("coral"),
+    }),
+    [],
+  );
   const notes = useMemo(
     () => [
-      { x: -0.22, y: 0.11, r: -0.06, c: "#f3dd7a", w: 0.13, h: 0.13 },
-      { x: -0.03, y: 0.14, r: 0.05, c: "#f0a9b4", w: 0.12, h: 0.12 },
-      { x: 0.17, y: 0.1, r: -0.03, c: "#a9d3f0", w: 0.13, h: 0.12 },
-      { x: -0.16, y: -0.11, r: 0.04, c: "#c8e6b8", w: 0.14, h: 0.12 },
-      { x: 0.06, y: -0.13, r: -0.07, c: "#f3dd7a", w: 0.12, h: 0.13 },
+      { x: -0.235, y: 0.105, w: 0.205, h: 0.155, angle: -0.045, style: "city" as const },
+      { x: 0.018, y: 0.105, w: 0.17, h: 0.205, angle: 0.035, style: "botanical" as const },
+      { x: 0.235, y: 0.095, w: 0.205, h: 0.155, angle: -0.028, style: "blueprint" as const },
+      { x: -0.12, y: -0.145, w: 0.19, h: 0.12, angle: 0.035, style: "coral" as const },
     ],
     [],
   );
-
+  useEffect(() => {
+    eachChiselMaterial(board, (material) => {
+      if (!(material instanceof MeshStandardMaterial)) return;
+      material.map = cork;
+      material.color.set("#ffffff");
+      material.metalness = 0;
+      material.roughness = 0.98;
+      material.needsUpdate = true;
+    });
+  }, [board, cork]);
+  useEffect(
+    () => () => {
+      cork.dispose();
+      Object.values(notesArtwork).forEach((texture) => texture.dispose());
+    },
+    [cork, notesArtwork],
+  );
   return (
     <Hotspot id="board" labelAt={[pos[0], pos[1] + 0.36, pos[2]]}>
       <group position={[pos[0], pos[1], pos[2]]}>
-        {/* frame */}
-        <RoundedBox args={[0.78, 0.56, 0.022]} radius={0.008} smoothness={3} castShadow>
-          <meshStandardMaterial color={palette.deskEdge} roughness={0.6} />
-        </RoundedBox>
-        {/* cork */}
-        <mesh position={[0, 0, 0.013]}>
-          <planeGeometry args={[0.72, 0.5]} />
-          <meshStandardMaterial color="#c9a273" roughness={0.95} />
+        <primitive object={board} dispose={null} />
+        <mesh position={[0, 0, 0.0215]}>
+          <planeGeometry args={[0.7488, 0.5376]} />
+          <meshStandardMaterial map={cork} roughness={0.98} metalness={0} />
         </mesh>
-
-        {notes.map((n, i) => (
-          <group key={i} position={[n.x, n.y, 0.016]} rotation={[0, 0, n.r]}>
-            <mesh castShadow>
-              <planeGeometry args={[n.w, n.h]} />
-              <meshStandardMaterial color={n.c} roughness={0.92} />
+        {notes.map((note, index) => (
+          <group
+            key={index}
+            position={[note.x, note.y, 0.023]}
+            rotation={[0, 0, note.angle]}
+          >
+            <mesh castShadow receiveShadow>
+              <boxGeometry args={[note.w, note.h, 0.005]} />
+              <meshStandardMaterial
+                map={notesArtwork[note.style as ChiselNoteStyle]}
+                roughness={0.96}
+                metalness={0}
+              />
             </mesh>
-            {/* pin */}
-            <mesh position={[0, n.h / 2 - 0.014, 0.004]}>
-              <sphereGeometry args={[0.006, 12, 10]} />
-              <meshPhysicalMaterial color="#cf4a3c" roughness={0.25} clearcoat={1} />
+            <mesh position={[0.003, note.h * 0.38 - 0.004, 0.009]}>
+              <circleGeometry args={[0.009, 16]} />
+              <meshBasicMaterial color="#544639" />
+            </mesh>
+            <mesh position={[0, note.h * 0.38, 0.015]} castShadow>
+              <sphereGeometry args={[0.0065, 16, 10]} />
+              <meshStandardMaterial color="#9d7951" roughness={0.52} metalness={0.12} />
             </mesh>
           </group>
         ))}

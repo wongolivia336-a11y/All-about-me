@@ -42,7 +42,7 @@ export function PhonePanel() {
                 </span>
                 <span className="phone-panel__face phone-panel__face--back" aria-hidden={!flipped}>
                   {app.qrSrc ? (
-                    <img src={app.qrSrc} alt={copy.phoneQrAlt + " " + label} loading="lazy" decoding="async" />
+                    <img src={app.qrSrc} alt={copy.phoneQrAlt + " " + label} loading="eager" decoding="async" />
                   ) : (
                     <span className="phone-panel__qr-fallback">{copy.phoneLinksMissing}</span>
                   )}
