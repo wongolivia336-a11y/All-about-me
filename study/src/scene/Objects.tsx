@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from "react";
-import { RoundedBox } from "@react-three/drei";
+import { useEffect, useMemo, useState } from "react";
+import { Html, RoundedBox, useCursor } from "@react-three/drei";
 import * as THREE from "three";
 import { Hotspot } from "../interaction/Hotspot";
 import { useLanguage, type Language } from "../i18n";
@@ -44,143 +44,194 @@ function PortfolioSpread() {
   );
 }
 
-// Body dimensions live here so the handle can be attached by arithmetic
-// instead of by nudging magic numbers until it looks about right.
 const MUG_H = 0.1;
-const MUG_R_TOP = 0.041;
-const MUG_R_BOTTOM = 0.035;
-const mugWallAt = (y: number) =>
-  MUG_R_BOTTOM + (y / MUG_H) * (MUG_R_TOP - MUG_R_BOTTOM);
+const MUG_PROFILE = [
+  [0, 0.006],
+  [0.029, 0.006],
+  [0.032, 0.009],
+  [0.034, 0.02],
+  [0.036, 0.05],
+  [0.0375, 0.082],
+  [0.0385, 0.096],
+  [0.039, 0.1],
+  [0.042, 0.1],
+  [0.0415, 0.096],
+  [0.0403, 0.082],
+  [0.0378, 0.05],
+  [0.0355, 0.02],
+  [0.0335, 0.009],
+  [0.03, 0.001],
+  [0, 0.001],
+] as const;
 
-const HANDLE_ARC = Math.PI * 1.2;
-const HANDLE_R = 0.023;
-const HANDLE_TUBE = 0.0062;
-const HANDLE_Y = 0.056;
+const MUG_OUTER_PROFILE = [
+  [0.001, 0.03],
+  [0.009, 0.0335],
+  [0.02, 0.0355],
+  [0.05, 0.0378],
+  [0.082, 0.0403],
+  [0.096, 0.0415],
+  [0.1, 0.042],
+] as const;
 
-/**
- * A torus arc starts at +X and sweeps counter-clockwise, so a 216° arc left
- * unrotated is centred on 108° — pointing back through the cup. Rotating by
- * half the arc centres the bulge on +X, where a handle belongs.
- */
-const HANDLE_ROT = -HANDLE_ARC / 2;
-/** x of the arc's open ends, relative to the torus centre (negative) */
-const HANDLE_END_X = HANDLE_R * Math.cos(HANDLE_ARC / 2);
-const HANDLE_END_Y = HANDLE_R * Math.sin(HANDLE_ARC / 2);
-/** push the centre out until both ends bite 2mm into the wall */
-const HANDLE_X = mugWallAt(HANDLE_Y) - HANDLE_END_X - 0.002;
+const mugOuterRadiusAt = (height: number) => {
+  for (let index = 1; index < MUG_OUTER_PROFILE.length; index++) {
+    const [nextHeight, nextRadius] = MUG_OUTER_PROFILE[index];
+    const [previousHeight, previousRadius] = MUG_OUTER_PROFILE[index - 1];
+    if (height <= nextHeight) {
+      const progress = (height - previousHeight) / (nextHeight - previousHeight);
+      return THREE.MathUtils.lerp(previousRadius, nextRadius, progress);
+    }
+  }
+  return MUG_OUTER_PROFILE[MUG_OUTER_PROFILE.length - 1][1];
+};
 
 function Mug() {
   const { pos } = layout.mug;
-  const mug = useChiselModelNode("PROP_mug");
+  const { language } = useLanguage();
+  const [hovered, setHovered] = useState(false);
+  useCursor(hovered);
+  const profile = useMemo(
+    () => MUG_PROFILE.map(([radius, height]) => new THREE.Vector2(radius, height)),
+    [],
+  );
+  const handle = useMemo(
+    () =>
+      new THREE.CatmullRomCurve3([
+        new THREE.Vector3(0.035, 0.025, 0),
+        new THREE.Vector3(0.057, 0.023, 0),
+        new THREE.Vector3(0.073, 0.032, 0),
+        new THREE.Vector3(0.075, 0.052, 0),
+        new THREE.Vector3(0.066, 0.071, 0),
+        new THREE.Vector3(0.039, 0.077, 0),
+      ], false, "centripetal"),
+    [],
+  );
+  const inscription = useMemo(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 512;
+    canvas.height = 256;
+    const context = canvas.getContext("2d");
+    if (context) {
+      context.fillStyle = "#68433b";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.font = "600 72px Georgia, 'Times New Roman', serif";
+      context.fillText("DAMN GOOD", 256, 97);
+      context.font = "500 48px Georgia, 'Times New Roman', serif";
+      context.fillText("COFFEE", 256, 176);
+    }
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = 4;
+    return texture;
+  }, []);
+  const inscriptionGeometry = useMemo(() => {
+    const width = 0.028;
+    const geometry = new THREE.PlaneGeometry(width, 0.014, 24, 8);
+    const positions = geometry.attributes.position;
+    for (let index = 0; index < positions.count; index++) {
+      const x = positions.getX(index);
+      const y = positions.getY(index);
+      const height = MUG_H / 2 + 0.003 + y;
+      const radius = mugOuterRadiusAt(height);
+      positions.setZ(index, Math.sqrt(Math.max(0, radius * radius - x * x)) + 0.00035);
+    }
+    geometry.computeVertexNormals();
+    return geometry;
+  }, []);
 
-  useEffect(() => {
-    mug.traverse((object) => {
-      if (!(object instanceof THREE.Mesh)) return;
-      const sourceMaterials = Array.isArray(object.material)
-        ? object.material
-        : [object.material];
-      const glazedMaterials = sourceMaterials.map((source) => {
-        const material = new THREE.MeshPhysicalMaterial({
-          color: palette.ceramic,
-          metalness: 0,
-          roughness: 0.32,
-          clearcoat: 0.68,
-          clearcoatRoughness: 0.2,
-          side: THREE.DoubleSide,
-        });
-        source.dispose();
-        return material;
-      });
-      object.material = Array.isArray(object.material)
-        ? glazedMaterials
-        : glazedMaterials[0];
-    });
-  }, [mug]);
-
-  const stampY = 0.008;
-  const stampPetals = [
-    [-0.0022, 0.0022],
-    [0.0022, 0.0022],
-    [-0.0022, -0.0022],
-    [0.0022, -0.0022],
-  ] as const;
+  useEffect(
+    () => () => {
+      inscription.dispose();
+      inscriptionGeometry.dispose();
+    },
+    [inscription, inscriptionGeometry],
+  );
 
   return (
-    <group position={[pos[0], pos[1] + MUG_H / 2, pos[2]]}>
-      <primitive object={mug} dispose={null} />
-
-      {/* A softly glazed rolled lip and a quieter inner edge give the opening depth. */}
-      <mesh position={[0, MUG_H / 2, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-        <torusGeometry args={[MUG_R_TOP, 0.0017, 10, 48]} />
+    <group position={[pos[0], pos[1], pos[2]]}>
+      <mesh
+        castShadow
+        receiveShadow
+        onPointerOver={(event) => { event.stopPropagation(); setHovered(true); }}
+        onPointerOut={(event) => { event.stopPropagation(); setHovered(false); }}
+      >
+        <latheGeometry args={[profile, 72]} />
         <meshPhysicalMaterial
           color={palette.ceramic}
-          roughness={0.24}
-          clearcoat={0.92}
-          clearcoatRoughness={0.16}
+          roughness={0.28}
+          clearcoat={0.72}
+          clearcoatRoughness={0.2}
+          side={THREE.DoubleSide}
         />
       </mesh>
-      <mesh position={[0, MUG_H / 2 - 0.0005, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[MUG_R_TOP - 0.0037, 0.00085, 8, 48]} />
-        <meshPhysicalMaterial color="#e5e1d7" roughness={0.3} clearcoat={0.72} />
+
+      {/* Deep coffee, a restrained crema edge and the rolled ceramic rim. */}
+      <mesh position={[0, 0.084, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[0.036, 64]} />
+        <meshPhysicalMaterial
+          color="#2b1812"
+          roughness={0.18}
+          clearcoat={0.92}
+          clearcoatRoughness={0.12}
+        />
+      </mesh>
+      <mesh position={[0, 0.0843, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.0357, 0.00055, 8, 64]} />
+        <meshPhysicalMaterial color="#765137" roughness={0.24} clearcoat={0.65} />
       </mesh>
 
-      {/* The liquid sits below the lip with a thin, warm meniscus at the edge. */}
-      <mesh position={[0, 0.034, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[mugWallAt(0.084) - 0.004, 40]} />
-        <meshPhysicalMaterial color="#3b2317" roughness={0.15} clearcoat={1} />
-      </mesh>
-      <mesh position={[0, 0.0342, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[mugWallAt(0.084) - 0.005, 0.0008, 6, 40]} />
-        <meshPhysicalMaterial color="#69472f" roughness={0.26} clearcoat={0.5} />
+      <mesh castShadow receiveShadow>
+        <tubeGeometry args={[handle, 48, 0.0058, 14, false]} />
+        <meshPhysicalMaterial
+          color={palette.ceramic}
+          roughness={0.28}
+          clearcoat={0.76}
+          clearcoatRoughness={0.18}
+        />
       </mesh>
 
       <mesh
-        position={[HANDLE_X, HANDLE_Y - MUG_H / 2, 0]}
-        rotation={[0, 0, HANDLE_ROT]}
-        castShadow
+        geometry={inscriptionGeometry}
+        position={[0, MUG_H / 2 + 0.003, 0]}
+        dispose={null}
       >
-        <torusGeometry args={[HANDLE_R, HANDLE_TUBE, 14, 32, HANDLE_ARC]} />
-        <meshPhysicalMaterial color={palette.ceramic} roughness={0.28} clearcoat={0.9} />
+        <meshBasicMaterial
+          map={inscription}
+          transparent
+          toneMapped={false}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+        />
       </mesh>
 
-      {/* Small ceramic joins soften the handle where it meets the cup wall. */}
-      {[-1, 1].map((side) => (
+      {[0.025, 0.077].map((height) => (
         <mesh
-          key={side}
-          position={[
-            HANDLE_X + HANDLE_END_X,
-            HANDLE_Y - MUG_H / 2 + side * HANDLE_END_Y,
-            0,
-          ]}
+          key={height}
+          position={[mugOuterRadiusAt(height) - 0.001, height, 0]}
+          scale={[1.1, 1, 1]}
           castShadow
         >
-          <sphereGeometry args={[HANDLE_TUBE * 0.98, 16, 12]} />
+          <sphereGeometry args={[0.0062, 16, 12]} />
           <meshPhysicalMaterial
             color={palette.ceramic}
             roughness={0.28}
-            clearcoat={0.9}
+            clearcoat={0.76}
             clearcoatRoughness={0.18}
           />
         </mesh>
       ))}
-
-      {/* A tiny four-leaf maker's mark ties the desk object back to FOUR HEARTS. */}
-      {stampPetals.map(([x, y], index) => {
-        const radius = mugWallAt(MUG_H / 2 + stampY + y);
-        const z = Math.sqrt(Math.max(0, radius * radius - x * x)) + 0.0006;
-        return (
-          <mesh key={index} position={[x, stampY + y, z]}>
-            <circleGeometry args={[0.00245, 16]} />
-            <meshStandardMaterial color="#718477" roughness={0.72} />
-          </mesh>
-        );
-      })}
-      <mesh
-        position={[0, stampY, mugWallAt(MUG_H / 2 + stampY) + 0.0007]}
-      >
-        <circleGeometry args={[0.00125, 12]} />
-        <meshStandardMaterial color="#718477" roughness={0.72} />
-      </mesh>
+      {hovered && (
+        <Html position={[0, MUG_H + 0.055, 0]} center distanceFactor={2.2} zIndexRange={[20, 0]}>
+          <div className="hotspot-label" role="note">
+            <span className="hotspot-label__title">Damn Good Coffee</span>
+            <span className="hotspot-label__blurb">
+              {language === "zh" ? "致敬大卫·林奇与特工库珀。" : "A small nod to David Lynch and Agent Cooper."}
+            </span>
+          </div>
+        </Html>
+      )}
     </group>
   );
 }

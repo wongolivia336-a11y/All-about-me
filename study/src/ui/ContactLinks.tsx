@@ -25,7 +25,7 @@ function ChannelIcon({ id }: { id: ChannelId }) {
   return <><path d="M7.3 3.5 10 7.3 8.2 9.1a14.7 14.7 0 0 0 6.7 6.7l1.8-1.8 3.8 2.7-.9 3.1c-.2.6-.8 1-1.5 1C10.2 20.1 3.9 13.8 3.2 5.9c-.1-.7.3-1.3 1-1.5l3.1-.9Z" /></>;
 }
 
-export function ContactLinks() {
+export function ContactLinks({ compact = false }: { compact?: boolean }) {
   const { copy } = useLanguage();
   const channels: { id: ChannelId; label: string; href: string | null }[] = [
     { id: "github", label: copy.githubOpen, href: `https://github.com/${GITHUB_USER}` },
@@ -38,8 +38,8 @@ export function ContactLinks() {
   ];
 
   return (
-    <div className="archive__social-note">
-      <p>{copy.socialLinkLead}</p>
+    <div className={["archive__social-note", compact && "archive__social-note--compact"].filter(Boolean).join(" ")}>
+      {!compact && <p>{copy.socialLinkLead}</p>}
       <div className="archive__social-links" role="group" aria-label={copy.socialLinksLabel}>
         {channels.map(({ id, label, href }) => {
           const icon = (

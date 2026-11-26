@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import { phoneAppText, type Language } from "../i18n";
-import { GITHUB_USER } from "../data/links";
 
 /**
  * Palette for the study. Kept deliberately narrow: warm neutrals for the room,
@@ -59,36 +58,58 @@ function roundRect(
   ctx.fill();
 }
 
-/** The idle laptop screen mirrors the wallpaper shown by its interactive desktop. */
+/** Shared 1-bit Happy Mac artwork for the distant CRT and its interactive desktop. */
+export const HAPPY_MAC_BITMAP = [
+  "....########....",
+  "..############..",
+  ".##..........##.",
+  "##............##",
+  "##............##",
+  "##..##....##..##",
+  "##..##....##..##",
+  "##.......#....##",
+  "##.......#....##",
+  "##....####....##",
+  "##...######...##",
+  "##..########..##",
+  ".##..........##.",
+  "..############..",
+] as const;
+
 export const makeSiteScreen = (_language: Language) => {
   const canvas = document.createElement("canvas");
   canvas.width = 1024;
   canvas.height = 640;
   const context = canvas.getContext("2d")!;
-  context.fillStyle = "#f2f0df";
+  const glow = context.createRadialGradient(512, 310, 80, 512, 310, 660);
+  glow.addColorStop(0, "#e6efe4");
+  glow.addColorStop(0.72, "#cfdfd8");
+  glow.addColorStop(1, "#a9c3bf");
+  context.fillStyle = glow;
   context.fillRect(0, 0, canvas.width, canvas.height);
+
+  const cell = 36;
+  const columns = HAPPY_MAC_BITMAP[0].length;
+  const rows = HAPPY_MAC_BITMAP.length;
+  const originX = Math.round((canvas.width - columns * cell) / 2);
+  const originY = Math.round((canvas.height - rows * cell) / 2);
+  context.fillStyle = "#223b45";
+  HAPPY_MAC_BITMAP.forEach((line, row) => {
+    [...line].forEach((mark, column) => {
+      if (mark === "#") {
+        context.fillRect(originX + column * cell, originY + row * cell, cell, cell);
+      }
+    });
+  });
+
+  context.fillStyle = "rgba(31, 71, 77, 0.025)";
+  for (let y = 0; y < canvas.height; y += 5) {
+    context.fillRect(0, y, canvas.width, 1);
+  }
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = 8;
-
-  const cover = new Image();
-  cover.onload = () => {
-    const scale = Math.max(canvas.width / cover.naturalWidth, canvas.height / cover.naturalHeight);
-    const width = cover.naturalWidth * scale;
-    const height = cover.naturalHeight * scale;
-    context.drawImage(cover, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
-    const footer = context.createLinearGradient(0, canvas.height - 116, 0, canvas.height);
-    footer.addColorStop(0, "rgba(10,12,14,0)");
-    footer.addColorStop(1, "rgba(10,12,14,.72)");
-    context.fillStyle = footer;
-    context.fillRect(0, canvas.height - 116, canvas.width, 116);
-    context.fillStyle = "rgba(255,255,255,.94)";
-    context.font = "500 22px ui-monospace, SFMono-Regular, Consolas, monospace";
-    context.fillText(`GITHUB.COM/${GITHUB_USER.toUpperCase()}`, 48, canvas.height - 34);
-    texture.needsUpdate = true;
-  };
-  cover.src = "/images/steve-jobs-macintosh.png";
   return texture;
 };
 
