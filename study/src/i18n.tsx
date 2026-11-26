@@ -44,6 +44,8 @@ export interface Copy {
   allProjects: string;
   allProjectsDescription: string;
   viewAllProjects: string;
+  closeProjectArchive: string;
+  aboutPathsLabel: string;
   aboutEyebrow: string;
   aboutTitle: string;
   aboutBody: string;
@@ -221,6 +223,8 @@ const translations: Record<Language, Copy> = {
     allProjects: "All projects",
     allProjectsDescription: "Twelve projects across products, research, moving image and playful experiments. Open a project for its notes and available links.",
     viewAllProjects: "Browse all 12 projects",
+    closeProjectArchive: "Close project index",
+    aboutPathsLabel: "About and archive entries",
     aboutEyebrow: "A note from the studio",
     aboutTitle: "Technical work, with attention to how it feels to be inside.",
     aboutBody: "I work where interaction, systems and human attention meet. The work can be technical, but it starts with noticing what people need to feel understood.",
@@ -396,6 +400,8 @@ const translations: Record<Language, Copy> = {
     allProjects: "全部项目",
     allProjectsDescription: "从产品、研究到影像与交互实验，收录十二个项目。点开项目可以继续看简介与现有入口。",
     viewAllProjects: "浏览全部 12 个项目",
+    closeProjectArchive: "收起项目索引",
+    aboutPathsLabel: "关于与档案入口",
     aboutEyebrow: "来自工作室的一段话",
     aboutTitle: "关注技术，也关注身处其中的感受。",
     aboutBody: "我在交互、系统与人的注意力交汇处工作。工作可以很技术，但起点是留意人们需要怎样的理解与回应。",

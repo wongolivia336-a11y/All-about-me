@@ -60,7 +60,7 @@ export const layout = {
   mouse: { pos: [0.27, DESK_TOP_Y, -0.89] as const, rotY: 0.1 },
   sketchbook: { pos: [0.43, DESK_TOP_Y, -0.82] as const, rotY: 0.14 },
   phone: { pos: [0.67, DESK_TOP_Y, -0.86] as const, rotY: -0.35 },
-  polaroids: { pos: [0.67, DESK_TOP_Y, -1.12] as const, rotY: 0.1 },
+  polaroids: { pos: [-0.64, DESK_TOP_Y, -1.12] as const, rotY: 0.1 },
 
   /** a ring left where a mug used to sit — no object, just a stain */
   coffeeRing: { pos: [0.48, DESK_TOP_Y, -1.0] as const, rotY: 0 },

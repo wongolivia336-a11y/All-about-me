@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperti
 import { library } from "../data/library";
 import { GITHUB_USER } from "../data/links";
 import { projectText, type Language } from "../i18n";
+import { HAPPY_MAC_BITMAP } from "./theme";
 import "./LaptopDesktop.css";
 
 const SCREEN_WIDTH = 548;
@@ -70,6 +71,16 @@ const appGlyphs: Record<AppKind, string> = {
   settings: "⚙",
   about: "✿",
 };
+
+function HappyMacMark() {
+  return (
+    <svg className="laptop-os__happy-mac" viewBox="0 0 16 14" aria-hidden="true" shapeRendering="crispEdges">
+      {HAPPY_MAC_BITMAP.flatMap((row, y) => Array.from(row).flatMap((mark, x) => (
+        mark === "#" ? [<rect key={x + "-" + y} x={x} y={y} width="1" height="1" />] : []
+      )))}
+    </svg>
+  );
+}
 
 function readStored(key: string, fallback: string) {
   try { return window.localStorage.getItem(key) ?? fallback; } catch { return fallback; }
@@ -348,7 +359,9 @@ export function LaptopDesktop({ language }: { language: Language }) {
         else if (active) { closeWindow(active.id); event.stopPropagation(); }
       }}
     >
-      <div className="laptop-os__wallpaper" aria-hidden="true" />
+      <div className="laptop-os__wallpaper" aria-hidden="true">
+        <HappyMacMark />
+      </div>
       <a
         className="laptop-os__github-link"
         href={`https://github.com/${GITHUB_USER}`}
